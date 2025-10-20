@@ -8,47 +8,60 @@
 <style>
 :root{--brand:#0A2E5C;--accent:#F7931E;--bg:#f6f8fc;--card:#fff;--line:#e5e7eb;--muted:#64748b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}
-header{position:sticky;top:0;z-index:9;background:var(--brand);color:#fff;display:flex;gap:12px;align-items:center;padding:10px 14px}
+body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0f172a}
+
+/* Header + Tabs */
+header{position:sticky;top:0;z-index:50;background:var(--brand);color:#fff;display:flex;gap:12px;align-items:center;padding:10px 14px}
 .logo{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
 header .titolo{display:flex;flex-direction:column}
 header .titolo small{opacity:.9}
-nav{position:sticky;top:64px;z-index:8;display:flex;gap:8px;padding:10px;background:var(--bg)}
+nav{position:sticky;top:64px;z-index:40;display:flex;gap:8px;padding:10px;background:var(--bg)}
 .tab{border:1px solid var(--line);background:var(--card);padding:8px 12px;border-radius:999px;cursor:pointer}
 .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Layout */
 main{padding:12px;max-width:1200px;margin:0 auto}
+section{display:none}
+section.active{display:block}
 .split{display:grid;grid-template-columns:320px 1fr;gap:12px}
 @media(max-width:900px){.split{grid-template-columns:1fr}}
+
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px}
 .card>.head{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .card>.body{padding:12px}
-.list{max-height:66vh;overflow:auto;display:flex;flex-direction:column}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
 .row{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
 .row:hover{background:#f9fafb}
 .row small{color:var(--muted)}
+.list{max-height:66vh;overflow:auto;display:flex;flex-direction:column}
+
 label{display:block;margin:8px 0 6px;font-weight:600}
 input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 textarea{min-height:100px}
 .grid2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 .grid3{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.danger{border-color:#ef4444;color:#ef4444}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid var(--line);padding:8px}
 th{background:#f8fafc;text-align:left}
+.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.danger{border-color:#ef4444;color:#ef4444}
 .hint{color:var(--muted);font-size:12px}
+
+/* KPI */
 .kpis{display:grid;gap:8px;grid-template-columns:repeat(4,1fr);margin-top:8px}
 .kpis .box{background:#0a2e5c10;border:1px solid var(--line);border-radius:10px;padding:10px}
+
+/* Firma */
 .sigWrap{border:2px dashed var(--line);border-radius:12px;padding:10px}
-.sigPad{width:100%;height:180px;border:1px solid var(--line);border-radius:12px;background:#fff;touch-action:none}
-.no-print{ }
+.sigPad{width:100%;height:200px;border:1px solid var(--line);border-radius:12px;background:#fff;touch-action:none}
+.sigPad.hidden{display:none}
+
+/* Print */
 @media print{
   header,nav,.no-print,.print-hide{display:none!important}
-  .print-only{display:block!important}
   body{background:#fff}
-  .sheet{width:190mm;min-height:277mm;margin:0 auto;padding:12mm}
+  .sheet{display:block!important;width:190mm;min-height:277mm;margin:0 auto;padding:12mm}
   .ph{display:flex;gap:10px;align-items:center}
   .ph img{width:50px;height:50px;border-radius:50%;border:2px solid #000;object-fit:cover}
   .pt{font-size:18px;margin-top:6px}
@@ -57,7 +70,7 @@ th{background:#f8fafc;text-align:left}
 </style>
 </head>
 <body>
-<header class="no-print">
+<header>
   <img id="appLogo" class="logo" alt="Logo">
   <div class="titolo">
     <strong id="ttl">Giorgio — Elettricista & Antennista</strong>
@@ -66,14 +79,14 @@ th{background:#f8fafc;text-align:left}
   </div>
 </header>
 
-<nav class="no-print">
+<nav>
   <button class="tab active" data-tab="pv">Preventivi</button>
   <button class="tab" data-tab="iv">Interventi</button>
   <button class="tab" data-tab="st">Impostazioni</button>
 </nav>
 
 <main>
-  <!-- PREVENTIVI -->
+  <!-- ========== PREVENTIVI ========== -->
   <section id="pv" class="active">
     <div class="split">
       <div class="card">
@@ -103,6 +116,303 @@ th{background:#f8fafc;text-align:left}
             <button class="btn" id="pv-dup">Duplica</button>
             <button class="btn primary" id="pv-save">Salva</button>
             <button class="btn danger" id="pv-del">Elimina</button>
+            <button class="btn" id="pv-print">Stampa / PDF</button>
+            <button class="btn" id="pv-share">Condividi</button>
+          </div>
+        </div>
+        <div class="body">
+          <form id="pv-form" onsubmit="return false;">
+            <input type="hidden" id="pv-id">
+            <div class="grid3">
+              <div><label>Numero</label><input id="pv-num" placeholder="PV-0001"></div>
+              <div><label>Data</label><input type="date" id="pv-date"></div>
+              <div><label>Scadenza</label><input type="date" id="pv-expire" title="Di default 30 giorni dalla data"></div>
+            </div>
+            <div class="grid2">
+              <div><label>Cliente</label><input id="pv-cli" placeholder="Nome cliente"></div>
+              <div><label>Contatto</label><input id="pv-con" placeholder="Telefono / Email"></div>
+            </div>
+            <label>Oggetto</label><input id="pv-obj" placeholder="Oggetto del preventivo">
+
+            <div class="grid3">
+              <div><label>Q.tà manodopera</label><input id="pv-labQ" type="number" min="0" step="0.25" value="0"></div>
+              <div><label>Unità</label><select id="pv-labU"><option value="ora">Ore</option><option value="giorno">Giorni</option></select></div>
+              <div><label>Tariffa (€ / unità)</label><input id="pv-labP" type="number" min="0" step="0.01" value="0"></div>
+            </div>
+
+            <label style="margin-top:10px">Materiali / Servizi</label>
+            <table id="pv-rows">
+              <thead><tr><th>Descrizione</th><th style="width:90px">Q.tà</th><th style="width:110px">Prezzo</th><th style="width:44px" class="no-print">×</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="actions no-print">
+              <button class="btn" type="button" id="pv-add">+ Riga</button>
+              <button class="btn" type="button" id="pv-clear">Svuota righe</button>
+            </div>
+
+            <div class="grid3">
+              <div><label>Sconto %</label><input type="number" id="pv-sco" value="0" step="0.1"></div>
+              <div><label>Maggiorazione %</label><input type="number" id="pv-mag" value="0" step="0.1"></div>
+              <div><label>Totale</label><input id="pv-tot" readonly></div>
+            </div>
+
+            <div class="kpis">
+              <div class="box"><div class="hint">Materiali</div><div id="pv-mat">€ 0,00</div></div>
+              <div class="box"><div class="hint">Manodopera</div><div id="pv-lab">€ 0,00</div></div>
+              <div class="box"><div class="hint">Imponibile (materiali + manodopera)</div><div id="pv-imp">€ 0,00</div></div>
+              <div class="box"><div class="hint">Totale</div><div id="pv-to">€ 0,00</div></div>
+            </div>
+
+            <div style="margin-top:12px" class="grid2">
+              <div class="sigWrap">
+                <div class="grid2" style="align-items:center">
+                  <strong>Firma Cliente ✍️</strong>
+                  <div class="actions" style="justify-content:end">
+                    <button class="btn" type="button" data-open="sigC">Apri</button>
+                    <button class="btn" type="button" data-clear="sigC">Pulisci</button>
+                    <button class="btn" type="button" data-close="sigC">Chiudi</button>
+                  </div>
+                </div>
+                <canvas id="sigC" class="sigPad hidden"></canvas>
+                <div class="hint" id="sigCstate">Non firmato</div>
+              </div>
+              <div class="sigWrap">
+                <div class="grid2" style="align-items:center">
+                  <strong>Firma Tecnico ✍️</strong>
+                  <div class="actions" style="justify-content:end">
+                    <button class="btn" type="button" data-open="sigT">Apri</button>
+                    <button class="btn" type="button" data-clear="sigT">Pulisci</button>
+                    <button class="btn" type="button" data-close="sigT">Chiudi</button>
+                  </div>
+                </div>
+                <canvas id="sigT" class="sigPad hidden"></canvas>
+                <div class="hint" id="sigTstate">Non firmato</div>
+              </div>
+            </div>
+
+            <div class="hint" style="margin-top:6px">
+              Termini: validità preventivo 30 giorni salvo diversa indicazione. Prezzi al netto di urgenze/trasferte se non indicati.
+              Materiali garantiti se specificati. Pagamento alla consegna salvo accordi scritti. Le firme equivalgono a firma digitale.
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== INTERVENTI ========== -->
+  <section id="iv">
+    <div class="split">
+      <div class="card">
+        <div class="head">
+          <strong>Elenco Interventi</strong>
+          <div class="actions">
+            <button class="btn" id="iv-exp">Esporta</button>
+            <label class="btn"><input type="file" id="iv-imp" accept="application/json" style="display:none">Importa</label>
+          </div>
+        </div>
+        <div class="body list" id="iv-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <strong>Scheda Intervento</strong>
+          <div class="actions">
+            <button class="btn" id="iv-new">Nuovo</button>
+            <button class="btn" id="iv-dup">Duplica</button>
+            <button class="btn primary" id="iv-save">Salva</button>
+            <button class="btn danger" id="iv-del">Elimina</button>
+          </div>
+        </div>
+        <div class="body">
+          <form id="iv-form" onsubmit="return false;">
+            <input type="hidden" id="iv-id">
+            <div class="grid3">
+              <div><label>Numero</label><input id="iv-num" placeholder="INT-0001"></div>
+              <div><label>Data</label><input type="date" id="iv-date"></div>
+              <div><label>Stato</label><select id="iv-st"><option>Aperto</option><option>In corso</option><option>Chiuso</option></select></div>
+            </div>
+            <div class="grid2">
+              <div><label>Cliente</label><input id="iv-cli" placeholder="Nome cliente"></div>
+              <div><label>Contatto</label><input id="iv-con" placeholder="Telefono / Email"></div>
+            </div>
+            <label>Descrizione</label>
+            <textarea id="iv-des" placeholder="Diagnosi, materiali usati, note..."></textarea>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== IMPOSTAZIONI ========== -->
+  <section id="st">
+    <div class="card">
+      <div class="head"><strong>Impostazioni</strong></div>
+      <div class="body">
+        <div class="grid2">
+          <div><label>Intestazione</label><input id="st-rag" value="Giorgio — Elettricista & Antennista"></div>
+          <div><label>Colore brand</label><input id="st-brand" value="#0A2E5C"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Telefono</label><input id="st-phone" value="+39 351 796 9013"></div>
+          <div><label>Note di stampa</label><input id="st-note" placeholder="Indirizzo, orari, condizioni..."></div>
+        </div>
+        <label>Logo JPG/PNG</label>
+        <input type="file" id="st-file" accept="image/jpeg,image/png">
+        <div style="margin-top:8px"><img id="st-prev" class="logo" alt="Anteprima logo"></div>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn primary" id="st-save">Salva impostazioni</button>
+          <button class="btn" id="st-reset">Ripristina colori/testi</button>
+          <button class="btn danger" id="st-wipe">Cancella tutti i dati</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Foglio stampa -->
+  <section class="print-hide" style="display:none"><div id="sheet" class="sheet"></div></section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+/* ===== Helpers & Storage ===== */
+const qs=(s,e=document)=>e.querySelector(s), qsa=(s,e=document)=>[...e.querySelectorAll(s)];
+const S={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:(k)=>localStorage.removeItem(k)};
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=n=>(Math.round(n*100)/100).toFixed(2).replace('.',',');
+const num=v=>isNaN(parseFloat(v))?0:parseFloat(v);
+const uuid=()=>crypto.randomUUID();
+
+/* ===== Tabs ===== */
+qsa('nav .tab').forEach(b=>b.addEventListener('click',()=>{
+  qsa('nav .tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  qsa('main>section').forEach(s=>s.classList.toggle('active', s.id===b.dataset.tab));
+}));
+
+/* ===== Branding / Impostazioni ===== */
+function initBrand(){
+  const rag=S.get('rag','Giorgio — Elettricista & Antennista');
+  const brand=S.get('brand','#0A2E5C');
+  const phone=S.get('phone','+39 351 796 9013');
+  const note=S.get('note','');
+  const logo=S.get('logo',null);
+  qs('#ttl').textContent=rag;
+  qs('#tel').textContent=phone?('Tel. '+phone):'';
+  document.documentElement.style.setProperty('--brand',brand);
+  qs('#st-rag').value=rag; qs('#st-brand').value=brand; qs('#st-phone').value=phone; qs('#st-note').value=note;
+  if(logo){qs('#appLogo').src=logo; qs('#st-prev').src=logo;}
+}
+qs('#st-save').onclick=()=>{
+  S.set('rag',qs('#st-rag').value.trim()||'Giorgio — Elettricista & Antennista');
+  S.set('brand',qs('#st-brand').value.trim()||'#0A2E5C');
+  S.set('phone',qs('#st-phone').value.trim());
+  S.set('note',qs('#st-note').value.trim());
+  alert('Impostazioni salvate'); initBrand();
+};
+qs('#st-reset').onclick=()=>{S.del('rag');S.del('brand');S.del('phone');S.del('note');initBrand()};
+qs('#st-wipe').onclick=()=>{if(confirm('Cancellare TUTTI i dati?')){localStorage.clear();location.reload()}};
+qs('#st-file').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=ev=>{S.set('logo',ev.target.result); initBrand();}; rd.readAsDataURL(f);
+};
+
+/* ===== Preventivi ===== */
+const getPV=()=>S.get('pv',[]), setPV=a=>S.set('pv',a);
+function addRow(desc='',q=1,pr=0){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="d" value="${desc}"></td>
+    <td><input type="number" class="q" step="0.01" value="${q}"></td>
+    <td><input type="number" class="p" step="0.01" value="${pr}"></td>
+    <td class="no-print"><button type="button" class="btn danger x">×</button></td>`;
+  qs('#pv-rows tbody').appendChild(tr);
+  tr.querySelectorAll('input').forEach(i=>i.oninput=calc);
+  tr.querySelector('.x').onclick=()=>{tr.remove();calc()};
+}
+function rows(){return[...qsa('#pv-rows tbody tr')].map(tr=>({d:tr.querySelector('.d').value.trim(),q:num(tr.querySelector('.q').value),p:num(tr.querySelector('.p').value)})).filter(r=>r.d||r.q||r.p)}
+function calc(){
+  const r=rows();
+  const mat=r.reduce((s,v)=>s+v.q*v.p,0);
+  const labQ=num(qs('#pv-labQ').value), labP=num(qs('#pv-labP').value);
+  const lab = labQ*labP;
+  const imponibile = mat + lab;
+  const sPerc=num(qs('#pv-sco').value), mPerc=num(qs('#pv-mag').value);
+  const sVal=imponibile*sPerc/100;
+  const base=imponibile-sVal;
+  const mVal=base*mPerc/100;
+  const tot=base+mVal;
+  qs('#pv-mat').textContent='€ '+fmt(mat);
+  qs('#pv-lab').textContent='€ '+fmt(lab);
+  qs('#pv-imp').textContent='€ '+fmt(imponibile);
+  qs('#pv-to').textContent='€ '+fmt(tot);
+  qs('#pv-tot').value='€ '+fmt(tot);
+}
+['#pv-labQ','#pv-labP','#pv-sco','#pv-mag'].forEach(sel=>qs(sel).addEventListener('input',calc));
+
+function statusByExpiry(p){
+  if(!p.scadenza) return 'nd';
+  const t=new Date().setHours(0,0,0,0);
+  const d=new Date(p.scadenza).setHours(0,0,0,0);
+  const diff=(d-t)/86400000;
+  if(diff<0) return 'over';
+  if(diff<=7) return 'due7';
+  return 'ok';
+}
+function renderPV(){
+  const l=qs('#pv-list'); l.innerHTML='';
+  const q=qs('#pv-q').value.trim().toLowerCase();
+  const f=qs('#pv-filter').value;
+  const arr=getPV().filter(p=>{
+    const hit=!q || [p.numero,p.cliente,p.oggetto].join(' ').toLowerCase().includes(q);
+    const st=statusByExpiry(p);
+    const ok = f==='all' || f===st;
+    return hit && ok;
+  });
+  if(!arr.length){l.innerHTML='<div class="hint">Nessun preventivo</div>'; return}
+  arr.forEach(p=>{
+    const st=statusByExpiry(p);
+    const badge= st==='over'?'🟥 scaduto':(st==='due7'?'🟨 in scadenza':'🟩');
+    const d=document.createElement('div'); d.className='row';
+    d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><small>${p.scadenza||''} · ${badge}</small>`;
+    d.onclick=()=>fillPV(p.id); l.appendChild(d);
+  });
+}
+qs('#pv-q').oninput=renderPV; qs('#pv-filter').onchange=renderPV;
+
+function newPV(){
+  qs('#pv-form').reset(); qs('#pv-id').value='';
+  qs('#pv-rows tbody').innerHTML=''; addRow();
+  const seq=S.get('pv_seq',0)+1; S.set('pv_seq',seq);
+  qs('#pv-num').value='PV-'+String(seq).padStart(4,'0');
+  qs('#pv-date').value=today();
+  const d=new Date(); d.setDate(d.getDate()+30); qs('#pv-expire').value=d.toISOString().slice(0,10);
+  calc();
+}
+function readPV(){
+  return { id:qs('#pv-id').value||uuid(),
+    numero:qs('#pv-num').value.trim(), data:qs('#pv-date').value, scadenza:qs('#pv-expire').value,
+    cliente:qs('#pv-cli').value.trim(), contatto:qs('#pv-con').value.trim(), oggetto:qs('#pv-obj').value.trim(),
+    labQ:num(qs('#pv-labQ').value), labU:qs('#pv-labU').value, labP:num(qs('#pv-labP').value),
+    voci:rows(), sconto:num(qs('#pv-sco').value), maggiorazione:num(qs('#pv-mag').value),
+    totale:num(qs('#pv-to').textContent.replace('€ ','').replace(',','.')),
+    sigC:qs('#sigC').dataset.png||null, sigT:qs('#sigT').dataset.png||null
+  };
+}
+function fillPV(id){
+  const p=getPV().find(x=>x.id===id); if(!p) return;
+  qs('#pv-id').value=p.id; qs('#pv-num').value=p.numero; qs('#pv-date').value=p.data;
+  qs('#pv-expire').value=p.scadenza||''; qs('#pv-cli').value=p.cliente||''; qs('#pv-con').value=p.contatto||'';
+  qs('#pv-obj').value=p.oggetto||''; qs('#pv-rows tbody').innerHTML='';
+  (p.voci||[]).forEach(v=>addRow(v.d,v.q,v.p));
+  qs('#pv-labQ').value=p.labQ??0; qs('#pv-labU').value=p.labU||'ora'; qs('#pv-labP').value=p.labP??0;
+  qs('#pv-sco').value=p.sconto??0; qs('#pv-mag').value=p.maggiorazione??0;
+  if(p.sigC){qs('#sigC').dataset.png=p.sigC; qs('#sigCstate').textContent='Presente';}
+  else {qs('#sigC').dataset.png=''; qs('#sigCstate').textContent='Non firmato';}
+  if(p.sigT){qs('#sigT').dataset.png=p.sigT; qs('#sigTstate').textContent='Presente';}
+  else {qs('#sigT').dataset.png=''; qs('#sigTstate').textContent='Non firmato';}
+  calc();
+}
+function savePV(){const r=readPV(); const arr=getPV(); const i=arr.findIndex(x=>x.id===r.id); if(i>=0) arr[i]=r; else arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅');}
             <button class="btn" id="pv-print">Stampa / PDF</button>
             <button class="btn" id="pv-share">Condividi</button>
           </div>
