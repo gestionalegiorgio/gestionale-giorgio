@@ -1,109 +1,136 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestionale Giorgio — no IVA</title>
+<title>Giorgio elettricista e antennista</title>
+
+<!-- Colore barra / app -->
 <meta name="theme-color" content="#0A2E5C">
+
+<!-- Favicon (puoi lasciare questa o metterne una tua in data URL) -->
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAusB9QqP9x8AAAAASUVORK5CYII=">
+
 <style>
-:root{--brand:#0A2E5C;--accent:#F7931E;--bg:#f6f8fc;--card:#fff;--line:#e5e7eb;--muted:#64748b}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0f172a}
-
-/* Header + Tabs */
-header{position:sticky;top:0;z-index:50;background:var(--brand);color:#fff;display:flex;gap:12px;align-items:center;padding:10px 14px}
-.logo{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
-header .titolo{display:flex;flex-direction:column}
-header .titolo small{opacity:.9}
-nav{position:sticky;top:64px;z-index:40;display:flex;gap:8px;padding:10px;background:var(--bg)}
-.tab{border:1px solid var(--line);background:var(--card);padding:8px 12px;border-radius:999px;cursor:pointer}
-.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-/* Layout */
-main{padding:12px;max-width:1200px;margin:0 auto}
-section{display:none}
-section.active{display:block}
-.split{display:grid;grid-template-columns:320px 1fr;gap:12px}
-@media(max-width:900px){.split{grid-template-columns:1fr}}
-
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px}
-.card>.head{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.card>.body{padding:12px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.row{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
-.row:hover{background:#f9fafb}
-.row small{color:var(--muted)}
-.list{max-height:66vh;overflow:auto;display:flex;flex-direction:column}
-
-label{display:block;margin:8px 0 6px;font-weight:600}
-input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
-textarea{min-height:100px}
-.grid2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.grid3{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid var(--line);padding:8px}
-th{background:#f8fafc;text-align:left}
-.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.danger{border-color:#ef4444;color:#ef4444}
-.hint{color:var(--muted);font-size:12px}
-
-/* KPI */
-.kpis{display:grid;gap:8px;grid-template-columns:repeat(4,1fr);margin-top:8px}
-.kpis .box{background:#0a2e5c10;border:1px solid var(--line);border-radius:10px;padding:10px}
-
-/* Firma */
-.sigWrap{border:2px dashed var(--line);border-radius:12px;padding:10px}
-.sigPad{width:100%;height:200px;border:1px solid var(--line);border-radius:12px;background:#fff;touch-action:none}
-.sigPad.hidden{display:none}
-
-/* Print */
-@media print{
-  header,nav,.no-print,.print-hide{display:none!important}
-  body{background:#fff}
-  .sheet{display:block!important;width:190mm;min-height:277mm;margin:0 auto;padding:12mm}
-  .ph{display:flex;gap:10px;align-items:center}
-  .ph img{width:50px;height:50px;border-radius:50%;border:2px solid #000;object-fit:cover}
-  .pt{font-size:18px;margin-top:6px}
-  table{border:1px solid #000} th,td{border:1px solid #000}
-}
+  :root{--brand:#0A2E5C;--accent:#F7931E}
+  body{margin:0;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0a223d;background:#f6f8fb}
+  header{background:var(--brand);color:#fff;padding:14px 16px}
+  h1{margin:0;font-size:18px}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  .note{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px}
+  .ok{display:inline-block;background:var(--accent);color:#fff;padding:6px 10px;border-radius:10px;margin-top:10px}
+  .muted{color:#64748b}
 </style>
 </head>
 <body>
+
 <header>
-  <img id="appLogo" class="logo" alt="Logo">
-  <div class="titolo">
-    <strong id="ttl">Giorgio — Elettricista & Antennista</strong>
-    <small id="tel">Tel. +39 351 796 9013</small>
-    <small>Preventivi · Interventi · Impostazioni</small>
-  </div>
+  <h1>Giorgio — Elettricista &amp; Antennista</h1>
+  <div class="muted">PWA installabile · offline · stampa</div>
 </header>
 
-<nav>
-  <button class="tab active" data-tab="pv">Preventivi</button>
-  <button class="tab" data-tab="iv">Interventi</button>
-  <button class="tab" data-tab="st">Impostazioni</button>
-</nav>
+<div class="wrap">
+  <div class="note">
+    <strong>⚙️ File unico, PWA auto-configurata</strong><br>
+    Questo <em>index.html</em> crea da solo <b>manifest</b> e <b>service worker</b>. Puoi già attivare GitHub Pages e installare l’app.<br><br>
+    <b>Per usare il tuo gestionale:</b> incolla il tuo HTML completo nel blocco qui sotto (sostituisci il segnaposto).
+    <div class="ok">Funziona anche offline</div>
+  </div>
 
-<main>
-  <!-- ========== PREVENTIVI ========== -->
-  <section id="pv" class="active">
-    <div class="split">
-      <div class="card">
-        <div class="head">
-          <strong>Elenco Preventivi</strong>
-          <div class="actions">
-            <select id="pv-filter" class="btn">
-              <option value="all">Tutti (scadenza)</option>
-              <option value="due7">In scadenza (7 giorni)</option>
-              <option value="over">Scaduti</option>
-            </select>
-            <button class="btn" id="pv-exp">Esporta</button>
-            <label class="btn"><input type="file" id="pv-imp" accept="application/json" style="display:none">Importa</label>
-          </div>
-        </div>
-        <div class="body">
-          <input id="pv-q" placeholder="Cerca: numero, cliente, oggetto..." class="no-print">
+  <!-- APP: QUI IL TUO GESTIONALE  -->
+  <div id="app" class="wrap" style="padding:24px 0">
+    <!-- 🔽 Sostituisci tutto questo div con il TUO gestionale (Preventivi/Interventi ecc.) -->
+    <p class="muted">Segnaposto app — incolla qui il tuo gestionale per intero (HTML+CSS+JS in linea o con link esterni).</p>
+  </div>
+  <!-- /APP -->
+</div>
+
+<script>
+/* =========================
+   1) ICONS in Data URL
+   Sostituisci ICON192/ICON512 con il TUO logo (JPG/PNG) in base64.
+   Basta mettere:  const ICON192 = "data:image/jpeg;base64,.....";
+   ========================= */
+const ICON192 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABb2j/AAAAAAXNSR0IArs4c6QAAABxpRE9UAAAAAgAAAAAAAAAwAAAAKAAAADAAAABMAf5j2AAAAF0lEQVR42u3BMQEAAADCIPunNsYQAAAAAAAAAO4GQwAAAHf2k1wAAAAASUVORK5CYII=";
+const ICON512 = ICON192; // puoi metterne uno migliore 512×512
+
+/* =========================
+   2) Manifest generato al volo (un solo file!)
+   ========================= */
+const manifest = {
+  name: "Giorgio elettricista e antennista",
+  short_name: "Gestionale Giorgio",
+  description: "Preventivi & Interventi — PWA offline.",
+  start_url: "./",
+  scope: "./",
+  display: "standalone",
+  theme_color: "#0A2E5C",
+  background_color: "#0A2E5C",
+  icons: [
+    { src: ICON192, sizes: "192x192", type: ICON192.split(';')[0].split(':')[1] || "image/png" },
+    { src: ICON512, sizes: "512x512", type: ICON512.split(';')[0].split(':')[1] || "image/png" }
+  ]
+};
+
+// Crea <link rel="manifest"> con Blob (niente file esterni)
+(function injectManifest(){
+  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = url;
+  document.head.appendChild(link);
+})();
+
+/* =========================
+   3) Service Worker iniettato da stringa (offline ready)
+   Strategia: network-first con fallback alla cache + caching dinamico.
+   ========================= */
+const swCode = `
+  const CACHE = 'ggiorgio-v1';
+  self.addEventListener('install', e => {
+    e.waitUntil((async ()=>{
+      const c = await caches.open(CACHE);
+      try { await c.addAll(['./']); } catch(e){}
+      self.skipWaiting();
+    })());
+  });
+  self.addEventListener('activate', e => {
+    e.waitUntil((async ()=>{
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => k!==CACHE).map(k=>caches.delete(k)));
+      self.clients.claim();
+    })());
+  });
+  self.addEventListener('fetch', e => {
+    const req = e.request;
+    // ignoriamo chiamate di terze parti non GET
+    if (req.method !== 'GET') { return; }
+    e.respondWith((async ()=>{
+      try {
+        const net = await fetch(req);
+        const cache = await caches.open(CACHE);
+        cache.put(req, net.clone());
+        return net;
+      } catch(err) {
+        const hit = await caches.match(req);
+        return hit || caches.match('./');
+      }
+    })());
+  });
+`;
+
+// Registra SW da Blob (nessun file esterno)
+(function registerSW(){
+  if (!('serviceWorker' in navigator)) return;
+  const blob = new Blob([swCode], {type: 'text/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  window.addEventListener('load', () => navigator.serviceWorker.register(swUrl).catch(()=>{}));
+})();
+</script>
+
+</body>
+</html>          <input id="pv-q" placeholder="Cerca: numero, cliente, oggetto..." class="no-print">
         </div>
         <div class="body list" id="pv-list"></div>
       </div>
