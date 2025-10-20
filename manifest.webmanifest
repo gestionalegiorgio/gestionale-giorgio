@@ -1,0 +1,16 @@
+{
+  "name": "Gestionale Giorgio",
+  "short_name": "Giorgio",
+  "description": "Gestionale preventivi e interventi - Giorgio Elettricista & Antennista",
+  "start_url": "/gestionale-giorgio/index.html",
+  "display": "standalone",
+  "background_color": "#001f4d",
+  "theme_color": "#001f4d",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
