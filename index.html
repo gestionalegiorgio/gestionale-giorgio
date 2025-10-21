@@ -49,12 +49,10 @@ th{background:#f8fafc;text-align:left}
 .badge.danger{border-color:#ef4444;color:#991b1b;background:#fef2f2}
 .note{font-size:12px;color:var(--muted)}
 
-/* Firma: scrittura mobile stabile (modale + canvas) */
+/* Firma inline */
 canvas[data-signature]{touch-action:none;-ms-touch-action:none}
-.sig-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#0006;z-index:9999}
-.sig-modal.open{display:flex}
-.sig-box{background:#fff;width:min(720px,92vw);border-radius:14px;padding:12px}
-.sig-box canvas{width:100%;height:280px;border:2px dashed #e5e7eb;border-radius:10px}
+.sig-box{background:#fff;width:100%;border-radius:14px;padding:10px}
+.sig-box canvas{width:100%;height:260px;border:2px dashed #e5e7eb;border-radius:10px}
 
 /* Stampa */
 @media print{
@@ -66,7 +64,6 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
   .pm{font-size:12px;opacity:.8}
   .terms{font-size:11px;margin-top:8px}
   table,th,td{border:1px solid #000}
-  /* firme a destra */
   .sign-row{display:flex;justify-content:flex-end;gap:24px;margin-top:16px}
   .sign{width:220px;text-align:center}
   .sign img{width:100%;max-height:90px;object-fit:contain;border:1px solid #000;padding:6px;background:#fff}
@@ -80,7 +77,7 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
   <div>
     <h1 id="ttl">Giorgio — Elettricista & Antennista</h1>
     <small id="tel">Tel. +39 351 796 9013</small> ·
-    <small>v30 — Preventivi · Interventi · Impostazioni</small>
+    <small>v31 — Preventivi · Interventi · Impostazioni</small>
   </div>
 </header>
 
@@ -169,14 +166,16 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <div class="card"><div class="body"><div class="note">Imponibile (materiali + manodopera)</div><div id="pv-imp">€ 0,00</div></div></div>
           </div>
 
-          <!-- FIRMA CLIENTE -->
+          <!-- FIRMA CLIENTE (inline) -->
           <div data-signature-wrap style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <strong>Firma Cliente ✍️</strong>
               <span data-sig-badge class="badge">Non firmato</span>
             </div>
-            <div class="sig-modal"><div class="sig-box"><canvas data-signature></canvas></div></div>
-            <div class="actions">
+            <div class="sig-box" style="display:none">
+              <canvas data-signature></canvas>
+            </div>
+            <div class="actions" style="margin-top:6px">
               <button class="btn" data-sig-open>Apri</button>
               <button class="btn" data-sig-clear>Pulisci</button>
               <button class="btn" data-sig-close>Chiudi</button>
@@ -184,14 +183,16 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <input type="hidden" name="firma_cliente" data-sig-data>
           </div>
 
-          <!-- FIRMA TECNICO -->
+          <!-- FIRMA TECNICO (inline) -->
           <div data-signature-wrap style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <strong>Firma Tecnico ✍️</strong>
               <span data-sig-badge class="badge">Non firmato</span>
             </div>
-            <div class="sig-modal"><div class="sig-box"><canvas data-signature></canvas></div></div>
-            <div class="actions">
+            <div class="sig-box" style="display:none">
+              <canvas data-signature></canvas>
+            </div>
+            <div class="actions" style="margin-top:6px">
               <button class="btn" data-sig-open>Apri</button>
               <button class="btn" data-sig-clear>Pulisci</button>
               <button class="btn" data-sig-close>Chiudi</button>
@@ -269,6 +270,8 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
           <button class="btn primary" id="st-save">Salva impostazioni</button>
           <button class="btn" id="st-reset">Ripristina predefiniti</button>
           <button class="btn danger" id="st-wipe">Cancella tutti i dati</button>
+          <button class="btn" id="st-backup">Esporta impostazioni</button>
+          <label class="btn"><input type="file" id="st-restore" accept="application/json" style="display:none">Importa impostazioni</label>
         </div>
       </div>
     </div>
@@ -281,7 +284,7 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
 </main>
 
 <script>
-/* ===== Helpers con fallback UUID ===== */
+/* ===== Helpers ===== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const S={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
 const today=()=>new Date().toISOString().slice(0,10);
@@ -297,6 +300,35 @@ function bindTabs(){
   }));
 }
 
+/* ===== Logo: compress + fallback ===== */
+function compressImageFile(file, maxW=400, maxH=400, quality=0.85){
+  return new Promise((resolve, reject)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let {width,height}=img;
+        const r=Math.min(maxW/width,maxH/height,1);
+        const w=Math.round(width*r), h=Math.round(height*r);
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+        const out=c.toDataURL('image/jpeg',quality);
+        resolve(out);
+      };
+      img.onerror=reject; img.src=fr.result;
+    };
+    fr.onerror=reject; fr.readAsDataURL(file);
+  });
+}
+function setAppLogo(src){
+  const el=$('#appLogo'); if(!el) return;
+  if(!src){ el.src='icona-192.png'; return; }
+  const test=new Image();
+  test.onload=()=>{ el.src=src; };
+  test.onerror=()=>{ el.src='icona-192.png'; };
+  test.src=src;
+}
+
 /* ===== Brand/Impostazioni ===== */
 function initBrand(){
   const rag=S.get('rag','Giorgio — Elettricista & Antennista');
@@ -306,7 +338,7 @@ function initBrand(){
   $('#ttl').textContent=rag;
   $('#tel').textContent=phone?('Tel. '+phone):'';
   document.documentElement.style.setProperty('--brand',brand);
-  $('#appLogo').src = logo || 'icona-192.png';
+  setAppLogo(logo);
   $('#st-rag').value=rag; $('#st-brand').value=brand; $('#st-phone').value=phone; $('#st-note').value=S.get('note','');
 }
 function bindSettings(){
@@ -318,12 +350,38 @@ function bindSettings(){
     initBrand(); alert('Impostazioni salvate ✅');
   };
   $('#st-reset').onclick=()=>{['rag','brand','phone','note','logo'].forEach(S.del); initBrand();};
-  $('#st-file').onchange=e=>{
+  $('#st-file').onchange= async e=>{
     const f=e.target.files[0]; if(!f) return;
-    if(!/^image\/(png|jpeg)$/.test(f.type)){alert('Carica PNG o JPG'); return}
-    const r=new FileReader(); r.onload=ev=>{S.set('logo',ev.target.result); initBrand();}; r.readAsDataURL(f);
+    if(!/^image\/(png|jpeg|jpg)$/.test(f.type)){ alert('Carica PNG o JPG'); return; }
+    try{
+      const dataUrl=await compressImageFile(f,400,400,0.85);
+      S.set('logo',dataUrl); initBrand(); alert('Logo aggiornato ✅ (ottimizzato)');
+    }catch(err){ console.error(err); alert('Non riesco a salvare il logo. Prova un file più piccolo.'); }
   };
   $('#st-wipe').onclick=()=>{ if(confirm('Cancellare TUTTI i dati?')){ localStorage.clear(); location.reload(); } };
+  // Backup / Restore impostazioni
+  $('#st-backup').onclick=()=>{
+    const data={ rag:S.get('rag',''), brand:S.get('brand',''), phone:S.get('phone',''), note:S.get('note',''), logo:S.get('logo',null) };
+    const a=document.createElement('a');
+    a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data));
+    a.download='impostazioni_giorgio.json'; a.click();
+  };
+  $('#st-restore').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const o=JSON.parse(ev.target.result);
+        if('rag' in o)   S.set('rag',o.rag||'');
+        if('brand' in o) S.set('brand',o.brand||'#0A2E5C');
+        if('phone' in o) S.set('phone',o.phone||'');
+        if('note' in o)  S.set('note',o.note||'');
+        if('logo' in o)  S.set('logo',o.logo||null);
+        initBrand(); alert('Impostazioni importate ✅');
+      }catch{ alert('File impostazioni non valido'); }
+    };
+    r.readAsText(f);
+  };
 }
 
 /* ===== Store ===== */
@@ -339,7 +397,7 @@ function addRow(desc='',q=1,pr=0){
   <td><button class="btn danger x" type="button">×</button></td>`;
   $('#pv-rows tbody').appendChild(tr);
   tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
-  tr.querySelector('.x').onclick=()=>{tr.remove();calc()};
+  tr.querySelector('.x').onclick=()=>{tr.remove();calc(); ensureAtLeastOneRow();};
 }
 function rows(){return [...$('#pv-rows tbody').querySelectorAll('tr')].map(tr=>({
   desc:tr.querySelector('.d').value.trim(), qty:num(tr.querySelector('.q').value), price:num(tr.querySelector('.p').value)
@@ -358,9 +416,13 @@ function calc(){
   $('#pv-imp').textContent='€ '+fmt(imp);
   $('#pv-tot').value='€ '+fmt(total);
 }
+function ensureAtLeastOneRow(){
+  const tb=$('#pv-rows tbody'); if(!tb) return;
+  if(tb.children.length===0) addRow();
+}
 function bindCalcInputs(){
-  $('#pv-add').onclick=()=>addRow();
-  $('#pv-clear').onclick=()=>{$('#pv-rows tbody').innerHTML=''; calc();}
+  $('#pv-add').onclick=()=>{addRow();};
+  $('#pv-clear').onclick=()=>{$('#pv-rows tbody').innerHTML=''; calc(); ensureAtLeastOneRow();};
   ['pv-lab-qty','pv-lab-rate','pv-sco','pv-mag'].forEach(id=>$('#'+id).addEventListener('input',calc));
 }
 
@@ -374,7 +436,7 @@ function newPV(){
   $('#pv-obj').value=''; $('#pv-lab-qty').value=0; $('#pv-lab-rate').value=0; $('#pv-lab-unit').value='h';
   $('#pv-sco').value=0; $('#pv-mag').value=0;
   $('#pv-rows tbody').innerHTML=''; addRow();
-  calc();
+  calc(); ensureAtLeastOneRow();
 }
 function readPV(){
   return {
@@ -405,14 +467,15 @@ function fillPV(id){
   $('#pv-sco').value=p.sconto??0; $('#pv-mag').value=p.maggiorazione??0;
   if(p.sigC) document.querySelectorAll('[name="firma_cliente"]').forEach(i=>i.value=p.sigC);
   if(p.sigT) document.querySelectorAll('[name="firma_tecnico"]').forEach(i=>i.value=p.sigT);
-  calc();
+  calc(); ensureAtLeastOneRow();
 }
 function savePV(){
   const r=readPV(); const arr=getPV(); const i=arr.findIndex(x=>x.id===r.id);
   if(i>=0) arr[i]=r; else arr.unshift(r);
   setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅');
+  ensureAtLeastOneRow();
 }
-function dupPV(){ const r=readPV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); }
+function dupPV(){ const r=readPV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); ensureAtLeastOneRow(); }
 function delPV(){ const id=$('#pv-id').value; if(!id) return; if(!confirm('Eliminare questo preventivo?')) return;
   const arr=getPV().filter(x=>x.id!==id); setPV(arr); renderPV(); arr.length?fillPV(arr[0].id):newPV(); }
 
@@ -460,57 +523,73 @@ function bindIVImpExp(){
   $('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setIV(JSON.parse(ev.target.result)); renderIV();}catch{alert('File non valido')}}; r.readAsText(f);};
 }
 
-/* ===== Firme (modale + pointer events) ===== */
+/* ===== Firme v31 (inline) ===== */
 function initSignPads(){
   document.querySelectorAll('[data-signature-wrap]').forEach(wrap=>{
-    const openBtn  = wrap.querySelector('[data-sig-open]');
-    const clearBtn = wrap.querySelector('[data-sig-clear]');
-    const closeBtn = wrap.querySelector('[data-sig-close]');
-    const badge    = wrap.querySelector('[data-sig-badge]');
-    const hidden   = wrap.querySelector('[data-sig-data]');
-    const modal    = wrap.querySelector('.sig-modal');
-    const canvas   = wrap.querySelector('canvas[data-signature]');
-    const ctx      = canvas.getContext('2d', { willReadFrequently:true });
+    const box     = wrap.querySelector('.sig-box');
+    const canvas  = wrap.querySelector('canvas[data-signature]');
+    const hidden  = wrap.querySelector('[data-sig-data]');
+    const badge   = wrap.querySelector('[data-sig-badge]');
+    const openBtn = wrap.querySelector('[data-sig-open]');
+    const clearBtn= wrap.querySelector('[data-sig-clear]');
+    const closeBtn= wrap.querySelector('[data-sig-close]');
+    const ctx     = canvas.getContext('2d', { willReadFrequently:true });
 
-    let drawing = false;
-    let dpr = Math.max(1, window.devicePixelRatio || 1);
+    let drawing=false;
+    let dpr=Math.max(1,window.devicePixelRatio||1);
 
-    function resizeCanvas(){
-      const rect = canvas.getBoundingClientRect();
-      canvas.width  = Math.round(rect.width  * dpr);
-      canvas.height = Math.round(rect.height * dpr);
+    function sizeCanvas(){
+      const cssH=canvas.clientHeight||260;
+      const cssW=canvas.clientWidth||wrap.clientWidth||600;
+      canvas.width=Math.round(cssW*dpr);
+      canvas.height=Math.round(cssH*dpr);
       ctx.setTransform(dpr,0,0,dpr,0,0);
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = '#0A2E5C';
+      ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#0A2E5C';
     }
-    new ResizeObserver(resizeCanvas).observe(canvas);
-    setTimeout(resizeCanvas,0);
 
-    function pos(e){ const r=canvas.getBoundingClientRect(); const p=e.touches?e.touches[0]:e; return {x:(p.clientX-r.left),y:(p.clientY-r.top)}; }
-    function down(e){ e.preventDefault(); drawing=true; ctx.beginPath(); const {x,y}=pos(e); ctx.moveTo(x,y); }
-    function move(e){ if(!drawing) return; e.preventDefault(); const {x,y}=pos(e); ctx.lineTo(x,y); ctx.stroke(); }
-    function up(e){ if(!drawing) return; e.preventDefault(); drawing=false; }
-
-    canvas.addEventListener('pointerdown', down, {passive:false});
-    canvas.addEventListener('pointermove', move, {passive:false});
-    window.addEventListener('pointerup', up, {passive:false});
-
-    openBtn?.addEventListener('click', ()=>{ modal.classList.add('open'); resizeCanvas(); });
-    clearBtn?.addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); if(badge){ badge.textContent='Non firmato'; badge.className='badge'; } if(hidden) hidden.value=''; });
-    closeBtn?.addEventListener('click', ()=>{
-      const blank = document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
-      const empty = canvas.toDataURL() === blank.toDataURL();
-      if(!empty && hidden){
-        hidden.value = canvas.toDataURL('image/png');
+    function openPad(){ box.style.display='block'; sizeCanvas(); }
+    function closePad(){
+      const blank=document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
+      if(canvas.toDataURL()!==blank.toDataURL()){
+        hidden.value=canvas.toDataURL('image/png');
         if(badge){ badge.textContent='Firmato'; badge.className='badge'; badge.style.borderColor='#10b981'; badge.style.color='#065f46'; badge.style.background='#ecfdf5'; }
       }
-      modal.classList.remove('open');
-    });
+      box.style.display='none';
+    }
+    function clearPad(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      hidden.value='';
+      if(badge){ badge.textContent='Non firmato'; badge.className='badge'; badge.style.borderColor=''; badge.style.color=''; badge.style.background=''; }
+    }
+
+    function pointerPos(e){
+      const r=canvas.getBoundingClientRect();
+      const src=e.touches?e.touches[0]:e;
+      return {x:(src.clientX-r.left),y:(src.clientY-r.top)};
+    }
+    const start=e=>{ e.preventDefault(); drawing=true; const {x,y}=pointerPos(e); ctx.beginPath(); ctx.moveTo(x,y); };
+    const move =e=>{ if(!drawing) return; e.preventDefault(); const {x,y}=pointerPos(e); ctx.lineTo(x,y); ctx.stroke(); };
+    const end  =e=>{ if(!drawing) return; e.preventDefault(); drawing=false; };
+
+    canvas.addEventListener('pointerdown',start,{passive:false});
+    canvas.addEventListener('pointermove',move,{passive:false});
+    window.addEventListener('pointerup',end,{passive:false});
+    canvas.addEventListener('touchstart',e=>start(e),{passive:false});
+    canvas.addEventListener('touchmove', e=>move(e), {passive:false});
+    window.addEventListener('touchend', end, {passive:false});
+    canvas.addEventListener('mousedown',start,{passive:false});
+    canvas.addEventListener('mousemove',move,{passive:false});
+    window.addEventListener('mouseup',end,{passive:false});
+
+    openBtn?.addEventListener('click',openPad);
+    clearBtn?.addEventListener('click',clearPad);
+    closeBtn?.addEventListener('click',closePad);
+
+    new ResizeObserver(()=>{ if(box.style.display!=='none') sizeCanvas(); }).observe(canvas);
   });
 }
 
-/* ===== Print (firme a destra) ===== */
+/* ===== Print ===== */
 function renderPrint(rec){
   const sheet=$('#sheet');
   const logo=S.get('logo',null)||'icona-192.png';
@@ -520,9 +599,8 @@ function renderPrint(rec){
   const imp=mat+lab;
   const afterDiscount=imp - (imp*(rec.sconto||0)/100);
   const total=afterDiscount + (afterDiscount*(rec.maggiorazione||0)/100);
-
-  const sigCliente = document.querySelector('[name="firma_cliente"]')?.value || '';
-  const sigTecnico = document.querySelector('[name="firma_tecnico"]')?.value || '';
+  const sigCliente=document.querySelector('[name="firma_cliente"]')?.value||'';
+  const sigTecnico=document.querySelector('[name="firma_tecnico"]')?.value||'';
 
   sheet.innerHTML=`
     <div class="ph">
@@ -594,37 +672,24 @@ ${rows || '-'}${labLine}
 Totale preventivo: ${tot}`;
 }
 function pvToIV(){
-  const r = readPV();
-  if(!r.numero){ alert('Salva prima il preventivo'); return; }
-  const arr = getIV();
-  const nuovoIV = {
-    id: uuid(),
-    numero: 'INT-'+String(arr.length+1).padStart(4,'0'),
-    data: today(),
-    stato: 'Aperto',
-    cliente: r.cliente || '',
-    contatto: r.contatto || '',
-    descrizione: buildDescriptionFromPV(r)
-  };
-  arr.unshift(nuovoIV);
-  setIV(arr);
-  renderIV();
-  $$('nav .tab').forEach(t=>t.classList.remove('active'));
-  $('nav .tab[data-tab="iv"]').classList.add('active');
-  $$('main>section').forEach(s=>s.classList.remove('active'));
-  $('#iv').classList.add('active');
-  fillIV(nuovoIV.id);
-  alert('Intervento creato da preventivo ✅');
+  const r=readPV(); if(!r.numero){ alert('Salva prima il preventivo'); return; }
+  const arr=getIV();
+  const nuovoIV={ id:uuid(), numero:'INT-'+String(arr.length+1).padStart(4,'0'), data:today(), stato:'Aperto',
+    cliente:r.cliente||'', contatto:r.contatto||'', descrizione:buildDescriptionFromPV(r) };
+  arr.unshift(nuovoIV); setIV(arr); renderIV();
+  $$('nav .tab').forEach(t=>t.classList.remove('active')); $('nav .tab[data-tab="iv"]').classList.add('active');
+  $$('main>section').forEach(s=>s.classList.remove('active')); $('#iv').classList.add('active');
+  fillIV(nuovoIV.id); alert('Intervento creato da preventivo ✅');
 }
 function bindPVtoIV(){ $('#pv-to-iv').onclick=pvToIV; }
 
-/* ===== Binds botttoni principali ===== */
+/* ===== Binds ===== */
 function bindMainButtons(){
   $('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV;
   $('#iv-new').onclick=newIV; $('#iv-save').onclick=saveIV; $('#iv-del').onclick=delIV; $('#iv-dup').onclick=dupIV;
 }
 
-/* ===== Avvio ===== */
+/* ===== Start ===== */
 function start(){
   bindTabs();
   initBrand(); bindSettings();
@@ -633,9 +698,9 @@ function start(){
   newPV(); newIV();
   initSignPads();
 }
-document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+document.readyState==='loading' ? document.addEventListener('DOMContentLoaded', start) : start();
 
-/* ===== NIENTE service worker in questa versione safe ===== */
+/* (nessun service worker in v31 safe) */
 </script>
 </body>
 </html>
