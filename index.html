@@ -48,8 +48,6 @@ th{background:#f8fafc;text-align:left}
 .badge.warn{border-color:#f59e0b;color:#b45309;background:#fffbeb}
 .badge.danger{border-color:#ef4444;color:#991b1b;background:#fef2f2}
 .note{font-size:12px;color:var(--muted)}
-
-/* Firma inline */
 canvas[data-signature]{touch-action:none;-ms-touch-action:none}
 .sig-box{background:#fff;width:100%;border-radius:14px;padding:10px}
 .sig-box canvas{width:100%;height:260px;border:2px dashed #e5e7eb;border-radius:10px}
@@ -77,7 +75,7 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
   <div>
     <h1 id="ttl">Giorgio — Elettricista & Antennista</h1>
     <small id="tel">Tel. +39 351 796 9013</small> ·
-    <small>v31 — Preventivi · Interventi · Impostazioni</small>
+    <small>v33 — Preventivi · Interventi · Impostazioni</small>
   </div>
 </header>
 
@@ -123,13 +121,14 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <button class="btn" id="pv-share">Condividi</button>
           </div>
         </div>
-        <div class="body">
+        <div class="body" id="pv-form">
           <input type="hidden" id="pv-id">
           <div class="grid3">
             <div><label>Numero</label><input id="pv-num" placeholder="PV-0001"></div>
             <div><label>Data</label><input type="date" id="pv-date"></div>
             <div><label>Scadenza</label><input type="date" id="pv-expdate"></div>
           </div>
+
           <div class="grid3">
             <div>
               <label>Unità manodopera</label>
@@ -138,6 +137,7 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <div><label>Q.tà manodopera</label><input type="number" id="pv-lab-qty" step="0.25" value="0" inputmode="decimal"></div>
             <div><label>Tariffa (€ / unità)</label><input type="number" id="pv-lab-rate" step="0.01" value="0" inputmode="decimal"></div>
           </div>
+
           <div class="grid2">
             <div><label>Cliente</label><input id="pv-cli" placeholder="Nome cliente"></div>
             <div><label>Contatto</label><input id="pv-con" placeholder="Telefono / Email"></div>
@@ -166,7 +166,13 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <div class="card"><div class="body"><div class="note">Imponibile (materiali + manodopera)</div><div id="pv-imp">€ 0,00</div></div></div>
           </div>
 
-          <!-- FIRMA CLIENTE (inline) -->
+          <div class="grid3">
+            <div><label>Acconto %</label><input type="number" id="pv-dep-perc" step="1" value="50"></div>
+            <div><label>Acconto €</label><input id="pv-dep-amt" readonly></div>
+            <div><label>Saldo €</label><input id="pv-balance-amt" readonly></div>
+          </div>
+
+          <!-- FIRMA CLIENTE -->
           <div data-signature-wrap style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <strong>Firma Cliente ✍️</strong>
@@ -183,7 +189,7 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <input type="hidden" name="firma_cliente" data-sig-data>
           </div>
 
-          <!-- FIRMA TECNICO (inline) -->
+          <!-- FIRMA TECNICO -->
           <div data-signature-wrap style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <strong>Firma Tecnico ✍️</strong>
@@ -200,9 +206,11 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
             <input type="hidden" name="firma_tecnico" data-sig-data>
           </div>
 
-          <div class="note" style="margin-top:8px">
-            Termini: validità preventivo 30 giorni salvo diversa indicazione. Prezzi al netto di urgenze/trasferte se non indicati.
-            Materiali garantiti se specificati. Pagamento alla consegna salvo accordi scritti. Le firme equivalgono a firma digitale.
+          <div class="note" id="pv-terms" style="margin-top:8px">
+            Pagamento: acconto del 50% all’accettazione del preventivo e saldo al termine dei lavori.
+            Il materiale fornito rimane di proprietà dell’installatore fino al saldo completo.
+            Validità preventivo 30 giorni salvo accordi diversi. Eventuali varianti saranno concordate a parte.
+            Le firme equivalgono a firma digitale.
           </div>
         </div>
       </div>
@@ -290,7 +298,7 @@ const S={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{ret
 const today=()=>new Date().toISOString().slice(0,10);
 const uuid=()=> (crypto && crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2));
 const num=v=>isNaN(parseFloat(v))?0:parseFloat(v);
-const fmt=n=>(Math.round(n*100)/100).toFixed(2).replace('.',',');
+const fmtEur=n=>'€ '+(Math.round(n*100)/100).toFixed(2).replace('.',',');
 
 /* ===== Tabs ===== */
 function bindTabs(){
@@ -312,8 +320,7 @@ function compressImageFile(file, maxW=400, maxH=400, quality=0.85){
         const w=Math.round(width*r), h=Math.round(height*r);
         const c=document.createElement('canvas'); c.width=w; c.height=h;
         const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
-        const out=c.toDataURL('image/jpeg',quality);
-        resolve(out);
+        resolve(c.toDataURL('image/jpeg',quality));
       };
       img.onerror=reject; img.src=fr.result;
     };
@@ -359,7 +366,6 @@ function bindSettings(){
     }catch(err){ console.error(err); alert('Non riesco a salvare il logo. Prova un file più piccolo.'); }
   };
   $('#st-wipe').onclick=()=>{ if(confirm('Cancellare TUTTI i dati?')){ localStorage.clear(); location.reload(); } };
-  // Backup / Restore impostazioni
   $('#st-backup').onclick=()=>{
     const data={ rag:S.get('rag',''), brand:S.get('brand',''), phone:S.get('phone',''), note:S.get('note',''), logo:S.get('logo',null) };
     const a=document.createElement('a');
@@ -372,11 +378,7 @@ function bindSettings(){
     r.onload=ev=>{
       try{
         const o=JSON.parse(ev.target.result);
-        if('rag' in o)   S.set('rag',o.rag||'');
-        if('brand' in o) S.set('brand',o.brand||'#0A2E5C');
-        if('phone' in o) S.set('phone',o.phone||'');
-        if('note' in o)  S.set('note',o.note||'');
-        if('logo' in o)  S.set('logo',o.logo||null);
+        ['rag','brand','phone','note','logo'].forEach(k=>{ if(k in o) S.set(k,o[k]); });
         initBrand(); alert('Impostazioni importate ✅');
       }catch{ alert('File impostazioni non valido'); }
     };
@@ -402,40 +404,80 @@ function addRow(desc='',q=1,pr=0){
 function rows(){return [...$('#pv-rows tbody').querySelectorAll('tr')].map(tr=>({
   desc:tr.querySelector('.d').value.trim(), qty:num(tr.querySelector('.q').value), price:num(tr.querySelector('.p').value)
 })).filter(r=>r.desc||r.qty||r.price)}
-function calc(){
-  const r=rows();
-  const mat=r.reduce((s,v)=>s+v.qty*v.price,0);
-  const labQty=num($('#pv-lab-qty').value), labRate=num($('#pv-lab-rate').value);
-  const lab=labQty*labRate;
-  const imp=mat+lab;
-  const sPerc=num($('#pv-sco').value), mPerc=num($('#pv-mag').value);
-  const afterDiscount=imp - (imp*sPerc/100);
-  const total=afterDiscount + (afterDiscount*mPerc/100);
-  $('#pv-mat').textContent='€ '+fmt(mat);
-  $('#pv-lab').textContent='€ '+fmt(lab);
-  $('#pv-imp').textContent='€ '+fmt(imp);
-  $('#pv-tot').value='€ '+fmt(total);
-}
 function ensureAtLeastOneRow(){
   const tb=$('#pv-rows tbody'); if(!tb) return;
   if(tb.children.length===0) addRow();
 }
+function calc(){
+  const r=rows();
+  const materiali=r.reduce((s,v)=>s+v.qty*v.price,0);
+
+  const labQty=num($('#pv-lab-qty').value);
+  const labRate=num($('#pv-lab-rate').value);
+  const manodopera=labQty*labRate;
+
+  const imponibile=materiali+manodopera;
+
+  const sPerc=num($('#pv-sco').value), mPerc=num($('#pv-mag').value);
+  const afterDiscount=imponibile - (imponibile*sPerc/100);
+  const totale=afterDiscount + (afterDiscount*mPerc/100);
+
+  $('#pv-mat').textContent=fmtEur(materiali);
+  $('#pv-lab').textContent=fmtEur(manodopera);
+  $('#pv-imp').textContent=fmtEur(imponibile);
+
+  const sVal=imponibile*sPerc/100, mVal=afterDiscount*mPerc/100;
+  $('#pv-sc') && ($('#pv-sc').textContent=fmtEur(sVal));
+  $('#pv-mg') && ($('#pv-mg').textContent=fmtEur(mVal));
+  $('#pv-to').textContent=fmtEur(totale);
+  $('#pv-tot').value=fmtEur(totale);
+
+  // Acconto/Saldo
+  const depPerc = Math.max(0, Math.min(100, num($('#pv-dep-perc').value||'0')));
+  const depAmt  = (totale * depPerc / 100);
+  const balance = Math.max(0, totale - depAmt);
+  $('#pv-dep-amt').value = fmtEur(depAmt);
+  $('#pv-balance-amt').value = fmtEur(balance);
+}
 function bindCalcInputs(){
   $('#pv-add').onclick=()=>{addRow();};
   $('#pv-clear').onclick=()=>{$('#pv-rows tbody').innerHTML=''; calc(); ensureAtLeastOneRow();};
-  ['pv-lab-qty','pv-lab-rate','pv-sco','pv-mag'].forEach(id=>$('#'+id).addEventListener('input',calc));
+  ['pv-lab-qty','pv-lab-rate','pv-sco','pv-mag','pv-dep-perc'].forEach(id=>$('#'+id).addEventListener('input',calc));
 }
 
 /* ===== Preventivi CRUD ===== */
+function nextPVNumber(){
+  const arr=getPV(); let n=0;
+  arr.forEach(p=>{ const m=(p.numero||'').match(/PV-(\d+)/i); if(m) n=Math.max(n,parseInt(m[1],10)); });
+  const ctr=parseInt(localStorage.getItem('pvCounter')||'0',10);
+  n=Math.max(n,ctr)+1; localStorage.setItem('pvCounter',String(n));
+  return 'PV-'+String(n).padStart(4,'0');
+}
+function clearSignatures(){
+  document.querySelectorAll('[data-signature-wrap]').forEach(w=>{
+    const canvas=w.querySelector('canvas[data-signature]');
+    const hid=w.querySelector('[data-sig-data]');
+    const badge=w.querySelector('[data-sig-badge]');
+    if(canvas?.getContext){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+    if(hid) hid.value='';
+    if(badge){ badge.textContent='Non firmato'; badge.className='badge'; badge.style.cssText=''; }
+  });
+}
 function newPV(){
   $('#pv-id').value='';
-  $('#pv-num').value='PV-'+String(getPV().length+1).padStart(4,'0');
+  $('#pv-num').value=nextPVNumber();
   $('#pv-date').value=today();
   const d=new Date(); d.setDate(d.getDate()+30);
   $('#pv-expdate').value=d.toISOString().slice(0,10);
-  $('#pv-obj').value=''; $('#pv-lab-qty').value=0; $('#pv-lab-rate').value=0; $('#pv-lab-unit').value='h';
+
+  ['pv-cli','pv-con','pv-obj'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+
+  $('#pv-lab-unit').value='h'; $('#pv-lab-qty').value=0; $('#pv-lab-rate').value=0;
   $('#pv-sco').value=0; $('#pv-mag').value=0;
+  $('#pv-dep-perc').value=50;
+
   $('#pv-rows tbody').innerHTML=''; addRow();
+  clearSignatures();
   calc(); ensureAtLeastOneRow();
 }
 function readPV(){
@@ -453,7 +495,8 @@ function readPV(){
     voci:rows(),
     sconto:num($('#pv-sco').value),
     maggiorazione:num($('#pv-mag').value),
-    totale:($('#pv-tot').value||'').replace('€','').trim(),
+    depPerc:num($('#pv-dep-perc').value),
+    totale:(($('#pv-tot').value||'').replace('€','').replace(',','.').trim())||'0',
     sigC: document.querySelector('[name="firma_cliente"]')?.value || '',
     sigT: document.querySelector('[name="firma_tecnico"]')?.value || ''
   };
@@ -464,20 +507,29 @@ function fillPV(id){
   $('#pv-lab-unit').value=p.unita||'h'; $('#pv-lab-qty').value=p.labqty??0; $('#pv-lab-rate').value=p.labrate??0;
   $('#pv-cli').value=p.cliente||''; $('#pv-con').value=p.contatto||''; $('#pv-obj').value=p.oggetto||'';
   $('#pv-rows tbody').innerHTML=''; (p.voci||[]).forEach(v=>addRow(v.desc,v.qty,v.price));
-  $('#pv-sco').value=p.sconto??0; $('#pv-mag').value=p.maggiorazione??0;
-  if(p.sigC) document.querySelectorAll('[name="firma_cliente"]').forEach(i=>i.value=p.sigC);
-  if(p.sigT) document.querySelectorAll('[name="firma_tecnico"]').forEach(i=>i.value=p.sigT);
+  $('#pv-sco').value=p.sconto??0; $('#pv-mag').value=p.maggiorazione??0; $('#pv-dep-perc').value=p.depPerc??50;
+
+  // firme salvate
+  document.querySelector('[name="firma_cliente"]').value = p.sigC||'';
+  document.querySelector('[name="firma_tecnico"]').value = p.sigT||'';
+  // badge
+  document.querySelectorAll('[data-signature-wrap]').forEach(w=>{
+    const hid=w.querySelector('[data-sig-data]');
+    const badge=w.querySelector('[data-sig-badge]');
+    if(hid?.value){ badge.textContent='Firmato'; badge.className='badge'; badge.style.borderColor='#10b981'; badge.style.color='#065f46'; badge.style.background='#ecfdf5'; }
+    else{ badge.textContent='Non firmato'; badge.className='badge'; badge.style.cssText=''; }
+  });
+
   calc(); ensureAtLeastOneRow();
 }
 function savePV(){
+  const numFld=$('#pv-num'); if(numFld && !numFld.value.trim()) numFld.value=nextPVNumber();
   const r=readPV(); const arr=getPV(); const i=arr.findIndex(x=>x.id===r.id);
   if(i>=0) arr[i]=r; else arr.unshift(r);
-  setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅');
-  ensureAtLeastOneRow();
+  setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅'); ensureAtLeastOneRow();
 }
 function dupPV(){ const r=readPV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); ensureAtLeastOneRow(); }
-function delPV(){ const id=$('#pv-id').value; if(!id) return; if(!confirm('Eliminare questo preventivo?')) return;
-  const arr=getPV().filter(x=>x.id!==id); setPV(arr); renderPV(); arr.length?fillPV(arr[0].id):newPV(); }
+function delPV(){ const id=$('#pv-id').value; if(!id) return; if(!confirm('Eliminare questo preventivo?')) return; const arr=getPV().filter(x=>x.id!==id); setPV(arr); renderPV(); arr.length?fillPV(arr[0].id):newPV(); }
 
 /* ===== Lista + filtri scadenza ===== */
 function statusBadge(p){
@@ -523,17 +575,17 @@ function bindIVImpExp(){
   $('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setIV(JSON.parse(ev.target.result)); renderIV();}catch{alert('File non valido')}}; r.readAsText(f);};
 }
 
-/* ===== Firme v31 (inline) ===== */
+/* ===== Firme (inline) ===== */
 function initSignPads(){
   document.querySelectorAll('[data-signature-wrap]').forEach(wrap=>{
-    const box     = wrap.querySelector('.sig-box');
-    const canvas  = wrap.querySelector('canvas[data-signature]');
-    const hidden  = wrap.querySelector('[data-sig-data]');
-    const badge   = wrap.querySelector('[data-sig-badge]');
-    const openBtn = wrap.querySelector('[data-sig-open]');
-    const clearBtn= wrap.querySelector('[data-sig-clear]');
-    const closeBtn= wrap.querySelector('[data-sig-close]');
-    const ctx     = canvas.getContext('2d', { willReadFrequently:true });
+    const box=wrap.querySelector('.sig-box');
+    const canvas=wrap.querySelector('canvas[data-signature]');
+    const hidden=wrap.querySelector('[data-sig-data]');
+    const badge=wrap.querySelector('[data-sig-badge]');
+    const openBtn=wrap.querySelector('[data-sig-open]');
+    const clearBtn=wrap.querySelector('[data-sig-clear]');
+    const closeBtn=wrap.querySelector('[data-sig-close]');
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
 
     let drawing=false;
     let dpr=Math.max(1,window.devicePixelRatio||1);
@@ -546,7 +598,6 @@ function initSignPads(){
       ctx.setTransform(dpr,0,0,dpr,0,0);
       ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#0A2E5C';
     }
-
     function openPad(){ box.style.display='block'; sizeCanvas(); }
     function closePad(){
       const blank=document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
@@ -559,24 +610,19 @@ function initSignPads(){
     function clearPad(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
       hidden.value='';
-      if(badge){ badge.textContent='Non firmato'; badge.className='badge'; badge.style.borderColor=''; badge.style.color=''; badge.style.background=''; }
+      if(badge){ badge.textContent='Non firmato'; badge.className='badge'; badge.style.cssText=''; }
     }
-
-    function pointerPos(e){
-      const r=canvas.getBoundingClientRect();
-      const src=e.touches?e.touches[0]:e;
-      return {x:(src.clientX-r.left),y:(src.clientY-r.top)};
-    }
-    const start=e=>{ e.preventDefault(); drawing=true; const {x,y}=pointerPos(e); ctx.beginPath(); ctx.moveTo(x,y); };
-    const move =e=>{ if(!drawing) return; e.preventDefault(); const {x,y}=pointerPos(e); ctx.lineTo(x,y); ctx.stroke(); };
+    function pos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
+    const start=e=>{ e.preventDefault(); drawing=true; const {x,y}=pos(e); ctx.beginPath(); ctx.moveTo(x,y); };
+    const move =e=>{ if(!drawing) return; e.preventDefault(); const {x,y}=pos(e); ctx.lineTo(x,y); ctx.stroke(); };
     const end  =e=>{ if(!drawing) return; e.preventDefault(); drawing=false; };
 
     canvas.addEventListener('pointerdown',start,{passive:false});
     canvas.addEventListener('pointermove',move,{passive:false});
     window.addEventListener('pointerup',end,{passive:false});
-    canvas.addEventListener('touchstart',e=>start(e),{passive:false});
-    canvas.addEventListener('touchmove', e=>move(e), {passive:false});
-    window.addEventListener('touchend', end, {passive:false});
+    canvas.addEventListener('touchstart',start,{passive:false});
+    canvas.addEventListener('touchmove', move,{passive:false});
+    window.addEventListener('touchend', end,{passive:false});
     canvas.addEventListener('mousedown',start,{passive:false});
     canvas.addEventListener('mousemove',move,{passive:false});
     window.addEventListener('mouseup',end,{passive:false});
@@ -589,18 +635,26 @@ function initSignPads(){
   });
 }
 
-/* ===== Print ===== */
+/* ===== Print & Share ===== */
 function renderPrint(rec){
   const sheet=$('#sheet');
   const logo=S.get('logo',null)||'icona-192.png';
-  const righe=(rec.voci||[]).map(v=>`<tr><td>${v.desc}</td><td>${v.qty}</td><td>€ ${fmt(v.price)}</td><td>€ ${fmt(v.qty*v.price)}</td></tr>`).join('');
+  const righe=(rec.voci||[]).map(v=>`<tr><td>${v.desc}</td><td>${v.qty}</td><td>€ ${(v.price).toFixed(2).replace('.',',')}</td><td>€ ${(v.qty*v.price).toFixed(2).replace('.',',')}</td></tr>`).join('');
   const mat=(rec.voci||[]).reduce((s,v)=>s+v.qty*v.price,0);
   const lab=(rec.labqty||0)*(rec.labrate||0);
   const imp=mat+lab;
-  const afterDiscount=imp - (imp*(rec.sconto||0)/100);
-  const total=afterDiscount + (afterDiscount*(rec.maggiorazione||0)/100);
+  const sVal=imp*(rec.sconto||0)/100;
+  const base=imp - sVal;
+  const mVal=base*(rec.maggiorazione||0)/100;
+  const tot=base + mVal;
+  const depPerc = rec.depPerc||0;
+  const depAmt  = tot * depPerc / 100;
+  const balance = Math.max(0, tot - depAmt);
+
   const sigCliente=document.querySelector('[name="firma_cliente"]')?.value||'';
   const sigTecnico=document.querySelector('[name="firma_tecnico"]')?.value||'';
+
+  const terms = $('#pv-terms').textContent.trim();
 
   sheet.innerHTML=`
     <div class="ph">
@@ -621,10 +675,16 @@ function renderPrint(rec){
     </table>
 
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">
-      <div class="card"><div class="body"><div class="note">Materiali</div>€ ${fmt(mat)}</div></div>
-      <div class="card"><div class="body"><div class="note">Manodopera (${rec.unita==='d'?'Giorni':'Ore'})</div>€ ${fmt(lab)}</div></div>
-      <div class="card"><div class="body"><div class="note">Sconto</div>€ ${fmt(imp*(rec.sconto||0)/100)}</div></div>
-      <div class="card"><div class="body"><div class="note">Totale</div>€ ${fmt(total)}</div></div>
+      <div class="card"><div class="body"><div class="note">Materiali</div>${fmtEur(mat)}</div></div>
+      <div class="card"><div class="body"><div class="note">Manodopera (${rec.unita==='d'?'Giorni':'Ore'})</div>${fmtEur(lab)}</div></div>
+      <div class="card"><div class="body"><div class="note">Sconto</div>${fmtEur(sVal)}</div></div>
+      <div class="card"><div class="body"><div class="note">Totale</div>${fmtEur(tot)}</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px">
+      <div class="card"><div class="body"><div class="note">Acconto (${depPerc}%)</div>${fmtEur(depAmt)}</div></div>
+      <div class="card"><div class="body"><div class="note">Saldo alla consegna</div>${fmtEur(balance)}</div></div>
+      <div class="card"><div class="body"><div class="note">Imponibile (materiali + manodopera)</div>${fmtEur(imp)}</div></div>
     </div>
 
     <div class="sign-row">
@@ -636,9 +696,7 @@ function renderPrint(rec){
         : `<div class="sign"><div style="height:90px;border-bottom:1px solid #000"></div><div class="cap">Firma Cliente</div></div>`}
     </div>
 
-    <div class="terms" style="margin-top:10px">
-      ${S.get('note','Termini: validità preventivo 30 giorni salvo diversa indicazione. Prezzi al netto di urgenze/trasferte se non indicati. Materiali garantiti se specificati. Pagamento alla consegna salvo accordi scritti. Le firme equivalgono a firma digitale.')}
-    </div>
+    <div class="terms" style="margin-top:10px">${terms}</div>
   `;
 }
 function bindPrintShare(){
@@ -650,6 +708,7 @@ Data: ${r.data}  Scadenza: ${r.scadenza||'-'}
 Cliente: ${r.cliente||'-'}  Contatto: ${r.contatto||'-'}
 Oggetto: ${r.oggetto||'-'}
 Totale: ${($('#pv-tot').value||'').trim()}
+Acconto ${r.depPerc||0}%: ${$('#pv-dep-amt').value||'-'}  —  Saldo: ${$('#pv-balance-amt').value||'-'}
 — Inviato da ${S.get('rag','Giorgio — Elettricista & Antennista')}`;
     if(navigator.share){ navigator.share({title:`Preventivo ${r.numero}`, text}).catch(()=>{}); }
     else{ navigator.clipboard.writeText(text); alert('Testo del preventivo copiato negli appunti ✅'); }
@@ -658,10 +717,10 @@ Totale: ${($('#pv-tot').value||'').trim()}
 
 /* ===== Preventivo -> Intervento ===== */
 function buildDescriptionFromPV(p){
-  const rows = (p.voci||[]).map(v=>`- ${v.desc} (x${v.qty} · € ${fmt(v.price)}) = € ${fmt(v.qty*v.price)}`).join('\n');
+  const rows = (p.voci||[]).map(v=>`- ${v.desc} (x${v.qty} · € ${(v.price).toFixed(2)}) = € ${(v.qty*v.price).toFixed(2)}`).join('\n');
   const labUnit = p.unita === 'd' ? 'giorni' : 'ore';
   const hasLab  = (p.labqty||0) > 0 && (p.labrate||0) > 0;
-  const labLine = hasLab ? `\nManodopera: ${p.labqty} ${labUnit} × € ${fmt(p.labrate)} = € ${fmt(p.labqty*p.labrate)}` : '';
+  const labLine = hasLab ? `\nManodopera: ${p.labqty} ${labUnit} × € ${(p.labrate).toFixed(2)} = € ${(p.labqty*p.labrate).toFixed(2)}` : '';
   const tot = ($('#pv-tot').value||'').trim();
   return `Da preventivo ${p.numero} del ${p.data}
 Oggetto: ${p.oggetto||'-'}
@@ -681,11 +740,10 @@ function pvToIV(){
   $$('main>section').forEach(s=>s.classList.remove('active')); $('#iv').classList.add('active');
   fillIV(nuovoIV.id); alert('Intervento creato da preventivo ✅');
 }
-function bindPVtoIV(){ $('#pv-to-iv').onclick=pvToIV; }
 
 /* ===== Binds ===== */
 function bindMainButtons(){
-  $('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV;
+  $('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV; $('#pv-to-iv').onclick=pvToIV;
   $('#iv-new').onclick=newIV; $('#iv-save').onclick=saveIV; $('#iv-del').onclick=delIV; $('#iv-dup').onclick=dupIV;
 }
 
@@ -693,14 +751,14 @@ function bindMainButtons(){
 function start(){
   bindTabs();
   initBrand(); bindSettings();
-  bindCalcInputs(); bindPVImpExp(); bindIVImpExp(); bindPrintShare(); bindPVtoIV(); bindMainButtons();
+  bindCalcInputs(); bindPVImpExp(); bindIVImpExp(); bindPrintShare(); bindMainButtons();
   renderPV(); renderIV();
   newPV(); newIV();
   initSignPads();
 }
 document.readyState==='loading' ? document.addEventListener('DOMContentLoaded', start) : start();
 
-/* (nessun service worker in v31 safe) */
+/* (nessun service worker in v33 safe) */
 </script>
 </body>
 </html>
