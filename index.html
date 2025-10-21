@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Gestionale Giorgio — Preventivi & Interventi</title>
+<title>Giorgio — Elettricista & Antennista</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0A2E5C">
 <style>
@@ -11,6 +11,8 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0f172a}
+
+/* Header + Tabs */
 header{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:10px 14px;display:flex;gap:12px;align-items:center}
 .logo{width:46px;height:46px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
 h1{margin:0;font-size:18px}
@@ -18,9 +20,11 @@ header small{opacity:.9}
 nav{position:sticky;top:66px;z-index:19;display:flex;gap:10px;flex-wrap:wrap;padding:10px;background:var(--bg)}
 .tab{padding:10px 14px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}
 .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Layout */
 main{padding:12px;max-width:1100px;margin:0 auto}
-section{display:none}
-section.active{display:block}
+main>section{display:none}
+main>section.active{display:block}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .card>.head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 .card>.body{padding:12px}
@@ -45,13 +49,15 @@ th{background:#f8fafc;text-align:left}
 .badge.warn{border-color:#f59e0b;color:#b45309;background:#fffbeb}
 .badge.danger{border-color:#ef4444;color:#991b1b;background:#fef2f2}
 .note{font-size:12px;color:var(--muted)}
-/* Firma */
-.sigBox{border:2px dashed var(--line);border-radius:12px;padding:12px}
-.sigHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.sigCanvas{width:100%;height:190px;border:1px solid var(--line);border-radius:10px;background:#fff;touch-action:none}
-.sigHidden{display:none}
-.sigFoot{display:flex;gap:8px;margin-top:8px}
-/* Print */
+
+/* Firma: scrittura mobile stabile (modale + canvas) */
+canvas[data-signature]{touch-action:none;-ms-touch-action:none}
+.sig-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#0006;z-index:9999}
+.sig-modal.open{display:flex}
+.sig-box{background:#fff;width:min(720px,92vw);border-radius:14px;padding:12px}
+.sig-box canvas{width:100%;height:280px;border:2px dashed #e5e7eb;border-radius:10px}
+
+/* Stampa */
 @media print{
   header,nav,.no-print{display:none!important}
   .printSheet{display:block!important;width:210mm;min-height:297mm;padding:16mm;margin:0 auto;color:#000}
@@ -61,6 +67,11 @@ th{background:#f8fafc;text-align:left}
   .pm{font-size:12px;opacity:.8}
   .terms{font-size:11px;margin-top:8px}
   table,th,td{border:1px solid #000}
+  /* firme a destra */
+  .sign-row{display:flex;justify-content:flex-end;gap:24px;margin-top:16px}
+  .sign{width:220px;text-align:center}
+  .sign img{width:100%;max-height:90px;object-fit:contain;border:1px solid #000;padding:6px;background:#fff}
+  .sign .cap{margin-top:6px;font-size:12px}
 }
 </style>
 </head>
@@ -70,7 +81,7 @@ th{background:#f8fafc;text-align:left}
   <div>
     <h1 id="ttl">Giorgio — Elettricista & Antennista</h1>
     <small id="tel">Tel. +39 351 796 9013</small> ·
-    <small>v27 — Preventivi · Interventi · Impostazioni</small>
+    <small>v29 — Preventivi · Interventi · Impostazioni</small>
   </div>
 </header>
 
@@ -98,7 +109,7 @@ th{background:#f8fafc;text-align:left}
           </div>
         </div>
         <div class="body">
-          <input id="pv-search" placeholder="Cerca: numero, cliente, oggetto…" />
+          <input id="pv-search" placeholder="Cerca: numero, cliente, oggetto…">
         </div>
         <div class="body list" id="pv-list"></div>
       </div>
@@ -110,6 +121,7 @@ th{background:#f8fafc;text-align:left}
             <button class="btn" id="pv-new">Nuovo</button>
             <button class="btn" id="pv-dup">Duplica</button>
             <button class="btn primary" id="pv-save">Salva</button>
+            <button class="btn" id="pv-to-iv">Crea intervento</button>
             <button class="btn danger" id="pv-del">Elimina</button>
             <button class="btn" id="pv-print">Stampa / PDF</button>
             <button class="btn" id="pv-share">Condividi</button>
@@ -123,16 +135,19 @@ th{background:#f8fafc;text-align:left}
             <div><label>Scadenza</label><input type="date" id="pv-expdate"></div>
           </div>
           <div class="grid3">
-            <div><label>Unità manodopera</label>
-              <select id="pv-lab-unit">
-                <option value="h">Oraria</option>
-                <option value="d">Giornaliera</option>
-              </select>
+            <div>
+              <label>Unità manodopera</label>
+              <select id="pv-lab-unit"><option value="h">Oraria</option><option value="d">Giornaliera</option></select>
             </div>
-            <div><label>Q.tà manodopera</label><input type="number" id="pv-lab-qty" step="0.25" value="0"></div>
-            <div><label>Tariffa (€ / unità)</label><input type="number" id="pv-lab-rate" step="0.01" value="0"></div>
+            <div><label>Q.tà manodopera</label><input type="number" id="pv-lab-qty" step="0.25" value="0" inputmode="decimal"></div>
+            <div><label>Tariffa (€ / unità)</label><input type="number" id="pv-lab-rate" step="0.01" value="0" inputmode="decimal"></div>
+          </div>
+          <div class="grid2">
+            <div><label>Cliente</label><input id="pv-cli" placeholder="Nome cliente"></div>
+            <div><label>Contatto</label><input id="pv-con" placeholder="Telefono / Email"></div>
           </div>
           <label>Oggetto</label><input id="pv-obj" placeholder="Oggetto del preventivo">
+
           <label>Materiali / Servizi</label>
           <table id="pv-rows">
             <thead><tr><th>Descrizione</th><th style="width:92px">Q.tà</th><th style="width:120px">Prezzo</th><th style="width:46px">×</th></tr></thead>
@@ -144,8 +159,8 @@ th{background:#f8fafc;text-align:left}
           </div>
 
           <div class="grid3">
-            <div><label>Sconto %</label><input type="number" id="pv-sco" step="0.1" value="0"></div>
-            <div><label>Maggiorazione %</label><input type="number" id="pv-mag" step="0.1" value="0"></div>
+            <div><label>Sconto %</label><input type="number" id="pv-sco" step="0.1" value="0" inputmode="decimal"></div>
+            <div><label>Maggiorazione %</label><input type="number" id="pv-mag" step="0.1" value="0" inputmode="decimal"></div>
             <div><label>Totale</label><input id="pv-tot" readonly></div>
           </div>
 
@@ -155,30 +170,39 @@ th{background:#f8fafc;text-align:left}
             <div class="card"><div class="body"><div class="note">Imponibile (materiali + manodopera)</div><div id="pv-imp">€ 0,00</div></div></div>
           </div>
 
-          <!-- Firme -->
-          <div class="grid2">
-            <div class="sigBox">
-              <div class="sigHead"><strong>Firma Cliente ✍️</strong><span id="pv-sigC-status" class="badge">Non firmato</span></div>
-              <canvas id="pv-sigC" class="sigCanvas sigHidden"></canvas>
-              <div class="sigFoot">
-                <button class="btn" id="pv-sigC-open">Apri</button>
-                <button class="btn" id="pv-sigC-clear">Pulisci</button>
-                <button class="btn" id="pv-sigC-close">Chiudi</button>
-              </div>
+          <!-- FIRMA CLIENTE -->
+          <div data-signature-wrap style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>Firma Cliente ✍️</strong>
+              <span data-sig-badge class="badge">Non firmato</span>
             </div>
-            <div class="sigBox">
-              <div class="sigHead"><strong>Firma Tecnico ✍️</strong><span id="pv-sigT-status" class="badge">Non firmato</span></div>
-              <canvas id="pv-sigT" class="sigCanvas sigHidden"></canvas>
-              <div class="sigFoot">
-                <button class="btn" id="pv-sigT-open">Apri</button>
-                <button class="btn" id="pv-sigT-clear">Pulisci</button>
-                <button class="btn" id="pv-sigT-close">Chiudi</button>
-              </div>
+            <div class="sig-modal"><div class="sig-box"><canvas data-signature></canvas></div></div>
+            <div class="actions">
+              <button class="btn" data-sig-open>Apri</button>
+              <button class="btn" data-sig-clear>Pulisci</button>
+              <button class="btn" data-sig-close>Chiudi</button>
             </div>
+            <input type="hidden" name="firma_cliente" data-sig-data>
+          </div>
+
+          <!-- FIRMA TECNICO -->
+          <div data-signature-wrap style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>Firma Tecnico ✍️</strong>
+              <span data-sig-badge class="badge">Non firmato</span>
+            </div>
+            <div class="sig-modal"><div class="sig-box"><canvas data-signature></canvas></div></div>
+            <div class="actions">
+              <button class="btn" data-sig-open>Apri</button>
+              <button class="btn" data-sig-clear>Pulisci</button>
+              <button class="btn" data-sig-close>Chiudi</button>
+            </div>
+            <input type="hidden" name="firma_tecnico" data-sig-data>
           </div>
 
           <div class="note" style="margin-top:8px">
-            Termini: validità preventivo 30 giorni salvo diversa indicazione. Prezzi al netto di urgenze/trasferte se non indicati. Materiali garantiti se specificati. Pagamento alla consegna salvo accordi scritti. Le firme equivalgono a firma digitale.
+            Termini: validità preventivo 30 giorni salvo diversa indicazione. Prezzi al netto di urgenze/trasferte se non indicati.
+            Materiali garantiti se specificati. Pagamento alla consegna salvo accordi scritti. Le firme equivalgono a firma digitale.
           </div>
         </div>
       </div>
@@ -281,7 +305,7 @@ function initBrand(){
   $('#ttl').textContent=rag;
   $('#tel').textContent=phone?('Tel. '+phone):'';
   document.documentElement.style.setProperty('--brand',brand);
-  if(logo) $('#appLogo').src=logo; else $('#appLogo').src='icona-192.png';
+  $('#appLogo').src = logo || 'icona-192.png';
   $('#st-rag').value=rag; $('#st-brand').value=brand; $('#st-phone').value=phone; $('#st-note').value=S.get('note','');
 }
 $('#st-save').onclick=()=>{
@@ -291,7 +315,7 @@ $('#st-save').onclick=()=>{
   S.set('note',$('#st-note').value.trim());
   initBrand(); alert('Impostazioni salvate ✅');
 };
-$('#st-reset').onclick=()=>{['rag','brand','phone','note'].forEach(S.del); initBrand();};
+$('#st-reset').onclick=()=>{['rag','brand','phone','note','logo'].forEach(S.del); initBrand();};
 $('#st-file').onchange=e=>{
   const f=e.target.files[0]; if(!f) return;
   if(!/^image\/(png|jpeg)$/.test(f.type)){alert('Carica PNG o JPG'); return}
@@ -299,7 +323,7 @@ $('#st-file').onchange=e=>{
 };
 $('#st-wipe').onclick=()=>{ if(confirm('Cancellare TUTTI i dati?')){ localStorage.clear(); location.reload(); } };
 
-/* ===== Preventivi data store ===== */
+/* ===== Store ===== */
 const getPV=()=>S.get('pv',[]), setPV=a=>S.set('pv',a);
 const getIV=()=>S.get('iv',[]), setIV=a=>S.set('iv',a);
 
@@ -307,8 +331,8 @@ const getIV=()=>S.get('iv',[]), setIV=a=>S.set('iv',a);
 function addRow(desc='',q=1,pr=0){
   const tr=document.createElement('tr');
   tr.innerHTML=`<td><input class="d" value="${desc}"></td>
-  <td><input type="number" class="q" step="0.01" value="${q}"></td>
-  <td><input type="number" class="p" step="0.01" value="${pr}"></td>
+  <td><input type="number" class="q" step="0.01" inputmode="decimal" value="${q}"></td>
+  <td><input type="number" class="p" step="0.01" inputmode="decimal" value="${pr}"></td>
   <td><button class="btn danger x" type="button">×</button></td>`;
   $('#pv-rows tbody').appendChild(tr);
   tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
@@ -345,39 +369,37 @@ function newPV(){
   $('#pv-obj').value=''; $('#pv-lab-qty').value=0; $('#pv-lab-rate').value=0; $('#pv-lab-unit').value='h';
   $('#pv-sco').value=0; $('#pv-mag').value=0;
   $('#pv-rows tbody').innerHTML=''; addRow();
-  clearSig('C'); clearSig('T');
   calc();
 }
 function readPV(){
   return {
-    id:$('#pv-id').value||uuid(),
+    id:$('#pv-id').value||crypto.randomUUID(),
     numero:$('#pv-num').value.trim(),
     data:$('#pv-date').value,
     scadenza:$('#pv-expdate').value,
     unita:$('#pv-lab-unit').value,
     labqty:num($('#pv-lab-qty').value),
     labrate:num($('#pv-lab-rate').value),
-    cliente:($('#pv-cli')?.value||'').trim(),
-    contatto:($('#pv-con')?.value||'').trim(),
+    cliente:$('#pv-cli').value.trim(),
+    contatto:$('#pv-con').value.trim(),
     oggetto:$('#pv-obj').value.trim(),
     voci:rows(),
     sconto:num($('#pv-sco').value),
     maggiorazione:num($('#pv-mag').value),
     totale:($('#pv-tot').value||'').replace('€','').trim(),
-    sigC: sigData('C'),
-    sigT: sigData('T')
+    sigC: document.querySelector('[name="firma_cliente"]')?.value || '',
+    sigT: document.querySelector('[name="firma_tecnico"]')?.value || ''
   };
 }
 function fillPV(id){
   const p=getPV().find(x=>x.id===id); if(!p) return;
   $('#pv-id').value=p.id; $('#pv-num').value=p.numero; $('#pv-date').value=p.data; $('#pv-expdate').value=p.scadenza||'';
   $('#pv-lab-unit').value=p.unita||'h'; $('#pv-lab-qty').value=p.labqty??0; $('#pv-lab-rate').value=p.labrate??0;
-  $('#pv-obj').value=p.oggetto||''; $('#pv-rows tbody').innerHTML='';
-  (p.voci||[]).forEach(v=>addRow(v.desc,v.qty,v.price));
+  $('#pv-cli').value=p.cliente||''; $('#pv-con').value=p.contatto||''; $('#pv-obj').value=p.oggetto||'';
+  $('#pv-rows tbody').innerHTML=''; (p.voci||[]).forEach(v=>addRow(v.desc,v.qty,v.price));
   $('#pv-sco').value=p.sconto??0; $('#pv-mag').value=p.maggiorazione??0;
-  // firme
-  if(p.sigC){setSig('C',p.sigC)} else clearSig('C');
-  if(p.sigT){setSig('T',p.sigT)} else clearSig('T');
+  if(p.sigC) document.querySelectorAll('[name="firma_cliente"]').forEach(i=>i.value=p.sigC);
+  if(p.sigT) document.querySelectorAll('[name="firma_tecnico"]').forEach(i=>i.value=p.sigT);
   calc();
 }
 function savePV(){
@@ -385,153 +407,10 @@ function savePV(){
   if(i>=0) arr[i]=r; else arr.unshift(r);
   setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅');
 }
-function dupPV(){ const r=readPV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); }
+function dupPV(){ const r=readPV(); r.id=crypto.randomUUID(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); }
 function delPV(){ const id=$('#pv-id').value; if(!id) return; if(!confirm('Eliminare questo preventivo?')) return;
   const arr=getPV().filter(x=>x.id!==id); setPV(arr); renderPV(); arr.length?fillPV(arr[0].id):newPV(); }
 
 /* ===== Lista + filtri scadenza ===== */
 function statusBadge(p){
-  const now=new Date(); const exp=new Date(p.scadenza||p.data);
-  const diff=Math.ceil((exp-now)/(1000*60*60*24));
-  if(diff<0) return '<span class="badge danger">Scaduto</span>';
-  if(diff<=7) return '<span class="badge warn">In scadenza</span>';
-  return '';
-}
-function renderPV(){
-  const l=$('#pv-list'); l.innerHTML='';
-  const q=($('#pv-search').value||'').toLowerCase();
-  const f=$('#pv-filter').value;
-  getPV().filter(p=>{
-    const expDays=Math.ceil((new Date(p.scadenza||p.data)-new Date())/(1000*60*60*24));
-    if(f==='due' && !(expDays>=0 && expDays<=7)) return false;
-    if(f==='expired' && !(expDays<0)) return false;
-    if(q && !(p.numero+p.cliente+p.oggetto).toLowerCase().includes(q)) return false;
-    return true;
-  }).forEach(p=>{
-    const d=document.createElement('div'); d.className='row';
-    d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><div>${statusBadge(p)}</div>`;
-    d.onclick=()=>fillPV(p.id); l.appendChild(d);
-  });
-}
-$('#pv-search').addEventListener('input',renderPV);
-$('#pv-filter').addEventListener('change',renderPV);
-
-/* ===== Export / Import ===== */
-$('#pv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getPV())); a.download='preventivi.json'; a.click();};
-$('#pv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setPV(JSON.parse(ev.target.result)); renderPV(); alert('Import ok')}catch{alert('File non valido')}}; r.readAsText(f);};
-
-/* ===== Interventi (essenziale) ===== */
-function newIV(){ $('#iv-id').value=''; $('#iv-num').value='INT-'+String(getIV().length+1).padStart(4,'0'); $('#iv-date').value=today(); $('#iv-st').value='Aperto'; $('#iv-cli').value=''; $('#iv-con').value=''; $('#iv-des').value=''; }
-function readIV(){ return { id:$('#iv-id').value||uuid(), numero:$('#iv-num').value.trim(), data:$('#iv-date').value, stato:$('#iv-st').value, cliente:$('#iv-cli').value.trim(), contatto:$('#iv-con').value.trim(), descrizione:$('#iv-des').value.trim() }; }
-function fillIV(id){ const p=getIV().find(x=>x.id===id); if(!p) return; $('#iv-id').value=p.id; $('#iv-num').value=p.numero; $('#iv-date').value=p.data; $('#iv-st').value=p.stato; $('#iv-cli').value=p.cliente||''; $('#iv-con').value=p.contatto||''; $('#iv-des').value=p.descrizione||''; }
-function renderIV(){ const l=$('#iv-list'); l.innerHTML=''; getIV().forEach(p=>{ const d=document.createElement('div'); d.className='row'; d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><small>${p.stato}</small>`; d.onclick=()=>fillIV(p.id); l.appendChild(d); }); }
-function saveIV(){ const r=readIV(); const arr=getIV(); const i=arr.findIndex(x=>x.id===r.id); if(i>=0) arr[i]=r; else arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); alert('Intervento salvato ✅'); }
-function dupIV(){ const r=readIV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getIV(); arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); }
-function delIV(){ const id=$('#iv-id').value; if(!id) return; if(!confirm('Eliminare questo intervento?')) return; const arr=getIV().filter(x=>x.id!==id); setIV(arr); renderIV(); arr.length?fillIV(arr[0].id):newIV(); }
-$('#iv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getIV())); a.download='interventi.json'; a.click();};
-$('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setIV(JSON.parse(ev.target.result)); renderIV();}catch{alert('File non valido')}}; r.readAsText(f);};
-
-/* ===== Firme ===== */
-function sigCanvas(el){
-  const c=$(el), ctx=c.getContext('2d');
-  let drawing=false, last=null, dirty=false;
-
-  function size(){ const r=c.getBoundingClientRect(); c.width=r.width*devicePixelRatio; c.height=r.height*devicePixelRatio; ctx.scale(devicePixelRatio,devicePixelRatio); ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#000'; }
-  size(); addEventListener('resize',size);
-
-  function pos(e){ if(e.touches) e=e.touches[0]; const r=c.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-  function start(e){ e.preventDefault(); drawing=true; last=pos(e); }
-  function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; dirty=true; }
-  function end(){ drawing=false; last=null; }
-
-  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); addEventListener('mouseup',end);
-  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); addEventListener('touchend',end);
-
-  return {
-    open(){c.classList.remove('sigHidden');},
-    close(){c.classList.add('sigHidden');},
-    clear(){ctx.clearRect(0,0,c.width,c.height); dirty=false;},
-    data(){ if(!dirty) return null; return c.toDataURL('image/png'); },
-    set(d){ if(!d){this.clear(); return} const img=new Image(); img.onload=()=>{ctx.drawImage(img,0,0,c.width/devicePixelRatio,c.height/devicePixelRatio); dirty=true;}; img.src=d; },
-    isDirty(){return dirty;}
-  }
-}
-const sigC=sigCanvas('#pv-sigC'), sigT=sigCanvas('#pv-sigT');
-function updateSigStatus(which){ const s=(which==='C'?sigC:sigT).isDirty()?'<span class="badge" style="border-color:#10b981;color:#065f46;background:#ecfdf5">Firmato</span>':'<span class="badge">Non firmato</span>'; $('#pv-sig'+which+'-status').innerHTML=s; }
-function setSig(which,data){ (which==='C'?sigC:sigT).set(data); updateSigStatus(which); }
-function clearSig(which){ (which==='C'?sigC:sigT).clear(); updateSigStatus(which); }
-function sigData(which){ return (which==='C'?sigC:sigT).data(); }
-['C','T'].forEach(w=>{
-  $('#pv-sig'+w+'-open').onclick=()=>{ (w==='C'?sigC:sigT).open(); };
-  $('#pv-sig'+w+'-clear').onclick=()=>{ clearSig(w); };
-  $('#pv-sig'+w+'-close').onclick=()=>{ (w==='C'?sigC:sigT).close(); updateSigStatus(w); };
-});
-
-/* ===== Print ===== */
-function renderPrint(rec){
-  const sheet=$('#sheet');
-  const logo=S.get('logo',null)||'icona-192.png';
-  const righe=(rec.voci||[]).map(v=>`<tr><td>${v.desc}</td><td>${v.qty}</td><td>€ ${fmt(v.price)}</td><td>€ ${fmt(v.qty*v.price)}</td></tr>`).join('');
-  const mat=(rec.voci||[]).reduce((s,v)=>s+v.qty*v.price,0);
-  const lab=(rec.labqty||0)*(rec.labrate||0);
-  const imp=mat+lab;
-  const afterDiscount=imp - (imp*(rec.sconto||0)/100);
-  const total=afterDiscount + (afterDiscount*(rec.maggiorazione||0)/100);
-  sheet.innerHTML=`
-    <div class="ph">
-      <img src="${logo}" alt="logo">
-      <div>
-        <div class="pt">${S.get('rag','Giorgio — Elettricista & Antennista')}</div>
-        <div class="pm">${S.get('phone','')}</div>
-      </div>
-    </div>
-    <h3 style="margin:8px 0">PREVENTIVO ${rec.numero}</h3>
-    <div class="pm">Data: ${rec.data} · Scadenza: ${rec.scadenza||''}</div>
-    <div class="pm">Oggetto: ${rec.oggetto||'—'}</div>
-    <table style="margin-top:8px;width:100%;border-collapse:collapse">
-      <thead><tr><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th><th>Totale</th></tr></thead>
-      <tbody>${righe||'<tr><td colspan="4">—</td></tr>'}</tbody>
-    </table>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">
-      <div class="card"><div class="body"><div class="note">Materiali</div>€ ${fmt(mat)}</div></div>
-      <div class="card"><div class="body"><div class="note">Manodopera</div>€ ${fmt(lab)}</div></div>
-      <div class="card"><div class="body"><div class="note">Sconto</div>€ ${fmt(imp*rec.sconto/100)}</div></div>
-      <div class="card"><div class="body"><div class="note">Totale</div>€ ${fmt(total)}</div></div>
-    </div>
-    <div class="terms">${S.get('note','Termini: validità preventivo 30 giorni salvo diversa indicazione. Prezzi al netto di urgenze/trasferte se non indicati. Materiali garantiti se specificati. Pagamento alla consegna salvo accordi scritti. Le firme equivalgono a firma digitale.')}</div>
-    <div style="display:flex;gap:40px;margin-top:24px">
-      <div><div class="note">Firma Cliente</div>${rec.sigC?`<img src="${rec.sigC}" style="width:220px;border:1px solid #000">`:'____________________'}</div>
-      <div><div class="note">Firma Tecnico</div>${rec.sigT?`<img src="${rec.sigT}" style="width:220px;border:1px solid #000">`:'____________________'}</div>
-    </div>
-  `;
-}
-$('#pv-print').onclick=()=>{ const rec=readPV(); renderPrint(rec); window.print(); };
-
-/* ===== Share ===== */
-$('#pv-share').onclick=()=>{
-  const r=readPV();
-  const text=`Preventivo ${r.numero}
-Data: ${r.data}  Scadenza: ${r.scadenza||'-'}
-Oggetto: ${r.oggetto||'-'}
-Totale: ${($('#pv-tot').value||'').trim()}
-— Inviato da ${S.get('rag','Giorgio — Elettricista & Antennista')}`;
-  if(navigator.share){ navigator.share({title:`Preventivo ${r.numero}`, text}); }
-  else{ navigator.clipboard.writeText(text); alert('Testo del preventivo copiato negli appunti ✅'); }
-};
-
-/* ===== Bind pulsanti ===== */
-$('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV;
-$('#iv-new').onclick=newIV; $('#iv-save').onclick=saveIV; $('#iv-del').onclick=delIV; $('#iv-dup').onclick=dupIV;
-
-/* ===== Avvio ===== */
-initBrand();
-renderPV(); renderIV();
-newPV(); newIV();
-
-/* ===== Service Worker ===== */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js').catch(()=>{});
-}
-</script>
-</body>
-</html>
+  const now=new Date(); const exp=new Date(p.
