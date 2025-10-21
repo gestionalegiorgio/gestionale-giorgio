@@ -2,763 +2,471 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Giorgio — Elettricista & Antennista</title>
-<meta name="theme-color" content="#0A2E5C">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestionale Giorgio — Preventivi & Interventi</title>
 <style>
-:root{--brand:#0A2E5C;--accent:#F7931E;--bg:#f6f8fb;--card:#fff;--line:#e6e8ef;--muted:#64748b}
+:root{
+  --brand:#0a3a66; --brand-2:#ff9900; --text:#0f172a; --muted:#64748b;
+  --line:#e5e7eb; --bg:#f6f8fb; --card:#ffffff;
+}
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0f172a}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;color:var(--text);background:var(--bg)}
+.container{max-width:980px;margin-inline:auto;padding:16px}
+.header{background:var(--brand);color:#fff;padding:14px 16px;margin-bottom:12px}
+.header h1{margin:0;font-size:20px}
+.header small{opacity:.9}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{font-size:12px;color:var(--muted);display:block;margin:4px 2px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:16px}
+input[readonly]{background:#f8fafc}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.danger{background:#fff;color:#b91c1c;border-color:#fca5a5}
+.btn.ghost{background:#f8fafc}
+.badge{padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-weight:600;font-size:12px}
+table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}
+th{background:#f8fafc;font-weight:600;color:#334155}
+td:last-child,th:last-child{text-align:center;width:48px}
+tr:last-child td{border-bottom:none}
+.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.totals .box{border:1px solid var(--line);border-radius:12px;padding:10px;background:#f8fafc}
+.totals .big{font-size:18px;font-weight:700}
+.hl{font-weight:700}
+.sig-box{border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:12px}
+.sig-head{font-weight:700;margin-bottom:8px}
+.sig-actions{display:flex;gap:8px;flex-wrap:wrap}
+.sig-badge{font-weight:600;margin-left:8px;color:#9ca3af}
 
-/* Header + Tabs */
-header{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:10px 14px;display:flex;gap:12px;align-items:center}
-.logo{width:46px;height:46px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
-h1{margin:0;font-size:18px}
-header small{opacity:.9}
-nav{position:sticky;top:66px;z-index:19;display:flex;gap:10px;flex-wrap:wrap;padding:10px;background:var(--bg)}
-.tab{padding:10px 14px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}
-.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Signature modal */
+.sig-modal[hidden]{display:none}
+.sig-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px}
+.sig-panel{background:#fff;width:min(900px,96vw);height:min(80vh,600px);border-radius:14px;border:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.sig-toolbar{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid var(--line);background:#f8fafc}
+.sig-toolbar .spacer{flex:1}
+#sig-canvas{flex:1;background:#fff;touch-action:none;display:block;width:100%;height:100%}
+.sig-hint{padding:8px;font-size:12px;color:#64748b;border-top:1px solid var(--line);background:#fafafa}
 
-/* Layout */
-main{padding:12px;max-width:1100px;margin:0 auto}
-main>section{display:none}
-main>section.active{display:block}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.card>.head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-.card>.body{padding:12px}
-.split{display:grid;gap:12px;grid-template-columns:330px 1fr}
-@media(max-width:930px){.split{grid-template-columns:1fr}}
-.list{max-height:62vh;overflow:auto;display:flex;flex-direction:column}
-.row{padding:10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;cursor:pointer}
-.row:hover{background:#f9fafb}
-.grid2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.grid3{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
-label{display:block;margin:8px 0 6px;font-weight:600}
-input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
-textarea{min-height:110px}
-.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.danger{color:#ef4444;border-color:#ef4444;background:#fff}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid var(--line);padding:8px}
-th{background:#f8fafc;text-align:left}
-.badge{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px}
-.badge.warn{border-color:#f59e0b;color:#b45309;background:#fffbeb}
-.badge.danger{border-color:#ef4444;color:#991b1b;background:#fef2f2}
-.note{font-size:12px;color:var(--muted)}
-canvas[data-signature]{touch-action:none;-ms-touch-action:none}
-.sig-box{background:#fff;width:100%;border-radius:14px;padding:10px}
-.sig-box canvas{width:100%;height:260px;border:2px dashed #e5e7eb;border-radius:10px}
-
-/* Stampa */
+/* Print */
 @media print{
-  header,nav,.no-print{display:none!important}
-  .printSheet{display:block!important;width:210mm;min-height:297mm;padding:16mm;margin:0 auto;color:#000}
-  .ph{display:flex;gap:12px;align-items:center;margin-bottom:8px}
-  .ph img{width:55px;height:55px;border-radius:50%;border:2px solid #000;object-fit:cover}
-  .pt{font-weight:700;font-size:18px}
-  .pm{font-size:12px;opacity:.8}
-  .terms{font-size:11px;margin-top:8px}
-  table,th,td{border:1px solid #000}
-  .sign-row{display:flex;justify-content:flex-end;gap:24px;margin-top:16px}
-  .sign{width:220px;text-align:center}
-  .sign img{width:100%;max-height:90px;object-fit:contain;border:1px solid #000;padding:6px;background:#fff}
-  .sign .cap{margin-top:6px;font-size:12px}
+  .no-print{display:none !important}
+  body{background:#fff}
+  .card{border:none}
 }
 </style>
 </head>
 <body>
-<header>
-  <img id="appLogo" class="logo" alt="Logo">
-  <div>
-    <h1 id="ttl">Giorgio — Elettricista & Antennista</h1>
-    <small id="tel">Tel. +39 351 796 9013</small> ·
-    <small>v33 — Preventivi · Interventi · Impostazioni</small>
+  <div class="header no-print">
+    <h1>Giorgio — Elettricista & Antennista</h1>
+    <small>Tel. +39 351 796 9013</small>
   </div>
-</header>
 
-<nav>
-  <button class="tab active" data-tab="pv">Preventivi</button>
-  <button class="tab" data-tab="iv">Interventi</button>
-  <button class="tab" data-tab="st">Impostazioni</button>
-</nav>
-
-<main>
-  <!-- PREVENTIVI -->
-  <section id="pv" class="active">
-    <div class="split">
-      <div class="card">
-        <div class="head">
-          <strong>Elenco Preventivi</strong>
-          <div class="actions">
-            <select id="pv-filter" class="btn">
-              <option value="all">Tutti (scadenza)</option>
-              <option value="due">In scadenza (7 giorni)</option>
-              <option value="expired">Scaduti</option>
-            </select>
-            <button class="btn" id="pv-exp">Esporta</button>
-            <label class="btn"><input type="file" id="pv-imp" accept="application/json" style="display:none">Importa</label>
-          </div>
-        </div>
-        <div class="body">
-          <input id="pv-search" placeholder="Cerca: numero, cliente, oggetto…">
-        </div>
-        <div class="body list" id="pv-list"></div>
-      </div>
-
-      <div class="card">
-        <div class="head">
-          <strong>Scheda Preventivo</strong>
-          <div class="actions">
-            <button class="btn" id="pv-new">Nuovo</button>
-            <button class="btn" id="pv-dup">Duplica</button>
-            <button class="btn primary" id="pv-save">Salva</button>
-            <button class="btn" id="pv-to-iv">Crea intervento</button>
-            <button class="btn danger" id="pv-del">Elimina</button>
-            <button class="btn" id="pv-print">Stampa / PDF</button>
-            <button class="btn" id="pv-share">Condividi</button>
-          </div>
-        </div>
-        <div class="body" id="pv-form">
-          <input type="hidden" id="pv-id">
-          <div class="grid3">
-            <div><label>Numero</label><input id="pv-num" placeholder="PV-0001"></div>
-            <div><label>Data</label><input type="date" id="pv-date"></div>
-            <div><label>Scadenza</label><input type="date" id="pv-expdate"></div>
-          </div>
-
-          <div class="grid3">
-            <div>
-              <label>Unità manodopera</label>
-              <select id="pv-lab-unit"><option value="h">Oraria</option><option value="d">Giornaliera</option></select>
-            </div>
-            <div><label>Q.tà manodopera</label><input type="number" id="pv-lab-qty" step="0.25" value="0" inputmode="decimal"></div>
-            <div><label>Tariffa (€ / unità)</label><input type="number" id="pv-lab-rate" step="0.01" value="0" inputmode="decimal"></div>
-          </div>
-
-          <div class="grid2">
-            <div><label>Cliente</label><input id="pv-cli" placeholder="Nome cliente"></div>
-            <div><label>Contatto</label><input id="pv-con" placeholder="Telefono / Email"></div>
-          </div>
-          <label>Oggetto</label><input id="pv-obj" placeholder="Oggetto del preventivo">
-
-          <label>Materiali / Servizi</label>
-          <table id="pv-rows">
-            <thead><tr><th>Descrizione</th><th style="width:92px">Q.tà</th><th style="width:120px">Prezzo</th><th style="width:46px">×</th></tr></thead>
-            <tbody></tbody>
-          </table>
-          <div class="actions">
-            <button class="btn" id="pv-add">+ Riga</button>
-            <button class="btn" id="pv-clear">Svuota righe</button>
-          </div>
-
-          <div class="grid3">
-            <div><label>Sconto %</label><input type="number" id="pv-sco" step="0.1" value="0" inputmode="decimal"></div>
-            <div><label>Maggiorazione %</label><input type="number" id="pv-mag" step="0.1" value="0" inputmode="decimal"></div>
-            <div><label>Totale</label><input id="pv-tot" readonly></div>
-          </div>
-
-          <div class="grid3">
-            <div class="card"><div class="body"><div class="note">Materiali</div><div id="pv-mat">€ 0,00</div></div></div>
-            <div class="card"><div class="body"><div class="note">Manodopera</div><div id="pv-lab">€ 0,00</div></div></div>
-            <div class="card"><div class="body"><div class="note">Imponibile (materiali + manodopera)</div><div id="pv-imp">€ 0,00</div></div></div>
-          </div>
-
-          <div class="grid3">
-            <div><label>Acconto %</label><input type="number" id="pv-dep-perc" step="1" value="50"></div>
-            <div><label>Acconto €</label><input id="pv-dep-amt" readonly></div>
-            <div><label>Saldo €</label><input id="pv-balance-amt" readonly></div>
-          </div>
-
-          <!-- FIRMA CLIENTE -->
-          <div data-signature-wrap style="margin-top:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <strong>Firma Cliente ✍️</strong>
-              <span data-sig-badge class="badge">Non firmato</span>
-            </div>
-            <div class="sig-box" style="display:none">
-              <canvas data-signature></canvas>
-            </div>
-            <div class="actions" style="margin-top:6px">
-              <button class="btn" data-sig-open>Apri</button>
-              <button class="btn" data-sig-clear>Pulisci</button>
-              <button class="btn" data-sig-close>Chiudi</button>
-            </div>
-            <input type="hidden" name="firma_cliente" data-sig-data>
-          </div>
-
-          <!-- FIRMA TECNICO -->
-          <div data-signature-wrap style="margin-top:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <strong>Firma Tecnico ✍️</strong>
-              <span data-sig-badge class="badge">Non firmato</span>
-            </div>
-            <div class="sig-box" style="display:none">
-              <canvas data-signature></canvas>
-            </div>
-            <div class="actions" style="margin-top:6px">
-              <button class="btn" data-sig-open>Apri</button>
-              <button class="btn" data-sig-clear>Pulisci</button>
-              <button class="btn" data-sig-close>Chiudi</button>
-            </div>
-            <input type="hidden" name="firma_tecnico" data-sig-data>
-          </div>
-
-          <div class="note" id="pv-terms" style="margin-top:8px">
-            Pagamento: acconto del 50% all’accettazione del preventivo e saldo al termine dei lavori.
-            Il materiale fornito rimane di proprietà dell’installatore fino al saldo completo.
-            Validità preventivo 30 giorni salvo accordi diversi. Eventuali varianti saranno concordate a parte.
-            Le firme equivalgono a firma digitale.
-          </div>
-        </div>
+  <div class="container">
+    <!-- BARRA AZIONI -->
+    <div class="card no-print">
+      <div class="btns">
+        <button class="btn" id="btn-new">Nuovo</button>
+        <button class="btn primary" id="btn-save">Salva</button>
+        <button class="btn" id="btn-print">Stampa / PDF</button>
+        <button class="btn" id="btn-share">Condividi</button>
+        <span class="badge" id="badge-state">Bozza</span>
       </div>
     </div>
-  </section>
 
-  <!-- INTERVENTI -->
-  <section id="iv">
-    <div class="split">
-      <div class="card">
-        <div class="head">
-          <strong>Elenco Interventi</strong>
-          <div class="actions">
-            <button class="btn" id="iv-exp">Esporta</button>
-            <label class="btn"><input type="file" id="iv-imp" accept="application/json" style="display:none">Importa</label>
-          </div>
-        </div>
-        <div class="body list" id="iv-list"></div>
-      </div>
-
-      <div class="card">
-        <div class="head">
-          <strong>Scheda Intervento</strong>
-          <div class="actions">
-            <button class="btn" id="iv-new">Nuovo</button>
-            <button class="btn" id="iv-dup">Duplica</button>
-            <button class="btn primary" id="iv-save">Salva</button>
-            <button class="btn danger" id="iv-del">Elimina</button>
-          </div>
-        </div>
-        <div class="body">
-          <input type="hidden" id="iv-id">
-          <div class="grid3">
-            <div><label>Numero</label><input id="iv-num" placeholder="INT-0001"></div>
-            <div><label>Data</label><input type="date" id="iv-date"></div>
-            <div><label>Stato</label><select id="iv-st"><option>Aperto</option><option>In corso</option><option>Chiuso</option></select></div>
-          </div>
-          <div class="grid2">
-            <div><label>Cliente</label><input id="iv-cli" placeholder="Nome cliente"></div>
-            <div><label>Contatto</label><input id="iv-con" placeholder="Telefono / Email"></div>
-          </div>
-          <label>Descrizione</label>
-          <textarea id="iv-des" placeholder="Diagnosi, materiali usati, note…"></textarea>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- IMPOSTAZIONI -->
-  <section id="st">
+    <!-- INTESTAZIONE -->
     <div class="card">
-      <div class="head"><strong>Impostazioni</strong></div>
-      <div class="body">
-        <div class="grid2">
-          <div><label>Intestazione</label><input id="st-rag" value="Giorgio — Elettricista & Antennista"></div>
-          <div><label>Colore brand</label><input id="st-brand" value="#0A2E5C"></div>
+      <div class="row">
+        <div>
+          <label>Numero</label>
+          <input id="pv-num" readonly>
         </div>
-        <div class="grid2">
-          <div><label>Telefono</label><input id="st-phone" value="+39 351 796 9013"></div>
-          <div><label>Note di stampa</label><input id="st-note" placeholder="Indirizzo, orari, condizioni…"></div>
+        <div>
+          <label>Data</label>
+          <input id="pv-date" type="date">
         </div>
-        <label>Logo JPG/PNG</label>
-        <input type="file" id="st-file" accept="image/png,image/jpeg">
-        <div class="actions" style="margin-top:10px">
-          <button class="btn primary" id="st-save">Salva impostazioni</button>
-          <button class="btn" id="st-reset">Ripristina predefiniti</button>
-          <button class="btn danger" id="st-wipe">Cancella tutti i dati</button>
-          <button class="btn" id="st-backup">Esporta impostazioni</button>
-          <label class="btn"><input type="file" id="st-restore" accept="application/json" style="display:none">Importa impostazioni</label>
+      </div>
+      <div class="row">
+        <div>
+          <label>Scadenza</label>
+          <input id="pv-exp" type="date">
+        </div>
+        <div>
+          <label>Stato</label>
+          <input id="pv-stato" value="Bozza" readonly>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Cliente</label>
+          <input id="pv-cliente" placeholder="Nome cliente">
+        </div>
+        <div>
+          <label>Contatto</label>
+          <input id="pv-contatto" placeholder="Telefono / Email">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Oggetto</label>
+          <input id="pv-ogg" placeholder="Oggetto del preventivo">
+        </div>
+        <div class="row" style="gap:10px">
+          <div>
+            <label>manodopera</label>
+            <select id="tipo-mdp">
+              <option value="oraria">Oraria</option>
+              <option value="giornaliera">Giornaliera</option>
+            </select>
+          </div>
+          <div>
+            <label>Q.tà manodopera</label>
+            <input id="q-mdp" type="number" min="0" step="0.25" value="0">
+          </div>
+          <div>
+            <label>Tariffa (€/unità)</label>
+            <input id="tar-mdp" type="number" min="0" step="0.01" value="0">
+          </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- PRINT -->
-  <section id="print" class="no-print" style="display:none">
-    <div id="sheet" class="printSheet"></div>
-  </section>
-</main>
+    <!-- MATERIALI / SERVIZI -->
+    <div class="card">
+      <h3 style="margin:2px 0 10px">Materiali / Servizi</h3>
+      <table id="tab">
+        <thead>
+          <tr><th>Descrizione</th><th style="width:110px">Q.tà</th><th style="width:140px">Prezzo</th><th>×</th></tr>
+        </thead>
+        <tbody id="tbody">
+          <tr>
+            <td><input placeholder="Descrizione"></td>
+            <td><input type="number" min="0" step="1" value="1"></td>
+            <td><input type="number" min="0" step="0.01" value="0"></td>
+            <td><button class="btn danger" data-del>✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="btns no-print" style="margin-top:10px">
+        <button class="btn" id="add-row">+ Riga</button>
+        <button class="btn" id="clr-rows">Svuota righe</button>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label>Sconto %</label>
+          <input id="sconto" type="number" min="0" max="100" step="0.1" value="0">
+        </div>
+        <div>
+          <label>Maggiorazione %</label>
+          <input id="magg" type="number" min="0" max="100" step="0.1" value="0">
+        </div>
+        <div>
+          <label>Totale provvisorio (€)</label>
+          <input id="tot-prov" readonly>
+        </div>
+      </div>
+
+      <div class="totals" style="margin-top:10px">
+        <div class="box">
+          <div>Materiali</div>
+          <div class="big" id="tot-mat">€ 0,00</div>
+        </div>
+        <div class="box">
+          <div>Manodopera</div>
+          <div class="big" id="tot-mdp">€ 0,00</div>
+          <div style="font-size:12px;color:var(--muted)" id="mdp-note">0 × 0,00 €/ora</div>
+        </div>
+        <div class="box">
+          <div>Imponibile <span class="hl">(materiali + manodopera)</span></div>
+          <div class="big" id="impon">€ 0,00</div>
+        </div>
+        <div class="box">
+          <div>Totale</div>
+          <div class="big" id="totale">€ 0,00</div>
+        </div>
+      </div>
+
+      <div class="row-3" style="margin-top:10px">
+        <div>
+          <label>Acconto %</label>
+          <input id="acc-perc" type="number" min="0" max="100" step="1" value="0">
+        </div>
+        <div>
+          <label>Acconto €</label>
+          <input id="acc-eur" type="number" min="0" step="0.01" value="0">
+        </div>
+        <div>
+          <label>Saldo €</label>
+          <input id="saldo" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIRME -->
+    <div class="card">
+      <div class="sig-box">
+        <div class="sig-head">Firma Cliente ✍️ <span id="sigc-badge" class="sig-badge">Non firmato</span></div>
+        <div class="sig-actions">
+          <button type="button" class="btn" data-sig-open="cli">Apri</button>
+          <button type="button" class="btn" data-sig-clear="cli">Pulisci</button>
+          <button type="button" class="btn" data-sig-close="cli">Chiudi</button>
+        </div>
+        <input type="hidden" id="sigc-data">
+      </div>
+
+      <div class="sig-box">
+        <div class="sig-head">Firma Tecnico ✍️ <span id="sigt-badge" class="sig-badge">Non firmato</span></div>
+        <div class="sig-actions">
+          <button type="button" class="btn" data-sig-open="tec">Apri</button>
+          <button type="button" class="btn" data-sig-clear="tec">Pulisci</button>
+          <button type="button" class="btn" data-sig-close="tec">Chiudi</button>
+        </div>
+        <input type="hidden" id="sigt-data">
+      </div>
+    </div>
+
+    <!-- TERMINI -->
+    <div class="card">
+      <h3 style="margin:2px 0 10px">Termini essenziali</h3>
+      <ul style="margin:0 0 0 18px;padding:0;line-height:1.5">
+        <li>Validità del preventivo: <b>30 giorni</b> salvo diversa indicazione.</li>
+        <li>I prezzi includono materiali e manodopera indicati in dettaglio.</li>
+        <li>L’eventuale acconto richiesto è indicato; il saldo è dovuto alla consegna/lavoro ultimato.</li>
+        <li>Materiali garantiti solo se specificato per iscritto.</li>
+        <li>Eventuali extra/urgenze si concordano e si fatturano a parte.</li>
+        <li>Le firme equivalgono a firma digitale per accettazione.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- MODALE FIRMA (una sola, riutilizzabile) -->
+  <div id="sig-modal" class="sig-modal" hidden>
+    <div class="sig-panel">
+      <div class="sig-toolbar">
+        <strong id="sig-title">Firma</strong>
+        <div class="spacer"></div>
+        <button type="button" id="sig-done" class="btn primary">Salva</button>
+        <button type="button" id="sig-clear" class="btn">Pulisci</button>
+        <button type="button" id="sig-cancel" class="btn danger">Chiudi</button>
+      </div>
+      <canvas id="sig-canvas"></canvas>
+      <div class="sig-hint">Firma con dito/mouse. (La pagina non scorrerà durante la firma)</div>
+    </div>
+  </div>
 
 <script>
-/* ===== Helpers ===== */
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const S={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
-const today=()=>new Date().toISOString().slice(0,10);
-const uuid=()=> (crypto && crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2));
-const num=v=>isNaN(parseFloat(v))?0:parseFloat(v);
-const fmtEur=n=>'€ '+(Math.round(n*100)/100).toFixed(2).replace('.',',');
+(()=>{'use strict';
+const qs=(s,e=document)=>e.querySelector(s), qsa=(s,e=document)=>[...e.querySelectorAll(s)];
+const fmt = n => (new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'})).format(+n||0);
 
-/* ===== Tabs ===== */
-function bindTabs(){
-  $$('nav .tab').forEach(b=>b.addEventListener('click',()=>{
-    $$('nav .tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-    $$('main>section').forEach(s=>s.classList.toggle('active', s.id===b.dataset.tab));
-  }));
+// ---------- Numerazione automatica + date ----------
+const numEl=qs('#pv-num'), dateEl=qs('#pv-date'), expEl=qs('#pv-exp');
+function pad(n){return String(n).padStart(4,'0')}
+function nextNumber(){
+  const k='pvCounter'; const v= +(localStorage.getItem(k) || 0) + 1;
+  localStorage.setItem(k, v); return `PV-${pad(v)}`;
+}
+function setTodayAndExpiry(){
+  const d=new Date(); const iso=(x)=>x.toISOString().slice(0,10);
+  dateEl.value = iso(d);
+  const e=new Date(d); e.setDate(e.getDate()+30);
+  expEl.value = iso(e);
+}
+function newDoc(){
+  numEl.value = nextNumber();
+  setTodayAndExpiry();
+  qs('#pv-stato').value='Bozza'; qs('#badge-state').textContent='Bozza';
+  // reset campi base
+  ['pv-cliente','pv-contatto','pv-ogg'].forEach(id=>qs('#'+id).value='');
+  qs('#tipo-mdp').value='oraria'; qs('#q-mdp').value=0; qs('#tar-mdp').value=0;
+  // reset tabella
+  const tbody=qs('#tbody'); tbody.innerHTML='';
+  addRow(); // una riga vuota
+  // reset calcoli
+  qs('#sconto').value=0; qs('#magg').value=0; qs('#acc-perc').value=0; qs('#acc-eur').value=0;
+  // reset firme
+  ['cli','tec'].forEach(w=>{input(w).value=''; badge(w).textContent='Non firmato';});
+  calc();
 }
 
-/* ===== Logo: compress + fallback ===== */
-function compressImageFile(file, maxW=400, maxH=400, quality=0.85){
-  return new Promise((resolve, reject)=>{
-    const fr=new FileReader();
-    fr.onload=()=>{
-      const img=new Image();
-      img.onload=()=>{
-        let {width,height}=img;
-        const r=Math.min(maxW/width,maxH/height,1);
-        const w=Math.round(width*r), h=Math.round(height*r);
-        const c=document.createElement('canvas'); c.width=w; c.height=h;
-        const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
-        resolve(c.toDataURL('image/jpeg',quality));
-      };
-      img.onerror=reject; img.src=fr.result;
-    };
-    fr.onerror=reject; fr.readAsDataURL(file);
-  });
-}
-function setAppLogo(src){
-  const el=$('#appLogo'); if(!el) return;
-  if(!src){ el.src='icona-192.png'; return; }
-  const test=new Image();
-  test.onload=()=>{ el.src=src; };
-  test.onerror=()=>{ el.src='icona-192.png'; };
-  test.src=src;
-}
-
-/* ===== Brand/Impostazioni ===== */
-function initBrand(){
-  const rag=S.get('rag','Giorgio — Elettricista & Antennista');
-  const brand=S.get('brand','#0A2E5C');
-  const phone=S.get('phone','+39 351 796 9013');
-  const logo=S.get('logo',null);
-  $('#ttl').textContent=rag;
-  $('#tel').textContent=phone?('Tel. '+phone):'';
-  document.documentElement.style.setProperty('--brand',brand);
-  setAppLogo(logo);
-  $('#st-rag').value=rag; $('#st-brand').value=brand; $('#st-phone').value=phone; $('#st-note').value=S.get('note','');
-}
-function bindSettings(){
-  $('#st-save').onclick=()=>{
-    S.set('rag',$('#st-rag').value.trim()||'Giorgio — Elettricista & Antennista');
-    S.set('brand',$('#st-brand').value.trim()||'#0A2E5C');
-    S.set('phone',$('#st-phone').value.trim());
-    S.set('note',$('#st-note').value.trim());
-    initBrand(); alert('Impostazioni salvate ✅');
-  };
-  $('#st-reset').onclick=()=>{['rag','brand','phone','note','logo'].forEach(S.del); initBrand();};
-  $('#st-file').onchange= async e=>{
-    const f=e.target.files[0]; if(!f) return;
-    if(!/^image\/(png|jpeg|jpg)$/.test(f.type)){ alert('Carica PNG o JPG'); return; }
-    try{
-      const dataUrl=await compressImageFile(f,400,400,0.85);
-      S.set('logo',dataUrl); initBrand(); alert('Logo aggiornato ✅ (ottimizzato)');
-    }catch(err){ console.error(err); alert('Non riesco a salvare il logo. Prova un file più piccolo.'); }
-  };
-  $('#st-wipe').onclick=()=>{ if(confirm('Cancellare TUTTI i dati?')){ localStorage.clear(); location.reload(); } };
-  $('#st-backup').onclick=()=>{
-    const data={ rag:S.get('rag',''), brand:S.get('brand',''), phone:S.get('phone',''), note:S.get('note',''), logo:S.get('logo',null) };
-    const a=document.createElement('a');
-    a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data));
-    a.download='impostazioni_giorgio.json'; a.click();
-  };
-  $('#st-restore').onchange=e=>{
-    const f=e.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=ev=>{
-      try{
-        const o=JSON.parse(ev.target.result);
-        ['rag','brand','phone','note','logo'].forEach(k=>{ if(k in o) S.set(k,o[k]); });
-        initBrand(); alert('Impostazioni importate ✅');
-      }catch{ alert('File impostazioni non valido'); }
-    };
-    r.readAsText(f);
-  };
-}
-
-/* ===== Store ===== */
-const getPV=()=>S.get('pv',[]), setPV=a=>S.set('pv',a);
-const getIV=()=>S.get('iv',[]), setIV=a=>S.set('iv',a);
-
-/* ===== Preventivi: righe & calcoli ===== */
-function addRow(desc='',q=1,pr=0){
+// ---------- Tabella materiali ----------
+function addRow(desc='',q=1,p=0){
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class="d" value="${desc}"></td>
-  <td><input type="number" class="q" step="0.01" inputmode="decimal" value="${q}"></td>
-  <td><input type="number" class="p" step="0.01" inputmode="decimal" value="${pr}"></td>
-  <td><button class="btn danger x" type="button">×</button></td>`;
-  $('#pv-rows tbody').appendChild(tr);
-  tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
-  tr.querySelector('.x').onclick=()=>{tr.remove();calc(); ensureAtLeastOneRow();};
+  tr.innerHTML=`<td><input placeholder="Descrizione" value="${desc}"></td>
+                <td><input type="number" min="0" step="1" value="${q}"></td>
+                <td><input type="number" min="0" step="0.01" value="${p}"></td>
+                <td><button class="btn danger" data-del>✕</button></td>`;
+  qs('#tbody').appendChild(tr);
 }
-function rows(){return [...$('#pv-rows tbody').querySelectorAll('tr')].map(tr=>({
-  desc:tr.querySelector('.d').value.trim(), qty:num(tr.querySelector('.q').value), price:num(tr.querySelector('.p').value)
-})).filter(r=>r.desc||r.qty||r.price)}
-function ensureAtLeastOneRow(){
-  const tb=$('#pv-rows tbody'); if(!tb) return;
-  if(tb.children.length===0) addRow();
+qs('#add-row').onclick=()=>{addRow();};
+qs('#clr-rows').onclick=()=>{qs('#tbody').innerHTML=''; addRow(); calc();};
+qs('#tbody').addEventListener('click',e=>{
+  if(e.target.matches('[data-del]')){
+    e.target.closest('tr').remove(); if(!qs('#tbody tr')) addRow(); calc();
+  }
+});
+document.addEventListener('input',e=>{
+  if(e.target.closest('#tbody') || ['#q-mdp','#tar-mdp','#sconto','#magg','#acc-perc','#acc-eur','#tipo-mdp'].some(sel=>e.target.matches(sel.replace('#','') ? sel : sel))){
+    calc();
+  }
+});
+
+// ---------- Calcoli ----------
+function sumMaterials(){
+  let s=0; qsa('#tbody tr').forEach(tr=>{
+    const q=+tr.children[1].querySelector('input').value||0;
+    const p=+tr.children[2].querySelector('input').value||0;
+    s+=q*p;
+  }); return s;
 }
 function calc(){
-  const r=rows();
-  const materiali=r.reduce((s,v)=>s+v.qty*v.price,0);
+  const mat=sumMaterials();
+  const q=+qs('#q-mdp').value||0, t=+qs('#tar-mdp').value||0;
+  const tipo=qs('#tipo-mdp').value;
+  const mdp = q * t;
+  const impon = mat + mdp;
 
-  const labQty=num($('#pv-lab-qty').value);
-  const labRate=num($('#pv-lab-rate').value);
-  const manodopera=labQty*labRate;
+  const sconto=+qs('#sconto').value||0, maggior=+qs('#magg').value||0;
+  let totale = impon;
+  if(sconto>0) totale -= impon*(sconto/100);
+  if(maggior>0) totale += impon*(maggior/100);
 
-  const imponibile=materiali+manodopera;
+  qs('#tot-mat').textContent=fmt(mat);
+  qs('#tot-mdp').textContent=fmt(mdp);
+  qs('#mdp-note').textContent = `${q} × ${fmt(t)} €/${tipo==='oraria'?'ora':'giorno'}`;
+  qs('#impon').textContent=fmt(impon);
+  qs('#totale').textContent=fmt(totale);
+  qs('#tot-prov').value=fmt(totale);
 
-  const sPerc=num($('#pv-sco').value), mPerc=num($('#pv-mag').value);
-  const afterDiscount=imponibile - (imponibile*sPerc/100);
-  const totale=afterDiscount + (afterDiscount*mPerc/100);
-
-  $('#pv-mat').textContent=fmtEur(materiali);
-  $('#pv-lab').textContent=fmtEur(manodopera);
-  $('#pv-imp').textContent=fmtEur(imponibile);
-
-  const sVal=imponibile*sPerc/100, mVal=afterDiscount*mPerc/100;
-  $('#pv-sc') && ($('#pv-sc').textContent=fmtEur(sVal));
-  $('#pv-mg') && ($('#pv-mg').textContent=fmtEur(mVal));
-  $('#pv-to').textContent=fmtEur(totale);
-  $('#pv-tot').value=fmtEur(totale);
-
-  // Acconto/Saldo
-  const depPerc = Math.max(0, Math.min(100, num($('#pv-dep-perc').value||'0')));
-  const depAmt  = (totale * depPerc / 100);
-  const balance = Math.max(0, totale - depAmt);
-  $('#pv-dep-amt').value = fmtEur(depAmt);
-  $('#pv-balance-amt').value = fmtEur(balance);
-}
-function bindCalcInputs(){
-  $('#pv-add').onclick=()=>{addRow();};
-  $('#pv-clear').onclick=()=>{$('#pv-rows tbody').innerHTML=''; calc(); ensureAtLeastOneRow();};
-  ['pv-lab-qty','pv-lab-rate','pv-sco','pv-mag','pv-dep-perc'].forEach(id=>$('#'+id).addEventListener('input',calc));
+  // acconti/saldo
+  const accPerc=+qs('#acc-perc').value||0;
+  let accEur=+qs('#acc-eur').value||0;
+  if(document.activeElement===qs('#acc-perc')){ // se edit % ricalcolo €
+    accEur = +(totale*(accPerc/100)).toFixed(2); qs('#acc-eur').value=accEur;
+  }else if(document.activeElement===qs('#acc-eur')){ // se edit € ricalcolo %
+    const p = totale>0 ? (accEur/totale*100) : 0; qs('#acc-perc').value= Math.round(p);
+  }else{ // sync base (es. al primo calc)
+    accEur = +(totale*(accPerc/100)).toFixed(2); qs('#acc-eur').value=accEur;
+  }
+  qs('#saldo').value = (totale-accEur).toFixed(2);
 }
 
-/* ===== Preventivi CRUD ===== */
-function nextPVNumber(){
-  const arr=getPV(); let n=0;
-  arr.forEach(p=>{ const m=(p.numero||'').match(/PV-(\d+)/i); if(m) n=Math.max(n,parseInt(m[1],10)); });
-  const ctr=parseInt(localStorage.getItem('pvCounter')||'0',10);
-  n=Math.max(n,ctr)+1; localStorage.setItem('pvCounter',String(n));
-  return 'PV-'+String(n).padStart(4,'0');
-}
-function clearSignatures(){
-  document.querySelectorAll('[data-signature-wrap]').forEach(w=>{
-    const canvas=w.querySelector('canvas[data-signature]');
-    const hid=w.querySelector('[data-sig-data]');
-    const badge=w.querySelector('[data-sig-badge]');
-    if(canvas?.getContext){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
-    if(hid) hid.value='';
-    if(badge){ badge.textContent='Non firmato'; badge.className='badge'; badge.style.cssText=''; }
-  });
-}
-function newPV(){
-  $('#pv-id').value='';
-  $('#pv-num').value=nextPVNumber();
-  $('#pv-date').value=today();
-  const d=new Date(); d.setDate(d.getDate()+30);
-  $('#pv-expdate').value=d.toISOString().slice(0,10);
+// ---------- Firma (modale custom) ----------
+const badge = who=>qs(who==='cli'?'#sigc-badge':'#sigt-badge');
+const input = who=>qs(who==='cli'?'#sigc-data':'#sigt-data');
 
-  ['pv-cli','pv-con','pv-obj'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+const Sig={
+  who:null, modal:qs('#sig-modal'), canvas:qs('#sig-canvas'), ctx:null,
+  drawing:false, last:[0,0], opened:false,
+  init(){
+    this.ctx=this.canvas.getContext('2d');
+    // Bottoni
+    qs('#sig-done').onclick=()=>this.save();
+    qs('#sig-clear').onclick=()=>this.clear();
+    qs('#sig-cancel').onclick=()=>this.close();
 
-  $('#pv-lab-unit').value='h'; $('#pv-lab-qty').value=0; $('#pv-lab-rate').value=0;
-  $('#pv-sco').value=0; $('#pv-mag').value=0;
-  $('#pv-dep-perc').value=50;
+    // Mouse
+    this.canvas.addEventListener('mousedown',e=>this.start([e.offsetX,e.offsetY]));
+    window.addEventListener('mousemove',e=>this.moveMouse(e));
+    window.addEventListener('mouseup',()=>this.end());
 
-  $('#pv-rows tbody').innerHTML=''; addRow();
-  clearSignatures();
-  calc(); ensureAtLeastOneRow();
-}
-function readPV(){
-  return {
-    id:$('#pv-id').value||uuid(),
-    numero:$('#pv-num').value.trim(),
-    data:$('#pv-date').value,
-    scadenza:$('#pv-expdate').value,
-    unita:$('#pv-lab-unit').value,
-    labqty:num($('#pv-lab-qty').value),
-    labrate:num($('#pv-lab-rate').value),
-    cliente:$('#pv-cli').value.trim(),
-    contatto:$('#pv-con').value.trim(),
-    oggetto:$('#pv-obj').value.trim(),
-    voci:rows(),
-    sconto:num($('#pv-sco').value),
-    maggiorazione:num($('#pv-mag').value),
-    depPerc:num($('#pv-dep-perc').value),
-    totale:(($('#pv-tot').value||'').replace('€','').replace(',','.').trim())||'0',
-    sigC: document.querySelector('[name="firma_cliente"]')?.value || '',
-    sigT: document.querySelector('[name="firma_tecnico"]')?.value || ''
+    // Touch
+    this.canvas.addEventListener('touchstart',e=>{
+      e.preventDefault();
+      const t=e.changedTouches[0], r=this.canvas.getBoundingClientRect();
+      this.start([t.clientX-r.left, t.clientY-r.top]);
+    },{passive:false});
+    this.canvas.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      const t=e.changedTouches[0], r=this.canvas.getBoundingClientRect();
+      this.drawTo([t.clientX-r.left, t.clientY-r.top]);
+    },{passive:false});
+    this.canvas.addEventListener('touchend',()=>this.end(),{passive:false});
+
+    // Apertura dai bottoni
+    qsa('[data-sig-open]').forEach(b=>b.addEventListener('click',()=>this.open(b.getAttribute('data-sig-open'))));
+    qsa('[data-sig-clear]').forEach(b=>b.addEventListener('click',()=>{
+      const w=b.getAttribute('data-sig-clear'); input(w).value=''; badge(w).textContent='Non firmato';
+    }));
+    qsa('[data-sig-close]').forEach(b=>b.addEventListener('click',()=>this.close()));
+
+    // Chiudi esterno
+    this.modal.addEventListener('click',e=>{if(e.target===this.modal) this.close();});
+    window.addEventListener('keydown',e=>{if(this.opened && e.key==='Escape') this.close();});
+
+    // Resize
+    const resize=()=>{
+      const r=this.canvas.getBoundingClientRect();
+      const snapshot=this.ctx.getImageData(0,0,this.canvas.width||0,this.canvas.height||0);
+      this.canvas.width=Math.max(300,Math.floor(r.width));
+      this.canvas.height=Math.max(180,Math.floor(r.height));
+      this.ctx.lineCap='round'; this.ctx.lineJoin='round'; this.ctx.lineWidth=2;
+      this.ctx.strokeStyle='#111827'; this.ctx.fillStyle='#fff';
+      this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+      if(snapshot.width && snapshot.height) { try{this.ctx.putImageData(snapshot,0,0);}catch{} }
+    };
+    new ResizeObserver(resize).observe(qs('.sig-panel'));
+    window.addEventListener('orientationchange',()=>setTimeout(resize,200));
+  },
+  open(who){
+    this.who=who; qs('#sig-title').textContent= who==='cli'?'Firma Cliente':'Firma Tecnico';
+    this.modal.hidden=false; document.documentElement.style.overflow='hidden'; this.opened=true;
+    const r=qs('.sig-panel').getBoundingClientRect();
+    this.canvas.width=Math.floor(r.width); this.canvas.height=Math.floor(r.height-84);
+    this.ctx.lineCap='round'; this.ctx.lineJoin='round'; this.ctx.lineWidth=2;
+    this.ctx.strokeStyle='#111827'; this.ctx.fillStyle='#fff'; this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+    const data=input(who).value;
+    if(data){ const img=new Image(); img.onload=()=>this.ctx.drawImage(img,0,0,this.canvas.width,this.canvas.height); img.src=data; }
+  },
+  close(){ this.opened=false; this.modal.hidden=true; document.documentElement.style.overflow=''; },
+  clear(){ this.ctx.fillStyle='#fff'; this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height); },
+  save(){ const data=this.canvas.toDataURL('image/png'); input(this.who).value=data; badge(this.who).textContent='Firmato'; this.close(); },
+  start([x,y]){ this.drawing=true; this.last=[x,y]; },
+  moveMouse(e){ if(!this.drawing) return; const r=this.canvas.getBoundingClientRect(); this.drawTo([e.clientX-r.left, e.clientY-r.top]); },
+  drawTo([x,y]){ if(!this.drawing) return; this.ctx.beginPath(); this.ctx.moveTo(this.last[0],this.last[1]); this.ctx.lineTo(x,y); this.ctx.stroke(); this.last=[x,y]; },
+  end(){ this.drawing=false; }
+};
+
+// ---------- Azioni top ----------
+qs('#btn-print').onclick=()=>window.print();
+qs('#btn-share').onclick=async()=>{
+  try{
+    if(navigator.share){
+      await navigator.share({title:document.title,text:`Preventivo ${numEl.value}`,url:location.href});
+    }else{ alert('Condivisione non supportata su questo dispositivo'); }
+  }catch{}
+};
+qs('#btn-save').onclick=()=>{
+  // Demo: salva bozza in localStorage
+  const data={
+    num:numEl.value,date:dateEl.value,exp:expEl.value,stato:qs('#pv-stato').value,
+    cliente:qs('#pv-cliente').value,contatto:qs('#pv-contatto').value,ogg:qs('#pv-ogg').value,
+    tipo:qs('#tipo-mdp').value,qmdp:+qs('#q-mdp').value, tmdp:+qs('#tar-mdp').value,
+    rows: qsa('#tbody tr').map(tr=>({
+      d:tr.children[0].querySelector('input').value,
+      q:+tr.children[1].querySelector('input').value,
+      p:+tr.children[2].querySelector('input').value
+    })),
+    sconto:+qs('#sconto').value, maggior:+qs('#magg').value,
+    accPerc:+qs('#acc-perc').value, accEur:+qs('#acc-eur').value,
+    sigc:qs('#sigc-data').value, sigt:qs('#sigt-data').value
   };
-}
-function fillPV(id){
-  const p=getPV().find(x=>x.id===id); if(!p) return;
-  $('#pv-id').value=p.id; $('#pv-num').value=p.numero; $('#pv-date').value=p.data; $('#pv-expdate').value=p.scadenza||'';
-  $('#pv-lab-unit').value=p.unita||'h'; $('#pv-lab-qty').value=p.labqty??0; $('#pv-lab-rate').value=p.labrate??0;
-  $('#pv-cli').value=p.cliente||''; $('#pv-con').value=p.contatto||''; $('#pv-obj').value=p.oggetto||'';
-  $('#pv-rows tbody').innerHTML=''; (p.voci||[]).forEach(v=>addRow(v.desc,v.qty,v.price));
-  $('#pv-sco').value=p.sconto??0; $('#pv-mag').value=p.maggiorazione??0; $('#pv-dep-perc').value=p.depPerc??50;
+  localStorage.setItem(`pv-${data.num}`, JSON.stringify(data));
+  qs('#pv-stato').value='Salvato'; qs('#badge-state').textContent='Salvato';
+  alert('Salvato in locale.');
+};
+qs('#btn-new').onclick=()=>{ if(confirm('Creare un nuovo preventivo?')) newDoc(); };
 
-  // firme salvate
-  document.querySelector('[name="firma_cliente"]').value = p.sigC||'';
-  document.querySelector('[name="firma_tecnico"]').value = p.sigT||'';
-  // badge
-  document.querySelectorAll('[data-signature-wrap]').forEach(w=>{
-    const hid=w.querySelector('[data-sig-data]');
-    const badge=w.querySelector('[data-sig-badge]');
-    if(hid?.value){ badge.textContent='Firmato'; badge.className='badge'; badge.style.borderColor='#10b981'; badge.style.color='#065f46'; badge.style.background='#ecfdf5'; }
-    else{ badge.textContent='Non firmato'; badge.className='badge'; badge.style.cssText=''; }
-  });
-
-  calc(); ensureAtLeastOneRow();
-}
-function savePV(){
-  const numFld=$('#pv-num'); if(numFld && !numFld.value.trim()) numFld.value=nextPVNumber();
-  const r=readPV(); const arr=getPV(); const i=arr.findIndex(x=>x.id===r.id);
-  if(i>=0) arr[i]=r; else arr.unshift(r);
-  setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅'); ensureAtLeastOneRow();
-}
-function dupPV(){ const r=readPV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); ensureAtLeastOneRow(); }
-function delPV(){ const id=$('#pv-id').value; if(!id) return; if(!confirm('Eliminare questo preventivo?')) return; const arr=getPV().filter(x=>x.id!==id); setPV(arr); renderPV(); arr.length?fillPV(arr[0].id):newPV(); }
-
-/* ===== Lista + filtri scadenza ===== */
-function statusBadge(p){
-  const now=new Date(); const exp=new Date(p.scadenza||p.data);
-  const diff=Math.ceil((exp-now)/(1000*60*60*24));
-  if(diff<0) return '<span class="badge danger">Scaduto</span>';
-  if(diff<=7) return '<span class="badge warn">In scadenza</span>';
-  return '';
-}
-function renderPV(){
-  const l=$('#pv-list'); if(!l) return; l.innerHTML='';
-  const q=($('#pv-search').value||'').toLowerCase();
-  const f=$('#pv-filter').value;
-  getPV().filter(p=>{
-    const expDays=Math.ceil((new Date(p.scadenza||p.data)-new Date())/(1000*60*60*24));
-    if(f==='due' && !(expDays>=0 && expDays<=7)) return false;
-    if(f==='expired' && !(expDays<0)) return false;
-    if(q && !(p.numero+p.cliente+p.oggetto).toLowerCase().includes(q)) return false;
-    return true;
-  }).forEach(p=>{
-    const d=document.createElement('div'); d.className='row';
-    d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><div>${statusBadge(p)}</div>`;
-    d.onclick=()=>fillPV(p.id); l.appendChild(d);
-  });
-}
-function bindPVImpExp(){
-  $('#pv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getPV())); a.download='preventivi.json'; a.click();};
-  $('#pv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setPV(JSON.parse(ev.target.result)); renderPV(); alert('Import ok')}catch{alert('File non valido')}}; r.readAsText(f);};
-  $('#pv-search').addEventListener('input',renderPV);
-  $('#pv-filter').addEventListener('change',renderPV);
-}
-
-/* ===== Interventi ===== */
-function newIV(){ $('#iv-id').value=''; $('#iv-num').value='INT-'+String(getIV().length+1).padStart(4,'0'); $('#iv-date').value=today(); $('#iv-st').value='Aperto'; $('#iv-cli').value=''; $('#iv-con').value=''; $('#iv-des').value=''; }
-function readIV(){ return { id:$('#iv-id').value||uuid(), numero:$('#iv-num').value.trim(), data:$('#iv-date').value, stato:$('#iv-st').value, cliente:$('#iv-cli').value.trim(), contatto:$('#iv-con').value.trim(), descrizione:$('#iv-des').value.trim() }; }
-function fillIV(id){ const p=getIV().find(x=>x.id===id); if(!p) return; $('#iv-id').value=p.id; $('#iv-num').value=p.numero; $('#iv-date').value=p.data; $('#iv-st').value=p.stato; $('#iv-cli').value=p.cliente||''; $('#iv-con').value=p.contatto||''; $('#iv-des').value=p.descrizione||''; }
-function renderIV(){ const l=$('#iv-list'); if(!l) return; l.innerHTML=''; getIV().forEach(p=>{ const d=document.createElement('div'); d.className='row'; d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><small>${p.stato}</small>`; d.onclick=()=>fillIV(p.id); l.appendChild(d); }); }
-function saveIV(){ const r=readIV(); const arr=getIV(); const i=arr.findIndex(x=>x.id===r.id); if(i>=0) arr[i]=r; else arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); alert('Intervento salvato ✅'); }
-function dupIV(){ const r=readIV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getIV(); arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); }
-function delIV(){ const id=$('#iv-id').value; if(!id) return; if(!confirm('Eliminare questo intervento?')) return; const arr=getIV().filter(x=>x.id!==id); setIV(arr); renderIV(); arr.length?fillIV(arr[0].id):newIV(); }
-function bindIVImpExp(){
-  $('#iv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getIV())); a.download='interventi.json'; a.click();};
-  $('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setIV(JSON.parse(ev.target.result)); renderIV();}catch{alert('File non valido')}}; r.readAsText(f);};
-}
-
-/* ===== Firme (inline) ===== */
-function initSignPads(){
-  document.querySelectorAll('[data-signature-wrap]').forEach(wrap=>{
-    const box=wrap.querySelector('.sig-box');
-    const canvas=wrap.querySelector('canvas[data-signature]');
-    const hidden=wrap.querySelector('[data-sig-data]');
-    const badge=wrap.querySelector('[data-sig-badge]');
-    const openBtn=wrap.querySelector('[data-sig-open]');
-    const clearBtn=wrap.querySelector('[data-sig-clear]');
-    const closeBtn=wrap.querySelector('[data-sig-close]');
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-
-    let drawing=false;
-    let dpr=Math.max(1,window.devicePixelRatio||1);
-
-    function sizeCanvas(){
-      const cssH=canvas.clientHeight||260;
-      const cssW=canvas.clientWidth||wrap.clientWidth||600;
-      canvas.width=Math.round(cssW*dpr);
-      canvas.height=Math.round(cssH*dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#0A2E5C';
-    }
-    function openPad(){ box.style.display='block'; sizeCanvas(); }
-    function closePad(){
-      const blank=document.createElement('canvas'); blank.width=canvas.width; blank.height=canvas.height;
-      if(canvas.toDataURL()!==blank.toDataURL()){
-        hidden.value=canvas.toDataURL('image/png');
-        if(badge){ badge.textContent='Firmato'; badge.className='badge'; badge.style.borderColor='#10b981'; badge.style.color='#065f46'; badge.style.background='#ecfdf5'; }
-      }
-      box.style.display='none';
-    }
-    function clearPad(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      hidden.value='';
-      if(badge){ badge.textContent='Non firmato'; badge.className='badge'; badge.style.cssText=''; }
-    }
-    function pos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
-    const start=e=>{ e.preventDefault(); drawing=true; const {x,y}=pos(e); ctx.beginPath(); ctx.moveTo(x,y); };
-    const move =e=>{ if(!drawing) return; e.preventDefault(); const {x,y}=pos(e); ctx.lineTo(x,y); ctx.stroke(); };
-    const end  =e=>{ if(!drawing) return; e.preventDefault(); drawing=false; };
-
-    canvas.addEventListener('pointerdown',start,{passive:false});
-    canvas.addEventListener('pointermove',move,{passive:false});
-    window.addEventListener('pointerup',end,{passive:false});
-    canvas.addEventListener('touchstart',start,{passive:false});
-    canvas.addEventListener('touchmove', move,{passive:false});
-    window.addEventListener('touchend', end,{passive:false});
-    canvas.addEventListener('mousedown',start,{passive:false});
-    canvas.addEventListener('mousemove',move,{passive:false});
-    window.addEventListener('mouseup',end,{passive:false});
-
-    openBtn?.addEventListener('click',openPad);
-    clearBtn?.addEventListener('click',clearPad);
-    closeBtn?.addEventListener('click',closePad);
-
-    new ResizeObserver(()=>{ if(box.style.display!=='none') sizeCanvas(); }).observe(canvas);
-  });
-}
-
-/* ===== Print & Share ===== */
-function renderPrint(rec){
-  const sheet=$('#sheet');
-  const logo=S.get('logo',null)||'icona-192.png';
-  const righe=(rec.voci||[]).map(v=>`<tr><td>${v.desc}</td><td>${v.qty}</td><td>€ ${(v.price).toFixed(2).replace('.',',')}</td><td>€ ${(v.qty*v.price).toFixed(2).replace('.',',')}</td></tr>`).join('');
-  const mat=(rec.voci||[]).reduce((s,v)=>s+v.qty*v.price,0);
-  const lab=(rec.labqty||0)*(rec.labrate||0);
-  const imp=mat+lab;
-  const sVal=imp*(rec.sconto||0)/100;
-  const base=imp - sVal;
-  const mVal=base*(rec.maggiorazione||0)/100;
-  const tot=base + mVal;
-  const depPerc = rec.depPerc||0;
-  const depAmt  = tot * depPerc / 100;
-  const balance = Math.max(0, tot - depAmt);
-
-  const sigCliente=document.querySelector('[name="firma_cliente"]')?.value||'';
-  const sigTecnico=document.querySelector('[name="firma_tecnico"]')?.value||'';
-
-  const terms = $('#pv-terms').textContent.trim();
-
-  sheet.innerHTML=`
-    <div class="ph">
-      <img src="${logo}" alt="logo">
-      <div>
-        <div class="pt">${S.get('rag','Giorgio — Elettricista & Antennista')}</div>
-        <div class="pm">${S.get('phone','')}</div>
-      </div>
-    </div>
-    <h3 style="margin:8px 0">PREVENTIVO ${rec.numero}</h3>
-    <div class="pm">Data: ${rec.data} · Scadenza: ${rec.scadenza||''}</div>
-    <div class="pm">Cliente: ${rec.cliente||'—'} · Contatto: ${rec.contatto||'—'}</div>
-    <div class="pm">Oggetto: ${rec.oggetto||'—'}</div>
-
-    <table style="margin-top:8px;width:100%;border-collapse:collapse">
-      <thead><tr><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th><th>Totale</th></tr></thead>
-      <tbody>${righe||'<tr><td colspan="4">—</td></tr>'}</tbody>
-    </table>
-
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">
-      <div class="card"><div class="body"><div class="note">Materiali</div>${fmtEur(mat)}</div></div>
-      <div class="card"><div class="body"><div class="note">Manodopera (${rec.unita==='d'?'Giorni':'Ore'})</div>${fmtEur(lab)}</div></div>
-      <div class="card"><div class="body"><div class="note">Sconto</div>${fmtEur(sVal)}</div></div>
-      <div class="card"><div class="body"><div class="note">Totale</div>${fmtEur(tot)}</div></div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px">
-      <div class="card"><div class="body"><div class="note">Acconto (${depPerc}%)</div>${fmtEur(depAmt)}</div></div>
-      <div class="card"><div class="body"><div class="note">Saldo alla consegna</div>${fmtEur(balance)}</div></div>
-      <div class="card"><div class="body"><div class="note">Imponibile (materiali + manodopera)</div>${fmtEur(imp)}</div></div>
-    </div>
-
-    <div class="sign-row">
-      ${sigTecnico
-        ? `<div class="sign"><img src="${sigTecnico}" alt="Firma Tecnico"><div class="cap">Firma Tecnico</div></div>`
-        : `<div class="sign"><div style="height:90px;border-bottom:1px solid #000"></div><div class="cap">Firma Tecnico</div></div>`}
-      ${sigCliente
-        ? `<div class="sign"><img src="${sigCliente}" alt="Firma Cliente"><div class="cap">Firma Cliente</div></div>`
-        : `<div class="sign"><div style="height:90px;border-bottom:1px solid #000"></div><div class="cap">Firma Cliente</div></div>`}
-    </div>
-
-    <div class="terms" style="margin-top:10px">${terms}</div>
-  `;
-}
-function bindPrintShare(){
-  $('#pv-print').onclick=()=>{ const rec=readPV(); renderPrint(rec); window.print(); };
-  $('#pv-share').onclick=()=>{
-    const r=readPV();
-    const text=`Preventivo ${r.numero}
-Data: ${r.data}  Scadenza: ${r.scadenza||'-'}
-Cliente: ${r.cliente||'-'}  Contatto: ${r.contatto||'-'}
-Oggetto: ${r.oggetto||'-'}
-Totale: ${($('#pv-tot').value||'').trim()}
-Acconto ${r.depPerc||0}%: ${$('#pv-dep-amt').value||'-'}  —  Saldo: ${$('#pv-balance-amt').value||'-'}
-— Inviato da ${S.get('rag','Giorgio — Elettricista & Antennista')}`;
-    if(navigator.share){ navigator.share({title:`Preventivo ${r.numero}`, text}).catch(()=>{}); }
-    else{ navigator.clipboard.writeText(text); alert('Testo del preventivo copiato negli appunti ✅'); }
-  };
-}
-
-/* ===== Preventivo -> Intervento ===== */
-function buildDescriptionFromPV(p){
-  const rows = (p.voci||[]).map(v=>`- ${v.desc} (x${v.qty} · € ${(v.price).toFixed(2)}) = € ${(v.qty*v.price).toFixed(2)}`).join('\n');
-  const labUnit = p.unita === 'd' ? 'giorni' : 'ore';
-  const hasLab  = (p.labqty||0) > 0 && (p.labrate||0) > 0;
-  const labLine = hasLab ? `\nManodopera: ${p.labqty} ${labUnit} × € ${(p.labrate).toFixed(2)} = € ${(p.labqty*p.labrate).toFixed(2)}` : '';
-  const tot = ($('#pv-tot').value||'').trim();
-  return `Da preventivo ${p.numero} del ${p.data}
-Oggetto: ${p.oggetto||'-'}
-
-Materiali/servizi:
-${rows || '-'}${labLine}
-
-Totale preventivo: ${tot}`;
-}
-function pvToIV(){
-  const r=readPV(); if(!r.numero){ alert('Salva prima il preventivo'); return; }
-  const arr=getIV();
-  const nuovoIV={ id:uuid(), numero:'INT-'+String(arr.length+1).padStart(4,'0'), data:today(), stato:'Aperto',
-    cliente:r.cliente||'', contatto:r.contatto||'', descrizione:buildDescriptionFromPV(r) };
-  arr.unshift(nuovoIV); setIV(arr); renderIV();
-  $$('nav .tab').forEach(t=>t.classList.remove('active')); $('nav .tab[data-tab="iv"]').classList.add('active');
-  $$('main>section').forEach(s=>s.classList.remove('active')); $('#iv').classList.add('active');
-  fillIV(nuovoIV.id); alert('Intervento creato da preventivo ✅');
-}
-
-/* ===== Binds ===== */
-function bindMainButtons(){
-  $('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV; $('#pv-to-iv').onclick=pvToIV;
-  $('#iv-new').onclick=newIV; $('#iv-save').onclick=saveIV; $('#iv-del').onclick=delIV; $('#iv-dup').onclick=dupIV;
-}
-
-/* ===== Start ===== */
-function start(){
-  bindTabs();
-  initBrand(); bindSettings();
-  bindCalcInputs(); bindPVImpExp(); bindIVImpExp(); bindPrintShare(); bindMainButtons();
-  renderPV(); renderIV();
-  newPV(); newIV();
-  initSignPads();
-}
-document.readyState==='loading' ? document.addEventListener('DOMContentLoaded', start) : start();
-
-/* (nessun service worker in v33 safe) */
+// ---------- Avvio ----------
+document.addEventListener('DOMContentLoaded',()=>{
+  newDoc();
+  calc();
+  Sig.init();
+});
+})();
 </script>
 </body>
 </html>
