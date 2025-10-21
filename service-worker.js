@@ -1,16 +1,15 @@
-// service-worker.js — v2
-const CACHE = "giorgio-cache-v2";
+// service-worker.js — v3 (icona fix)
+const CACHE = "giorgio-cache-v3";
 const ASSETS = [
-  "./",
-  "./index.html",
-  "./logo.png",
-  "./manifest.webmanifest"
+  "/gestionale-giorgio/",
+  "/gestionale-giorgio/index.html",
+  "/gestionale-giorgio/manifest.webmanifest",
+  "/gestionale-giorgio/icons/icon-192.png",
+  "/gestionale-giorgio/icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -25,8 +24,6 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
