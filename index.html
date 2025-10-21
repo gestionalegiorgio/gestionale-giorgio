@@ -1,129 +1,131 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Giorgio — Elettricista & Antennista</title>
-<meta name="theme-color" content="#0A2E5C" />
-<link rel="manifest" href="manifest.webmanifest" />
-<style>
-  :root{
-    --brand:#0A2E5C; --brand-2:#0e3d7a; --acc:#ff9f1a; --bg:#f6f8fb; --txt:#122; --mut:#6b7280;
-    --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --card:#fff; --br:14px;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--txt);background:var(--bg)}
-  header{background:var(--brand);color:#fff;padding:18px 16px 10px}
-  header h1{margin:0;font-size:22px;font-weight:700}
-  header small{display:block;opacity:.9;margin-top:6px}
-  .wrap{max-width:980px;margin:10px auto 80px;padding:0 12px}
-  .tabs{display:flex;gap:10px;margin:10px 0 14px}
-  .tab{background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:10px 16px;cursor:pointer}
-  .tab[aria-selected="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
-  .bar{display:flex;gap:10px;flex-wrap:wrap}
-  button, .btn{border:none;background:var(--brand);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
-  button.secondary{background:#fff;color:var(--brand);border:1px solid var(--brand)}
-  button.ghost{background:#fff;color:var(--txt);border:1px solid #e5e7eb}
-  button.danger{background:var(--danger)}
-  button.ok{background:var(--ok)}
-  button:disabled{opacity:.5;cursor:not-allowed}
-  .card{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--br);padding:14px;margin:14px 0}
-  .row{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
-  .col-12{grid-column:span 12} .col-6{grid-column:span 6} .col-4{grid-column:span 4} .col-3{grid-column:span 3}
-  @media (max-width:760px){.col-6,.col-4,.col-3{grid-column:span 12}}
-  label{font-size:12px;color:var(--mut);display:block;margin:8px 0 6px}
-  input,select,textarea{width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:12px;background:#fff;font:inherit}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .chip{padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid #e5e7eb;background:#fff}
-  table{width:100%;border-collapse:collapse}
-  th,td{border-bottom:1px solid #eef1f5;padding:10px;text-align:left}
-  th{font-size:12px;color:var(--mut);font-weight:700;background:#fafbfe}
-  td input{padding:8px}
-  .right{text-align:right}
-  .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;background:#eef1f5}
-  .mut{color:var(--mut)}
-  .sum{font-size:18px;font-weight:800}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media (max-width:760px){.grid-2{grid-template-columns:1fr}}
-  /* firma modal */
-  dialog{border:none;border-radius:18px;width:min(640px,96vw);padding:0;overflow:hidden}
-  .fm-head{background:var(--brand);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
-  .fm-body{padding:10px;background:#fff}
-  .canvas-wrap{border:2px dashed #cbd5e1;border-radius:12px;background:#fff;touch-action:none}
-  canvas{display:block;width:100%;height:320px}
-  .note{font-size:12px;color:var(--mut)}
-  footer{position:fixed;inset:auto 0 0 0;background:#fff;border-top:1px solid #e5e7eb;padding:10px}
-  .foot{max-width:980px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-  /* stampa */
-  @media print{
-    header,.tabs,footer,.no-print{display:none!important}
-    body{background:#fff}
-    .card{border:none;margin:0;padding:0}
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Giorgio — Elettricista & Antennista</title>
+
+  <!-- Colore barra / tema app -->
+  <meta name="theme-color" content="#001f4d" />
+
+  <!-- Manifest & Icone PWA (usa i file che hai già nel repo) -->
+  <link rel="manifest" href="/gestionale-giorgio/manifest.webmanifest" />
+  <link rel="icon" sizes="192x192" href="/gestionale-giorgio/icone/icona-192.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/gestionale-giorgio/icone/icona-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="/gestionale-giorgio/icone/icona-512.png" />
+
+  <style>
+    :root{
+      --brand:#001f4d;
+      --accent:#0a2e5c;
+      --muted:#6b7280;
+      --bg:#f4f6fa;
+      --card:#ffffff;
+      --ok:#0ea5e9;
+      --danger:#ef4444;
+      --ring:#dbe3f2;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);font:16px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial}
+    header{background:var(--brand);color:#fff;padding:18px}
+    header h1{margin:0;font-size:22px}
+    header small{opacity:.9}
+    .wrap{max-width:980px;margin:auto;padding:16px}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:16px;margin:16px 0;border:1px solid var(--ring)}
+    .row{display:grid;gap:12px}
+    @media(min-width:740px){.row-2{grid-template-columns:1fr 1fr}.row-3{grid-template-columns:1fr 1fr 1fr}.row-4{grid-template-columns:repeat(4,1fr)}}
+    label{display:block;font-weight:600;margin:6px 0;color:#111827}
+    input, select, textarea{
+      width:100%;padding:12px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;outline:none
+    }
+    input:focus, select:focus, textarea:focus{border-color:#7aa2ff;box-shadow:0 0 0 3px rgba(122,162,255,.25)}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:10px 16px;
+      background:#e5e7eb;color:#111827;font-weight:600;cursor:pointer
+    }
+    .btn.primary{background:#2563eb;color:#fff}
+    .btn.ghost{background:#eef2ff;color:#1e3a8a}
+    .btn.warn{background:#fee2e2;color:#b91c1c}
+    .toolbar{display:flex;gap:12px;flex-wrap:wrap}
+    .badge{background:#eef2ff;color:#1e3a8a;border-radius:999px;padding:6px 12px;font-weight:700}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    th,td{padding:10px 12px;background:#fff;border:1px solid #e5e7eb}
+    th{background:#f8fafc;text-align:left}
+    tr td:first-child, tr th:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+    tr td:last-child, tr th:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+    .right{text-align:right}
+    .muted{color:var(--muted)}
+    .totbox{background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:14px}
+    .grid-mini{display:grid;gap:10px}
+    @media(min-width:620px){.grid-mini{grid-template-columns:repeat(4,1fr)}}
+    .sign-zone{border:2px dashed #cbd5e1;border-radius:14px;padding:14px}
+    .sign-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .status{font-weight:700;padding:6px 12px;border-radius:999px;background:#f3f4f6}
+    .status.ok{background:#dcfce7;color:#166534}
+    /* STAMPA */
+    @media print{
+      header,.toolbar,.no-print{display:none !important}
+      body{background:#fff}
+      .wrap{max-width:100%;padding:0}
+      .card{box-shadow:none;border:none;margin:0;padding:0}
+      .terms{font-size:12px}
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>Giorgio — Elettricista & Antennista</h1>
-  <small>Tel. +39 351 796 9013</small>
-</header>
+  <header>
+    <h1>Giorgio — Elettricista & Antennista</h1>
+    <small>Tel. +39 351 796 9013</small>
+  </header>
 
-<div class="wrap">
-  <!-- Tabs -->
-  <div class="tabs no-print" role="tablist" aria-label="Sezioni">
-    <button class="tab" role="tab" aria-selected="true" data-tab="preventivi">Preventivi</button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="interventi">Interventi</button>
-    <button class="tab" role="tab" aria-selected="false" data-tab="impostazioni">Impostazioni</button>
-  </div>
-
-  <!-- PREVENTIVI -->
-  <section id="preventivi" role="tabpanel" aria-label="Preventivi">
-    <div class="bar no-print">
-      <button id="btnNuovo" class="ghost">Nuovo</button>
-      <button id="btnSalva" class="">Salva</button>
-      <button id="btnStampa" class="secondary">Stampa / PDF</button>
-      <button id="btnCondividi" class="secondary">Condividi</button>
-      <span id="statoBadge" class="chip">Bozza</span>
-    </div>
+  <div class="wrap">
 
     <div class="card">
-      <div class="row">
-        <div class="col-6">
+      <div class="toolbar no-print">
+        <button id="btn-nuovo" class="btn">Nuovo</button>
+        <button id="btn-salva" class="btn primary">Salva</button>
+        <button id="btn-stampa" class="btn ghost">Stampa / PDF</button>
+        <button id="btn-condividi" class="btn">Condividi</button>
+        <span id="statoBadge" class="badge">Bozza</span>
+      </div>
+
+      <div class="row row-4">
+        <div>
           <label>Numero</label>
-          <input id="num" readonly />
+          <input id="numero" readonly />
         </div>
-        <div class="col-6">
+        <div>
           <label>Data</label>
           <input id="data" type="date" />
         </div>
-        <div class="col-6">
+        <div>
           <label>Scadenza</label>
-          <input id="scad" type="date" />
+          <input id="scadenza" type="date" />
         </div>
-        <div class="col-6">
+        <div>
           <label>Stato</label>
-          <input id="stato" value="Bozza" readonly />
+          <input id="stato" value="Bozza" />
         </div>
-        <div class="col-6">
+      </div>
+
+      <div class="row row-2">
+        <div>
           <label>Cliente</label>
           <input id="cliente" placeholder="Nome cliente" />
         </div>
-        <div class="col-6">
+        <div>
           <label>Contatto</label>
           <input id="contatto" placeholder="Telefono / Email" />
         </div>
-        <div class="col-12">
-          <label>Oggetto del preventivo</label>
+      </div>
+
+      <div class="row row-3">
+        <div>
+          <label>Oggetto</label>
           <input id="oggetto" placeholder="Oggetto del preventivo" />
         </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin:0 0 8px">Manodopera</h3>
-      <div class="grid-2">
         <div>
-          <label>Unità</label>
+          <label>manodopera</label>
           <select id="unita">
             <option value="ora">Ora</option>
             <option value="giorno">Giorno</option>
@@ -131,422 +133,299 @@
         </div>
         <div>
           <label>Q.tà manodopera</label>
-          <input id="qtaMO" type="number" min="0" step="1" value="0" />
+          <input id="qtaLav" type="number" min="0" step="1" value="0" />
+        </div>
+      </div>
+
+      <div class="row row-3">
+        <div>
+          <label>Tariffa (€/unità)</label>
+          <input id="tariffa" type="number" min="0" step="0.01" value="0" />
         </div>
         <div>
-          <label>Tariffa (€ / unità)</label>
-          <input id="tariffa" type="number" min="0" step="0.01" value="0" />
+          <label>Sconto %</label>
+          <input id="sconto" type="number" min="0" max="100" step="1" value="0" />
+        </div>
+        <div>
+          <label>Maggiorazione %</label>
+          <input id="magg" type="number" min="0" max="100" step="1" value="0" />
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h3 style="margin:0 0 8px">Materiali / Servizi</h3>
-      <div class="no-print" style="margin:6px 0 10px">
-        <button id="addRiga" class="ghost">+ Riga</button>
-        <button id="svuota" class="ghost">Svuota righe</button>
+      <h3>Materiali / Servizi</h3>
+      <div class="no-print" style="margin:10px 0;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="add-row">+ Riga</button>
+        <button class="btn warn" id="clear-rows">Svuota righe</button>
       </div>
-      <div style="overflow:auto">
-        <table id="tbl">
+      <div class="table-wrap">
+        <table id="tab">
           <thead>
             <tr>
-              <th style="width:50%">Descrizione</th>
-              <th style="width:15%">Q.tà</th>
+              <th style="width:55%">Descrizione</th>
+              <th style="width:10%">Q.tà</th>
               <th style="width:20%">Prezzo</th>
-              <th class="right" style="width:15%">×</th>
+              <th class="right" style="width:15%">✖</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="tbody"></tbody>
         </table>
       </div>
 
-      <div class="row" style="margin-top:10px">
-        <div class="col-6">
-          <label>Sconto %</label>
-          <input id="sconto" type="number" min="0" max="100" step="1" value="0"/>
+      <div class="grid-mini">
+        <div class="totbox">
+          <div class="muted">Materiali</div>
+          <div id="totMateriali" style="font-weight:800;font-size:18px">€ 0,00</div>
         </div>
-        <div class="col-6">
-          <label>Maggiorazione %</label>
-          <input id="magg" type="number" min="0" max="100" step="1" value="0"/>
+        <div class="totbox">
+          <div class="muted">Manodopera</div>
+          <div id="totLavoro" style="font-weight:800;font-size:18px">€ 0,00</div>
         </div>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <div class="col-3">
-          <label>Materiali</label>
-          <div class="pill sum" id="sumMat">€ 0,00</div>
+        <div class="totbox">
+          <div class="muted">Imponibile<br><small>(materiali + manodopera)</small></div>
+          <div id="imponibile" style="font-weight:800;font-size:18px">€ 0,00</div>
         </div>
-        <div class="col-3">
-          <label>Manodopera</label>
-          <div class="pill sum" id="sumMO">€ 0,00</div>
-        </div>
-        <div class="col-3">
-          <label>Imponibile (materiali + manodopera)</label>
-          <div class="pill sum" id="impon">€ 0,00</div>
-        </div>
-        <div class="col-3">
-          <label>Totale</label>
-          <div class="pill sum" id="totale">€ 0,00</div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <div class="col-6">
-          <label>Acconto richiesto 50%</label>
-          <div class="pill sum" id="acconto">€ 0,00</div>
-        </div>
-        <div class="col-6">
-          <label>Saldo</label>
-          <div class="pill sum" id="saldo">€ 0,00</div>
+        <div class="totbox">
+          <div class="muted">Totale</div>
+          <div id="totale" style="font-weight:800;font-size:18px">€ 0,00</div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h3 style="margin:0 0 8px">Firme</h3>
-      <div class="grid-2">
-        <div>
-          <label>Firma Cliente</label>
-          <div class="chips">
-            <button class="ghost" data-open-firma="cliente">Apri</button>
-            <button class="ghost" data-clear-firma="cliente">Pulisci</button>
-          </div>
-          <canvas id="previewCliente" height="120" style="width:100%;border:1px dashed #e5e7eb;border-radius:8px;background:#fff"></canvas>
-          <div id="statoCliente" class="note">Non firmato</div>
+      <h3>Firma Cliente ✍️</h3>
+      <div class="sign-zone">
+        <div class="sign-actions no-print">
+          <button class="btn" id="openSignCli">Apri</button>
+          <button class="btn" id="clearSignCli">Pulisci</button>
+          <button class="btn" id="closeSignCli">Chiudi</button>
+          <span id="statusCli" class="status">Non firmato</span>
         </div>
-        <div>
-          <label>Firma Tecnico</label>
-          <div class="chips">
-            <button class="ghost" data-open-firma="tecnico">Apri</button>
-            <button class="ghost" data-clear-firma="tecnico">Pulisci</button>
-          </div>
-          <canvas id="previewTecnico" height="120" style="width:100%;border:1px dashed #e5e7eb;border-radius:8px;background:#fff"></canvas>
-          <div id="statoTecnico" class="note">Non firmato</div>
-        </div>
+        <canvas id="padCli" width="700" height="200" style="width:100%;display:block;background:#fff;border-radius:10px"></canvas>
       </div>
-      <p class="note" style="margin-top:8px">Le firme equivalgono a firma digitale.</p>
     </div>
 
     <div class="card">
-      <h3 style="margin:0 0 8px">Termini</h3>
-      <div id="termini" style="line-height:1.45">
-        <strong>Pagamento:</strong> 50% all’accettazione del preventivo e 50% a fine lavori. <br/>
-        Il materiale resta di proprietà dell’installatore fino al saldo completo. <br/>
-        Validità preventivo 30 giorni salvo diversa indicazione. <br/>
-        Prezzi al netto di urgenze e trasferte se non indicate. <br/>
-        Eventuali varianti o lavori extra saranno eseguiti solo previa approvazione e conteggiati a consuntivo. <br/>
-        Le firme equivalgono a firma digitale.
-      </div>
-    </div>
-  </section>
-
-  <!-- INTERVENTI (sezione placeholder per continuità UI) -->
-  <section id="interventi" role="tabpanel" aria-label="Interventi" hidden>
-    <div class="card">
-      <h3 style="margin-top:0">Interventi</h3>
-      <p class="mut">(In questa versione la logica è identica ai preventivi: puoi copiare un preventivo con “Duplica” e convertirlo in intervento indicando nell’oggetto il riferimento.)</p>
-    </div>
-  </section>
-
-  <!-- IMPOSTAZIONI -->
-  <section id="impostazioni" role="tabpanel" aria-label="Impostazioni" hidden>
-    <div class="card">
-      <h3 style="margin:0 0 8px">Impostazioni</h3>
-      <div class="row">
-        <div class="col-6">
-          <label>Prefisso numerazione</label>
-          <input id="prefisso" placeholder="PV-" />
+      <h3>Firma Tecnico ✍️</h3>
+      <div class="sign-zone">
+        <div class="sign-actions no-print">
+          <button class="btn" id="openSignTec">Apri</button>
+          <button class="btn" id="clearSignTec">Pulisci</button>
+          <button class="btn" id="closeSignTec">Chiudi</button>
+          <span id="statusTec" class="status">Non firmato</span>
         </div>
-        <div class="col-6">
-          <label>Prossimo numero</label>
-          <input id="nextN" type="number" min="1" step="1" />
-        </div>
+        <canvas id="padTec" width="700" height="200" style="width:100%;display:block;background:#fff;border-radius:10px"></canvas>
       </div>
-      <div class="chips" style="margin-top:10px">
-        <button id="saveSettings" class="ok">Salva impostazioni</button>
-        <button id="resetAll" class="danger">Resetta tutto</button>
-      </div>
-      <p class="note" style="margin-top:8px">Le impostazioni vengono salvate sul dispositivo (localStorage).</p>
     </div>
-  </section>
-</div>
 
-<!-- MODALE FIRMA -->
-<dialog id="dlgFirma">
-  <div class="fm-head">
-    <div id="dlgTitolo">Firma</div>
-    <div class="chips">
-      <button id="btnClose" class="ghost">Chiudi</button>
+    <div class="card terms">
+      <h3>Termini e condizioni</h3>
+      <ol>
+        <li><b>Pagamento:</b> 50% all’accettazione del preventivo e saldo 50% a fine lavori.</li>
+        <li><b>Proprietà materiali:</b> i materiali forniti restano di proprietà dell’installatore fino al saldo completo.</li>
+        <li><b>Validità:</b> il preventivo è valido 30 giorni salvo diversa indicazione.</li>
+        <li><b>Urgenze/trasferte:</b> non incluse se non espressamente specificate.</li>
+      </ol>
     </div>
+
   </div>
-  <div class="fm-body">
-    <div class="canvas-wrap">
-      <canvas id="pad" width="1200" height="600" aria-label="Area firma"></canvas>
-    </div>
-    <div class="chips" style="margin-top:10px;justify-content:flex-end">
-      <button id="btnClear" class="ghost">Pulisci</button>
-      <button id="btnOk" class="ok">Conferma firma</button>
-    </div>
-    <div class="note">Scrivi con dito o mouse. L’area non si muove durante la firma.</div>
-  </div>
-</dialog>
 
-<footer class="no-print">
-  <div class="foot">
-    <button id="toPrev" class="secondary">Preventivi</button>
-    <button id="toInt" class="ghost">Interventi</button>
-    <button id="toImp" class="ghost">Impostazioni</button>
-  </div>
-</footer>
+  <script>
+  // ---------- util ----------
+  const € = n => n.toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+  const q = s => document.querySelector(s);
 
-<script>
-/* ---------- util ---------- */
-const € = (n)=> new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(+n||0);
-const el = (q)=> document.querySelector(q);
-const els= (q)=> [...document.querySelectorAll(q)];
-const ls = {
-  get(k,def){ try{ return JSON.parse(localStorage.getItem(k)) ?? def } catch{ return def } },
-  set(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
-};
-function addDays(d, n){ const x=new Date(d); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10) }
+  // ---------- numerazione automatica ----------
+  function nextNumero(){
+    const key='pv_counter';
+    const last= Number(localStorage.getItem(key) || '0') + 1;
+    localStorage.setItem(key, String(last));
+    return 'PV-' + String(last).padStart(4,'0');
+  }
 
-/* ---------- tabs ---------- */
-els('.tab').forEach(t=>{
-  t.addEventListener('click', ()=>{
-    els('.tab').forEach(b=>b.setAttribute('aria-selected','false'));
-    t.setAttribute('aria-selected','true');
-    const id=t.dataset.tab;
-    els('[role="tabpanel"]').forEach(p=>p.hidden = p.id!==id);
-  });
-});
-el('#toPrev').onclick=()=>els('.tab')[0].click();
-el('#toInt').onclick=()=>els('.tab')[1].click();
-el('#toImp').onclick=()=>els('.tab')[2].click();
+  // ---------- init form ----------
+  function todayISO(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+  function plusDays(iso,days){const d=new Date(iso);d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)}
 
-/* ---------- stato & numerazione ---------- */
-const settings = ls.get('settings',{prefisso:'PV-', next:1});
-const form = {
-  num: el('#num'), data: el('#data'), scad: el('#scad'), stato: el('#stato'), badge: el('#statoBadge'),
-  cliente: el('#cliente'), contatto: el('#contatto'), oggetto: el('#oggetto'),
-  unita: el('#unita'), qtaMO: el('#qtaMO'), tariffa: el('#tariffa'),
-  sconto: el('#sconto'), magg: el('#magg'),
-  sumMat: el('#sumMat'), sumMO: el('#sumMO'), impon: el('#impon'), totale: el('#totale'),
-  acconto: el('#acconto'), saldo: el('#saldo')
-};
-function nextNumber(){
-  const n = settings.next.toString().padStart(4,'0');
-  return `${settings.prefisso}${n}`;
-}
-function setNumberAdvance(){
-  form.num.value = nextNumber();
-}
-function bumpNumber(){
-  settings.next++;
-  ls.set('settings',settings);
-}
+  function nuovo(){
+    // campi base
+    q('#numero').value = nextNumero();
+    const d = todayISO();
+    q('#data').value = d;
+    q('#scadenza').value = plusDays(d,30);
+    q('#stato').value = 'Bozza';
+    q('#statoBadge').textContent = 'Bozza';
+    ['#cliente','#contatto','#oggetto'].forEach(s=>q(s).value='');
+    q('#unita').value='ora';
+    q('#qtaLav').value=0;
+    q('#tariffa').value=0;
+    q('#sconto').value=0;
+    q('#magg').value=0;
 
-/* ---------- init ---------- */
-function nuovo(){
-  setNumberAdvance();
-  const today = new Date().toISOString().slice(0,10);
-  form.data.value = today;
-  form.scad.value = addDays(today,30);
-  form.stato.value = 'Bozza';
-  form.badge.textContent = 'Bozza';
-  form.cliente.value = '';
-  form.contatto.value = '';
-  form.oggetto.value = '';
-  form.unita.value = 'ora';
-  form.qtaMO.value = 0;
-  form.tariffa.value = 0;
-  form.sconto.value = 0;
-  form.magg.value = 0;
-  // righe
-  tbody.innerHTML = '';
-  addRiga();
-  // firme
-  clearPreview('cliente');clearPreview('tecnico');
-  calc();
-}
-el('#btnNuovo').onclick = nuovo;
+    // tabella
+    tbody.innerHTML='';
+    addRow();
 
-/* ---------- materiali table ---------- */
-const tbody = el('#tbl tbody');
-function addRiga(desc='', q=1, p=0){
-  const tr=document.createElement('tr');
-  tr.innerHTML = `
-    <td><input placeholder="Descrizione" value="${desc}"/></td>
-    <td><input type="number" min="0" step="1" value="${q}"/></td>
-    <td><input type="number" min="0" step="0.01" value="${p}"/></td>
-    <td class="right"><button class="ghost danger" title="Elimina riga">✕</button></td>
-  `;
-  tbody.appendChild(tr);
-  tr.querySelectorAll('input').forEach(i=>i.addEventListener('input', calc));
-  tr.querySelector('button').addEventListener('click', ()=>{ tr.remove(); calc(); });
-}
-el('#addRiga').onclick=()=>addRiga();
-el('#svuota').onclick=()=>{ tbody.innerHTML=''; addRiga(); calc(); };
+    // firme
+    clearPad(padCli, ctxCli); padCli.dataset.enabled='0'; q('#statusCli').className='status'; q('#statusCli').textContent='Non firmato';
+    clearPad(padTec, ctxTec); padTec.dataset.enabled='0'; q('#statusTec').className='status'; q('#statusTec').textContent='Non firmato';
 
-/* ---------- calcoli ---------- */
-function calc(){
-  // materiali
-  let mat=0;
-  [...tbody.querySelectorAll('tr')].forEach(tr=>{
-    const [d,q,p]=tr.querySelectorAll('input');
-    mat += (parseFloat(q.value)||0) * (parseFloat(p.value)||0);
-  });
-  // manodopera
-  const mo = (parseFloat(form.qtaMO.value)||0) * (parseFloat(form.tariffa.value)||0);
-  // imponibile base
-  let impon = mat + mo;
-  // sconto
-  const scontoPerc = Math.min(Math.max(parseFloat(form.sconto.value)||0,0),100);
-  const scontoVal = impon * (scontoPerc/100);
-  impon -= scontoVal;
-  // maggiorazione
-  const maggPerc = Math.min(Math.max(parseFloat(form.magg.value)||0,0),100);
-  const maggVal = impon * (maggPerc/100);
-  const totale = impon + maggVal;
-  const acconto = totale * 0.5;
-  const saldo = totale - acconto;
-  // UI
-  form.sumMat.textContent = €(mat);
-  form.sumMO.textContent = €(mo);
-  form.impon.textContent = €(mat+mo); // imponibile “puro” richiesto
-  form.totale.textContent = €(totale);
-  form.acconto.textContent = €(acconto);
-  form.saldo.textContent = €(saldo);
-}
-['input','change'].forEach(evt=>{
-  [form.qtaMO,form.tariffa,form.sconto,form.magg].forEach(i=>i.addEventListener(evt,calc));
-});
+    calc();
+  }
 
-/* ---------- salvataggio ---------- */
-function serialize(){
-  return {
-    num: form.num.value, data: form.data.value, scad: form.scad.value, stato: form.stato.value,
-    cliente: form.cliente.value, contatto: form.contatto.value, oggetto: form.oggetto.value,
-    unita: form.unita.value, qmo: form.qtaMO.value, tariffa: form.tariffa.value,
-    sconto: form.sconto.value, magg: form.magg.value,
-    righe: [...tbody.querySelectorAll('tr')].map(tr=>{
-      const [d,q,p]=tr.querySelectorAll('input'); return {d:d.value,q:q.value,p:p.value}
-    }),
-    firme:{
-      cliente: previewData('cliente'),
-      tecnico: previewData('tecnico')
+  // ---------- tabella materiali ----------
+  const tbody = q('#tbody');
+
+  function addRow(desc='', qty=1, price=0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input class="desc" placeholder="Descrizione" value="${desc}"></td>
+      <td><input class="qty" type="number" min="0" step="1" value="${qty}"></td>
+      <td><input class="price" type="number" min="0" step="0.01" value="${price}"></td>
+      <td class="right"><button class="btn warn del">Rimuovi</button></td>
+    `;
+    tbody.appendChild(tr);
+    tr.querySelectorAll('input').forEach(i=>i.addEventListener('input', calc));
+    tr.querySelector('.del').addEventListener('click', ()=>{ tr.remove(); calc(); });
+  }
+
+  function rows(){
+    return [...tbody.querySelectorAll('tr')].map(tr=>{
+      const qty = Number(tr.querySelector('.qty').value || 0);
+      const price = Number(tr.querySelector('.price').value || 0);
+      return {qty, price, sub: qty*price}
+    });
+  }
+
+  function calc(){
+    const mat = rows().reduce((s,r)=>s+r.sub,0);
+    const lav = Number(q('#qtaLav').value||0) * Number(q('#tariffa').value||0);
+    const impon = mat + lav;
+
+    const scontoPerc = Number(q('#sconto').value||0)/100;
+    const maggPerc   = Number(q('#magg').value||0)/100;
+
+    const afterSconto = impon * (1 - scontoPerc);
+    const totale = afterSconto * (1 + maggPerc);
+
+    q('#totMateriali').textContent = €(mat);
+    q('#totLavoro').textContent    = €(lav);
+    q('#imponibile').textContent   = €(impon);
+    q('#totale').textContent       = €(totale);
+  }
+
+  q('#add-row').addEventListener('click', ()=>addRow());
+  q('#clear-rows').addEventListener('click', ()=>{tbody.innerHTML=''; addRow(); calc();});
+  ['#qtaLav','#tariffa','#sconto','#magg'].forEach(s=>q(s).addEventListener('input', calc));
+
+  // ---------- firme (canvas) ----------
+  function setupPad(canvas, statusEl){
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 2.2; ctx.lineCap='round'; ctx.strokeStyle='#111827';
+    let drawing=false, prev=null;
+
+    function pos(evt){
+      const r = canvas.getBoundingClientRect();
+      const t = ('touches' in evt) ? evt.touches[0] : evt;
+      return {x: (t.clientX-r.left) * (canvas.width/r.width), y:(t.clientY-r.top) * (canvas.height/r.height)};
     }
-  };
-}
-function deserialize(o){
-  form.num.value=o.num; form.data.value=o.data; form.scad.value=o.scad;
-  form.stato.value=o.stato; form.badge.textContent=o.stato||'Bozza';
-  form.cliente.value=o.cliente; form.contatto.value=o.contatto; form.oggetto.value=o.oggetto;
-  form.unita.value=o.unita; form.qtaMO.value=o.qmo; form.tariffa.value=o.tariffa;
-  form.sconto.value=o.sconto; form.magg.value=o.magg;
-  tbody.innerHTML=''; (o.righe||[]).forEach(r=>addRiga(r.d,r.q,r.p)); if((o.righe||[]).length===0)addRiga();
-  if(o.firme?.cliente) setPreview('cliente',o.firme.cliente); else clearPreview('cliente');
-  if(o.firme?.tecnico) setPreview('tecnico',o.firme.tecnico); else clearPreview('tecnico');
-  calc();
-}
-function salva(){
-  const data = serialize();
-  const all = ls.get('preventivi',[]);
-  const idx = all.findIndex(x=>x.num===data.num);
-  if(idx>=0) all[idx]=data; else all.push(data);
-  ls.set('preventivi',all);
-  form.stato.value='Bozza'; form.badge.textContent='Bozza';
-  alert('Salvato ✔');
-}
-el('#btnSalva').onclick = ()=>{ salva(); bumpNumber(); };
-window.addEventListener('beforeunload', ()=>{ try{ salva(); }catch{} });
+    function start(e){ if(canvas.dataset.enabled!=='1') return; drawing=true; prev=pos(e); e.preventDefault(); }
+    function move(e){ if(!drawing || canvas.dataset.enabled!=='1') return; const p=pos(e); ctx.beginPath(); ctx.moveTo(prev.x,prev.y); ctx.lineTo(p.x,p.y); ctx.stroke(); prev=p; e.preventDefault(); }
+    function end(){ drawing=false; if(canvas.dataset.enabled==='1'){ statusEl.textContent='Firmato'; statusEl.className='status ok'; } }
 
-/* ---------- stampa / condividi ---------- */
-el('#btnStampa').onclick=()=>{ window.print(); };
-el('#btnCondividi').onclick=async()=>{
-  const data = serialize();
-  const txt = `Preventivo ${data.num}\nCliente: ${data.cliente}\nOggetto: ${data.oggetto}\nTotale: ${el('#totale').textContent}\nAcconto 50%: ${el('#acconto').textContent}\nSaldo: ${el('#saldo').textContent}`;
-  if(navigator.share){ try{ await navigator.share({title:`Preventivo ${data.num}`, text:txt}); }catch{} }
-  else { navigator.clipboard.writeText(txt); alert('Dettagli copiati negli appunti'); }
-};
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', end);
+    canvas.addEventListener('mouseleave', end);
+    canvas.addEventListener('touchstart', start, {passive:false});
+    canvas.addEventListener('touchmove', move, {passive:false});
+    canvas.addEventListener('touchend', end);
 
-/* ---------- impostazioni ---------- */
-function loadSettingsUI(){
-  el('#prefisso').value=settings.prefisso;
-  el('#nextN').value=settings.next;
-}
-el('#saveSettings').onclick=()=>{
-  settings.prefisso=el('#prefisso').value||'PV-';
-  settings.next=parseInt(el('#nextN').value||1,10);
-  ls.set('settings',settings);
-  alert('Impostazioni salvate ✔');
-  setNumberAdvance();
-};
-el('#resetAll').onclick=()=>{
-  if(confirm('Sicuro di voler cancellare tutto?')){ localStorage.clear(); location.reload(); }
-};
+    return ctx;
+  }
 
-/* ---------- firme ---------- */
-const dlg = el('#dlgFirma'), pad = el('#pad'); let ctx = pad.getContext('2d',{willReadFrequently:true});
-let drawing=false, last=null, target='cliente';
-function setTitle(t){ el('#dlgTitolo').textContent = t }
-function openFirma(who){
-  target = who;
-  setTitle(who==='cliente'?'Firma Cliente':'Firma Tecnico');
-  // reset canvas
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,pad.width,pad.height);
-  // se esiste bozza precedente la carico
-  const data = previewData(who);
-  if(data){ const img=new Image(); img.onload=()=>ctx.drawImage(img,0,0,pad.width,pad.height); img.src=data; }
-  dlg.showModal();
-}
-function closeFirma(){ dlg.close(); }
-function clearPad(){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,pad.width,pad.height); }
-function pos(e){
-  const r = pad.getBoundingClientRect();
-  const x = ( (e.touches?e.touches[0].clientX:e.clientX) - r.left ) * (pad.width/r.width);
-  const y = ( (e.touches?e.touches[0].clientY:e.clientY) - r.top  ) * (pad.height/r.height);
-  return {x,y}
-}
-function line(a,b){
-  ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#111'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-}
-pad.addEventListener('pointerdown', e=>{ drawing=true; last=pos(e); pad.setPointerCapture(e.pointerId); e.preventDefault(); });
-pad.addEventListener('pointermove', e=>{ if(!drawing) return; const p=pos(e); line(last,p); last=p; e.preventDefault(); });
-pad.addEventListener('pointerup',   e=>{ drawing=false; last=null; pad.releasePointerCapture(e.pointerId); e.preventDefault(); });
-pad.addEventListener('touchmove',e=>e.preventDefault(), {passive:false}); // no scroll inside
-el('#btnOk').onclick=()=>{ const data = pad.toDataURL('image/png'); setPreview(target,data); closeFirma(); };
-el('#btnClear').onclick=clearPad;
-el('#btnClose').onclick=closeFirma;
+  function clearPad(canvas, ctx){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
 
-function setPreview(who,data){
-  const c = who==='cliente'?el('#previewCliente'):el('#previewTecnico');
-  const s = who==='cliente'?el('#statoCliente'):el('#statoTecnico');
-  const ctxp = c.getContext('2d');
-  const img = new Image(); img.onload=()=>{ ctxp.clearRect(0,0,c.width,c.height); ctxp.drawImage(img,0,0,c.width,c.height); }; img.src=data;
-  s.textContent='Firmato';
-  ls.set('firma_'+who,data);
-}
-function clearPreview(who){
-  const c = who==='cliente'?el('#previewCliente'):el('#previewTecnico');
-  const s = who==='cliente'?el('#statoCliente'):el('#statoTecnico');
-  c.getContext('2d').clearRect(0,0,c.width,c.height);
-  s.textContent='Non firmato';
-  localStorage.removeItem('firma_'+who);
-}
-function previewData(who){ return localStorage.getItem('firma_'+who); }
-els('[data-open-firma]').forEach(b=>b.onclick=()=>openFirma(b.dataset.openFirma));
-els('[data-clear-firma]').forEach(b=>b.onclick=()=>clearPreview(b.dataset.clearFirma));
+  const padCli = q('#padCli');
+  const padTec = q('#padTec');
+  const ctxCli = setupPad(padCli, q('#statusCli'));
+  const ctxTec = setupPad(padTec, q('#statusTec'));
 
-/* ---------- bootstrap ---------- */
-loadSettingsUI();
-nuovo();
-calc();
+  function openPad(canvas){canvas.dataset.enabled='1';}
+  function closePad(canvas){canvas.dataset.enabled='0';}
 
-/* PWA: registra SW se presente */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-}
-</script>
+  q('#openSignCli').addEventListener('click', ()=>openPad(padCli));
+  q('#clearSignCli').addEventListener('click', ()=>{ clearPad(padCli, ctxCli); q('#statusCli').textContent='Non firmato'; q('#statusCli').className='status'; });
+  q('#closeSignCli').addEventListener('click', ()=>closePad(padCli));
+
+  q('#openSignTec').addEventListener('click', ()=>openPad(padTec));
+  q('#clearSignTec').addEventListener('click', ()=>{ clearPad(padTec, ctxTec); q('#statusTec').textContent='Non firmato'; q('#statusTec').className='status'; });
+  q('#closeSignTec').addEventListener('click', ()=>closePad(padTec));
+
+  // ---------- Salva / Condividi / Stampa ----------
+  function snapshotPad(canvas){ return canvas.toDataURL('image/png'); }
+
+  q('#btn-salva').addEventListener('click', ()=>{
+    const data = {
+      numero: q('#numero').value,
+      data: q('#data').value,
+      scadenza: q('#scadenza').value,
+      stato: q('#stato').value,
+      cliente: q('#cliente').value,
+      contatto: q('#contatto').value,
+      oggetto: q('#oggetto').value,
+      unita: q('#unita').value,
+      qtaLav: q('#qtaLav').value,
+      tariffa: q('#tariffa').value,
+      sconto: q('#sconto').value,
+      magg: q('#magg').value,
+      righe: rows(),
+      totMateriali: q('#totMateriali').textContent,
+      totLavoro: q('#totLavoro').textContent,
+      imponibile: q('#imponibile').textContent,
+      totale: q('#totale').textContent,
+      firmaCli: snapshotPad(padCli),
+      firmaTec: snapshotPad(padTec)
+    };
+    const key = 'pv_store';
+    const lista = JSON.parse(localStorage.getItem(key) || '[]');
+    const i = lista.findIndex(x=>x.numero===data.numero);
+    if(i>=0) lista[i]=data; else lista.push(data);
+    localStorage.setItem(key, JSON.stringify(lista));
+    q('#statoBadge').textContent='Salvato';
+    alert('Preventivo salvato sul dispositivo.');
+  });
+
+  q('#btn-condividi').addEventListener('click', ()=>{
+    if(navigator.share){
+      navigator.share({
+        title: 'Preventivo ' + q('#numero').value,
+        text: 'Preventivo ' + q('#numero').value + ' — ' + q('#cliente').value,
+        url: location.href
+      }).catch(()=>{});
+    }else{
+      alert('La condivisione nativa non è supportata da questo dispositivo.');
+    }
+  });
+
+  q('#btn-stampa').addEventListener('click', ()=>window.print());
+  q('#btn-nuovo').addEventListener('click', nuovo);
+
+  // ---------- PWA: registra service worker ----------
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('/gestionale-giorgio/service-worker.js')
+        .then(()=> navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.update())))
+        .catch(console.warn);
+    });
+  }
+
+  // ---------- avvio ----------
+  addRow(); // prima riga tabella
+  nuovo();  // imposta numerazione e reset completo
+  </script>
 </body>
 </html>
