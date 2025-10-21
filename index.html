@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Giorgio — Elettricista & Antennista</title>
-<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0A2E5C">
 <style>
 :root{--brand:#0A2E5C;--accent:#F7931E;--bg:#f6f8fb;--card:#fff;--line:#e6e8ef;--muted:#64748b}
@@ -81,7 +80,7 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
   <div>
     <h1 id="ttl">Giorgio — Elettricista & Antennista</h1>
     <small id="tel">Tel. +39 351 796 9013</small> ·
-    <small>v29 — Preventivi · Interventi · Impostazioni</small>
+    <small>v30 — Preventivi · Interventi · Impostazioni</small>
   </div>
 </header>
 
@@ -282,19 +281,21 @@ canvas[data-signature]{touch-action:none;-ms-touch-action:none}
 </main>
 
 <script>
-/* ===== Helpers ===== */
+/* ===== Helpers con fallback UUID ===== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const S={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
 const today=()=>new Date().toISOString().slice(0,10);
-const uuid=()=>crypto.randomUUID();
+const uuid=()=> (crypto && crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2));
 const num=v=>isNaN(parseFloat(v))?0:parseFloat(v);
 const fmt=n=>(Math.round(n*100)/100).toFixed(2).replace('.',',');
 
 /* ===== Tabs ===== */
-$$('nav .tab').forEach(b=>b.addEventListener('click',()=>{
-  $$('nav .tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-  $$('main>section').forEach(s=>s.classList.toggle('active', s.id===b.dataset.tab));
-}));
+function bindTabs(){
+  $$('nav .tab').forEach(b=>b.addEventListener('click',()=>{
+    $$('nav .tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    $$('main>section').forEach(s=>s.classList.toggle('active', s.id===b.dataset.tab));
+  }));
+}
 
 /* ===== Brand/Impostazioni ===== */
 function initBrand(){
@@ -308,20 +309,22 @@ function initBrand(){
   $('#appLogo').src = logo || 'icona-192.png';
   $('#st-rag').value=rag; $('#st-brand').value=brand; $('#st-phone').value=phone; $('#st-note').value=S.get('note','');
 }
-$('#st-save').onclick=()=>{
-  S.set('rag',$('#st-rag').value.trim()||'Giorgio — Elettricista & Antennista');
-  S.set('brand',$('#st-brand').value.trim()||'#0A2E5C');
-  S.set('phone',$('#st-phone').value.trim());
-  S.set('note',$('#st-note').value.trim());
-  initBrand(); alert('Impostazioni salvate ✅');
-};
-$('#st-reset').onclick=()=>{['rag','brand','phone','note','logo'].forEach(S.del); initBrand();};
-$('#st-file').onchange=e=>{
-  const f=e.target.files[0]; if(!f) return;
-  if(!/^image\/(png|jpeg)$/.test(f.type)){alert('Carica PNG o JPG'); return}
-  const r=new FileReader(); r.onload=ev=>{S.set('logo',ev.target.result); initBrand();}; r.readAsDataURL(f);
-};
-$('#st-wipe').onclick=()=>{ if(confirm('Cancellare TUTTI i dati?')){ localStorage.clear(); location.reload(); } };
+function bindSettings(){
+  $('#st-save').onclick=()=>{
+    S.set('rag',$('#st-rag').value.trim()||'Giorgio — Elettricista & Antennista');
+    S.set('brand',$('#st-brand').value.trim()||'#0A2E5C');
+    S.set('phone',$('#st-phone').value.trim());
+    S.set('note',$('#st-note').value.trim());
+    initBrand(); alert('Impostazioni salvate ✅');
+  };
+  $('#st-reset').onclick=()=>{['rag','brand','phone','note','logo'].forEach(S.del); initBrand();};
+  $('#st-file').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    if(!/^image\/(png|jpeg)$/.test(f.type)){alert('Carica PNG o JPG'); return}
+    const r=new FileReader(); r.onload=ev=>{S.set('logo',ev.target.result); initBrand();}; r.readAsDataURL(f);
+  };
+  $('#st-wipe').onclick=()=>{ if(confirm('Cancellare TUTTI i dati?')){ localStorage.clear(); location.reload(); } };
+}
 
 /* ===== Store ===== */
 const getPV=()=>S.get('pv',[]), setPV=a=>S.set('pv',a);
@@ -355,9 +358,11 @@ function calc(){
   $('#pv-imp').textContent='€ '+fmt(imp);
   $('#pv-tot').value='€ '+fmt(total);
 }
-$('#pv-add').onclick=()=>addRow();
-$('#pv-clear').onclick=()=>{$('#pv-rows tbody').innerHTML=''; calc();}
-['pv-lab-qty','pv-lab-rate','pv-sco','pv-mag'].forEach(id=>$('#'+id).addEventListener('input',calc));
+function bindCalcInputs(){
+  $('#pv-add').onclick=()=>addRow();
+  $('#pv-clear').onclick=()=>{$('#pv-rows tbody').innerHTML=''; calc();}
+  ['pv-lab-qty','pv-lab-rate','pv-sco','pv-mag'].forEach(id=>$('#'+id).addEventListener('input',calc));
+}
 
 /* ===== Preventivi CRUD ===== */
 function newPV(){
@@ -373,7 +378,7 @@ function newPV(){
 }
 function readPV(){
   return {
-    id:$('#pv-id').value||crypto.randomUUID(),
+    id:$('#pv-id').value||uuid(),
     numero:$('#pv-num').value.trim(),
     data:$('#pv-date').value,
     scadenza:$('#pv-expdate').value,
@@ -407,7 +412,7 @@ function savePV(){
   if(i>=0) arr[i]=r; else arr.unshift(r);
   setPV(arr); renderPV(); fillPV(r.id); alert('Preventivo salvato ✅');
 }
-function dupPV(){ const r=readPV(); r.id=crypto.randomUUID(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); }
+function dupPV(){ const r=readPV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getPV(); arr.unshift(r); setPV(arr); renderPV(); fillPV(r.id); }
 function delPV(){ const id=$('#pv-id').value; if(!id) return; if(!confirm('Eliminare questo preventivo?')) return;
   const arr=getPV().filter(x=>x.id!==id); setPV(arr); renderPV(); arr.length?fillPV(arr[0].id):newPV(); }
 
@@ -420,7 +425,7 @@ function statusBadge(p){
   return '';
 }
 function renderPV(){
-  const l=$('#pv-list'); l.innerHTML='';
+  const l=$('#pv-list'); if(!l) return; l.innerHTML='';
   const q=($('#pv-search').value||'').toLowerCase();
   const f=$('#pv-filter').value;
   getPV().filter(p=>{
@@ -435,29 +440,29 @@ function renderPV(){
     d.onclick=()=>fillPV(p.id); l.appendChild(d);
   });
 }
-$('#pv-search').addEventListener('input',renderPV);
-$('#pv-filter').addEventListener('change',renderPV);
-
-/* ===== Export / Import ===== */
-$('#pv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getPV())); a.download='preventivi.json'; a.click();};
-$('#pv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setPV(JSON.parse(ev.target.result)); renderPV(); alert('Import ok')}catch{alert('File non valido')}}; r.readAsText(f);};
+function bindPVImpExp(){
+  $('#pv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getPV())); a.download='preventivi.json'; a.click();};
+  $('#pv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setPV(JSON.parse(ev.target.result)); renderPV(); alert('Import ok')}catch{alert('File non valido')}}; r.readAsText(f);};
+  $('#pv-search').addEventListener('input',renderPV);
+  $('#pv-filter').addEventListener('change',renderPV);
+}
 
 /* ===== Interventi ===== */
 function newIV(){ $('#iv-id').value=''; $('#iv-num').value='INT-'+String(getIV().length+1).padStart(4,'0'); $('#iv-date').value=today(); $('#iv-st').value='Aperto'; $('#iv-cli').value=''; $('#iv-con').value=''; $('#iv-des').value=''; }
-function readIV(){ return { id:$('#iv-id').value||crypto.randomUUID(), numero:$('#iv-num').value.trim(), data:$('#iv-date').value, stato:$('#iv-st').value, cliente:$('#iv-cli').value.trim(), contatto:$('#iv-con').value.trim(), descrizione:$('#iv-des').value.trim() }; }
+function readIV(){ return { id:$('#iv-id').value||uuid(), numero:$('#iv-num').value.trim(), data:$('#iv-date').value, stato:$('#iv-st').value, cliente:$('#iv-cli').value.trim(), contatto:$('#iv-con').value.trim(), descrizione:$('#iv-des').value.trim() }; }
 function fillIV(id){ const p=getIV().find(x=>x.id===id); if(!p) return; $('#iv-id').value=p.id; $('#iv-num').value=p.numero; $('#iv-date').value=p.data; $('#iv-st').value=p.stato; $('#iv-cli').value=p.cliente||''; $('#iv-con').value=p.contatto||''; $('#iv-des').value=p.descrizione||''; }
-function renderIV(){ const l=$('#iv-list'); l.innerHTML=''; getIV().forEach(p=>{ const d=document.createElement('div'); d.className='row'; d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><small>${p.stato}</small>`; d.onclick=()=>fillIV(p.id); l.appendChild(d); }); }
+function renderIV(){ const l=$('#iv-list'); if(!l) return; l.innerHTML=''; getIV().forEach(p=>{ const d=document.createElement('div'); d.className='row'; d.innerHTML=`<div><strong>${p.numero}</strong><br><small>${p.data} · ${p.cliente||'—'}</small></div><small>${p.stato}</small>`; d.onclick=()=>fillIV(p.id); l.appendChild(d); }); }
 function saveIV(){ const r=readIV(); const arr=getIV(); const i=arr.findIndex(x=>x.id===r.id); if(i>=0) arr[i]=r; else arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); alert('Intervento salvato ✅'); }
-function dupIV(){ const r=readIV(); r.id=crypto.randomUUID(); r.numero=r.numero+'-copy'; const arr=getIV(); arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); }
+function dupIV(){ const r=readIV(); r.id=uuid(); r.numero=r.numero+'-copy'; const arr=getIV(); arr.unshift(r); setIV(arr); renderIV(); fillIV(r.id); }
 function delIV(){ const id=$('#iv-id').value; if(!id) return; if(!confirm('Eliminare questo intervento?')) return; const arr=getIV().filter(x=>x.id!==id); setIV(arr); renderIV(); arr.length?fillIV(arr[0].id):newIV(); }
-$('#iv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getIV())); a.download='interventi.json'; a.click();};
-$('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setIV(JSON.parse(ev.target.result)); renderIV();}catch{alert('File non valido')}}; r.readAsText(f);};
+function bindIVImpExp(){
+  $('#iv-exp').onclick=()=>{const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(getIV())); a.download='interventi.json'; a.click();};
+  $('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{try{setIV(JSON.parse(ev.target.result)); renderIV();}catch{alert('File non valido')}}; r.readAsText(f);};
+}
 
 /* ===== Firme (modale + pointer events) ===== */
-(function(){
-  document.querySelectorAll('[data-signature-wrap]').forEach(initSigPad);
-
-  function initSigPad(wrap){
+function initSignPads(){
+  document.querySelectorAll('[data-signature-wrap]').forEach(wrap=>{
     const openBtn  = wrap.querySelector('[data-sig-open]');
     const clearBtn = wrap.querySelector('[data-sig-clear]');
     const closeBtn = wrap.querySelector('[data-sig-close]');
@@ -502,8 +507,8 @@ $('#iv-imp').onchange=e=>{const f=e.target.files[0]; if(!f) return; const r=new 
       }
       modal.classList.remove('open');
     });
-  }
-})();
+  });
+}
 
 /* ===== Print (firme a destra) ===== */
 function renderPrint(rec){
@@ -558,20 +563,20 @@ function renderPrint(rec){
     </div>
   `;
 }
-$('#pv-print').onclick=()=>{ const rec=readPV(); renderPrint(rec); window.print(); };
-
-/* ===== Share ===== */
-$('#pv-share').onclick=()=>{
-  const r=readPV();
-  const text=`Preventivo ${r.numero}
+function bindPrintShare(){
+  $('#pv-print').onclick=()=>{ const rec=readPV(); renderPrint(rec); window.print(); };
+  $('#pv-share').onclick=()=>{
+    const r=readPV();
+    const text=`Preventivo ${r.numero}
 Data: ${r.data}  Scadenza: ${r.scadenza||'-'}
 Cliente: ${r.cliente||'-'}  Contatto: ${r.contatto||'-'}
 Oggetto: ${r.oggetto||'-'}
 Totale: ${($('#pv-tot').value||'').trim()}
 — Inviato da ${S.get('rag','Giorgio — Elettricista & Antennista')}`;
-  if(navigator.share){ navigator.share({title:`Preventivo ${r.numero}`, text}); }
-  else{ navigator.clipboard.writeText(text); alert('Testo del preventivo copiato negli appunti ✅'); }
-};
+    if(navigator.share){ navigator.share({title:`Preventivo ${r.numero}`, text}).catch(()=>{}); }
+    else{ navigator.clipboard.writeText(text); alert('Testo del preventivo copiato negli appunti ✅'); }
+  };
+}
 
 /* ===== Preventivo -> Intervento ===== */
 function buildDescriptionFromPV(p){
@@ -591,10 +596,9 @@ Totale preventivo: ${tot}`;
 function pvToIV(){
   const r = readPV();
   if(!r.numero){ alert('Salva prima il preventivo'); return; }
-
   const arr = getIV();
   const nuovoIV = {
-    id: crypto.randomUUID(),
+    id: uuid(),
     numero: 'INT-'+String(arr.length+1).padStart(4,'0'),
     data: today(),
     stato: 'Aperto',
@@ -602,35 +606,36 @@ function pvToIV(){
     contatto: r.contatto || '',
     descrizione: buildDescriptionFromPV(r)
   };
-
   arr.unshift(nuovoIV);
   setIV(arr);
   renderIV();
-
-  // passa alla tab Interventi e apri la scheda
   $$('nav .tab').forEach(t=>t.classList.remove('active'));
   $('nav .tab[data-tab="iv"]').classList.add('active');
   $$('main>section').forEach(s=>s.classList.remove('active'));
   $('#iv').classList.add('active');
-
   fillIV(nuovoIV.id);
   alert('Intervento creato da preventivo ✅');
 }
+function bindPVtoIV(){ $('#pv-to-iv').onclick=pvToIV; }
 
-/* ===== Bind ===== */
-$('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV;
-$('#pv-to-iv').onclick=pvToIV;
-$('#iv-new').onclick=newIV; $('#iv-save').onclick=saveIV; $('#iv-del').onclick=delIV; $('#iv-dup').onclick=dupIV;
-
-/* ===== Start ===== */
-initBrand();
-renderPV(); renderIV();
-newPV(); newIV();
-
-/* ===== PWA (usa il tuo service worker se presente) ===== */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+/* ===== Binds botttoni principali ===== */
+function bindMainButtons(){
+  $('#pv-new').onclick=newPV; $('#pv-save').onclick=savePV; $('#pv-del').onclick=delPV; $('#pv-dup').onclick=dupPV;
+  $('#iv-new').onclick=newIV; $('#iv-save').onclick=saveIV; $('#iv-del').onclick=delIV; $('#iv-dup').onclick=dupIV;
 }
+
+/* ===== Avvio ===== */
+function start(){
+  bindTabs();
+  initBrand(); bindSettings();
+  bindCalcInputs(); bindPVImpExp(); bindIVImpExp(); bindPrintShare(); bindPVtoIV(); bindMainButtons();
+  renderPV(); renderIV();
+  newPV(); newIV();
+  initSignPads();
+}
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
+
+/* ===== NIENTE service worker in questa versione safe ===== */
 </script>
 </body>
 </html>
