@@ -53,7 +53,18 @@
   }
 </style>
 </head>
-<body>
+<script>
+  // DISATTIVA SW VECCHI (una tantum per buttare la cache vecchia)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    }).then(() => {
+      if (caches && caches.keys) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      }
+    });
+  }
+</script><body>
 <header>
   <h1 id="appTitle">Giorgio — Elettricista & Antennista</h1>
   <small>Tel. +39 351 796 9013</small>
