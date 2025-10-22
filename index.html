@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestionale Giorgio — v41 (stampa pulita + cache control)</title>
+<title>Gestionale Giorgio — v42</title>
+
+<!-- PWA hooks (manifest e icone: aggiungi i file separati come già spiegato) -->
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0A2E5C">
+<link rel="apple-touch-icon" href="icone/icona-192.png">
+
 <style>
   :root{--brand:#0A2E5C;--accent:#F59E0B;--bg:#f5f7fb;--card:#fff;--line:#e5e7eb;--muted:#64748b}
   *{box-sizing:border-box}
@@ -48,32 +53,24 @@
   .terms{font-size:13px;color:#111827}
 
   /* ——— STAMPA PULITA ——— */
-  #printArea{display:none}
+  #printArea, #iv-printArea{display:none}
   @media print{
-    /* nascondi l'app interattiva */
     header, nav, .tabs, .btns, .no-print, main { display:none !important; }
-
-    /* mostra solo l'area di stampa */
-    #printArea { display:block !important; }
-
+    #printArea, #iv-printArea { display:block !important; }
     @page { margin: 14mm 12mm; }
     body{ background:#fff; color:#111; }
-    #printArea { font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-
-    #printArea h1{ font-size:20px; margin:0 0 4mm; }
-    #printArea h2{ font-size:16px; margin:6mm 0 3mm; }
-    #printArea .meta{ font-size:12px; color:#333; }
-
-    #printArea table { width:100%; border-collapse:collapse; }
-    #printArea th, #printArea td { border:1px solid #000; padding:6px 8px; vertical-align:top; }
-    #printArea th { background:#f3f6fa; text-align:left; }
-
-    #printArea .totale-box{
+    #printArea, #iv-printArea { font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    #printArea h1,#iv-printArea h1{ font-size:20px; margin:0 0 4mm; }
+    #printArea h2,#iv-printArea h2{ font-size:16px; margin:6mm 0 3mm; }
+    .meta{ font-size:12px; color:#333; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid #000; padding:6px 8px; vertical-align:top; }
+    th { background:#f3f6fa; text-align:left; }
+    .totale-box{
       margin-top:6mm; padding:8px 10px; border:2px solid #0A2E5C;
       font-weight:800; font-size:22px; text-align:right; letter-spacing:.2px;
     }
-
-    #printArea .grid{ display:grid; grid-template-columns:1fr 1fr; gap:10mm; margin-top:8mm; }
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:10mm; margin-top:8mm; }
   }
 </style>
 </head>
@@ -104,8 +101,9 @@
         <button class="btn primary" id="pv-save" type="button">Salva</button>
         <button class="btn" id="pv-print" type="button">Stampa / PDF</button>
         <button class="btn warn" id="pv-share" type="button">Condividi</button>
-        <button class="btn danger" id="app-refresh" type="button">Svuota dati locali</button>
-        <button class="btn" id="app-cache" type="button">Aggiorna cache/PWA</button>
+        <button class="btn" id="pv-to-iv" type="button">Crea Intervento da questo</button>
+        <button class="btn" id="app-install" type="button" hidden>Installa app</button>
+        <button class="btn danger" id="app-refresh" type="button">Aggiorna app (svuota cache + dati)</button>
       </div>
 
       <div class="row3">
@@ -192,16 +190,88 @@
         </div>
       </div>
 
-      <!-- Layout stampa (riempito via JS e mostrato solo @print) -->
+      <!-- Area di stampa -->
       <div id="printArea"></div>
     </div>
   </section>
 
-  <!-- INTERVENTI (placeholder) -->
+  <!-- INTERVENTI -->
   <section id="iv">
     <div class="card">
-      <h3>Interventi</h3>
-      <p class="hint">Se vuoi, dopo che il preventivo è confermato, potremo aggiungere “Crea Intervento da Preventivo”.</p>
+      <div class="btns">
+        <button class="btn" id="iv-new" type="button">Nuovo</button>
+        <button class="btn primary" id="iv-save" type="button">Salva</button>
+        <button class="btn" id="iv-print" type="button">Stampa / PDF</button>
+        <button class="btn warn" id="iv-share" type="button">Condividi</button>
+      </div>
+
+      <div class="row3">
+        <div><label>Numero</label><input id="iv-num" placeholder="IV-0001"></div>
+        <div><label>Data</label><input id="iv-date" type="date"></div>
+        <div>
+          <label>Stato</label>
+          <select id="iv-status">
+            <option value="in_corso">In corso</option>
+            <option value="completato">Completato</option>
+            <option value="annullato">Annullato</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div><label>Cliente</label><input id="iv-cli" placeholder="Nome cliente"></div>
+        <div><label>Contatto</label><input id="iv-con" placeholder="Telefono / Email"></div>
+      </div>
+      <label>Oggetto</label><input id="iv-obj" placeholder="Oggetto intervento">
+
+      <label>Attività</label>
+      <div class="row3">
+        <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="iv-chk-inst"> Installazione</label>
+        <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="iv-chk-rip"> Riparazione</label>
+        <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="iv-chk-man"> Manutenzione</label>
+      </div>
+
+      <label>Descrizione lavori</label>
+      <textarea id="iv-desc" placeholder="Dettagli dell'intervento eseguito..."></textarea>
+
+      <h3 style="margin:12px 2px 6px">Costi</h3>
+      <div class="row3">
+        <div><label>Ore</label><input id="iv-hours" type="number" min="0" step="0.1" value="0"></div>
+        <div><label>Tariffa oraria (€)</label><input id="iv-rate" type="number" min="0" step="0.01" value="0"></div>
+        <div><label>Materiali (€)</label><input id="iv-mat" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+
+      <div class="row3" style="margin-top:8px">
+        <div><label>Sconto %</label><input id="iv-disc" type="number" min="0" step="0.1" value="0"></div>
+        <div><label>Maggiorazione %</label><input id="iv-mark" type="number" min="0" step="0.1" value="0"></div>
+        <div><label>Totale</label><input id="iv-total" readonly></div>
+      </div>
+
+      <h3 style="margin:12px 2px 6px">Firme</h3>
+      <div class="signwrap">
+        <div class="sign" id="iv-sg-cliente">
+          <div class="hint"><strong>Firma Cliente</strong> — Apri per firmare</div>
+          <canvas hidden></canvas>
+          <footer>
+            <button class="btn" data-act="open">Apri</button>
+            <button class="btn" data-act="clear">Pulisci</button>
+            <button class="btn" data-act="close">Chiudi</button>
+            <span class="status">Non firmato</span>
+          </footer>
+        </div>
+        <div class="sign" id="iv-sg-tecnico">
+          <div class="hint"><strong>Firma Tecnico</strong></div>
+          <canvas hidden></canvas>
+          <footer>
+            <button class="btn" data-act="open">Apri</button>
+            <button class="btn" data-act="clear">Pulisci</button>
+            <button class="btn" data-act="close">Chiudi</button>
+            <span class="status">Non firmato</span>
+          </footer>
+        </div>
+      </div>
+
+      <div id="iv-printArea"></div>
     </div>
   </section>
 
@@ -224,11 +294,6 @@
 </main>
 
 <script>
-/* Disinstalla eventuali Service Worker (in caso ci fossero) all'avvio sicuro */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-}
-
 /* Utils */
 const qs = (s,e=document)=>e.querySelector(s), qsa=(s,e=document)=>[...e.querySelectorAll(s)];
 const fmt = n => (Math.round((+n||0)*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
@@ -281,7 +346,7 @@ function addRow(desc='',qty=1,price=0){
 qs('#row-add').onclick=()=>addRow();
 qs('#row-clr').onclick=()=>{qs('#pv-rows').innerHTML='';calc();};
 
-/* Firma (tablet/telefono, no zoom al tocco, apri/chiudi pulisci) */
+/* Firma component */
 function signature(boxSel){
   const box = qs(boxSel);
   const canvas = qs('canvas', box);
@@ -304,12 +369,12 @@ function signature(boxSel){
   }
   box.addEventListener('click',e=>{
     if(e.target.dataset.act==='open'){ ensure(); }
-    if(e.target.dataset.act==='clear' && !canvas.hidden){ ctx.clearRect(0,0,canvas.width,canvas.height); ink=false; status.textContent='Non firmato'; saveDraft(); }
+    if(e.target.dataset.act==='clear' && !canvas.hidden){ ctx.clearRect(0,0,canvas.width,canvas.height); ink=false; status.textContent='Non firmato'; saveDraft(); ivSaveDraft?.(); }
     if(e.target.dataset.act==='close'){ canvas.hidden=true; }
   });
   function start(e){ if(canvas.hidden) return; e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
   function move(e){ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ink=true; e.preventDefault(); }
-  function end(){ drawing=false; if(ink) status.textContent='Firmato'; saveDraft(); }
+  function end(){ drawing=false; if(ink) status.textContent='Firmato'; saveDraft(); ivSaveDraft?.(); }
   ['pointerdown','touchstart','mousedown'].forEach(ev=>canvas.addEventListener(ev,start,{passive:false}));
   ['pointermove','touchmove','mousemove'].forEach(ev=>canvas.addEventListener(ev,move,{passive:false}));
   ['pointerup','touchend','mouseup','mouseleave','touchcancel'].forEach(ev=>canvas.addEventListener(ev,end));
@@ -323,7 +388,7 @@ function signature(boxSel){
 const sigCli = signature('#sg-cliente');
 const sigTec = signature('#sg-tecnico');
 
-/* Calcoli */
+/* Calcoli Preventivo */
 function rows(){
   return qsa('#pv-rows tr').map(tr=>({
     d: qs('.d',tr).value.trim(),
@@ -362,7 +427,7 @@ function calc(){
 }
 ['#mo-qty','#mo-rate','#pv-disc','#pv-mark','#pv-acp','#pv-ace'].forEach(sel=>qs(sel).addEventListener('input',calc));
 
-/* Numerazione e nuovo */
+/* Numerazione e nuovo Preventivo */
 function nextNum(){
   const k='pvCounter'; let v=+(localStorage.getItem(k)||0); v++; localStorage.setItem(k, v); return 'PV-'+String(v).padStart(4,'0');
 }
@@ -381,7 +446,7 @@ function newPV(){
 }
 qs('#pv-new').onclick=newPV;
 
-/* Salva / Condividi / Stampa */
+/* Lettura/scrittura Preventivo */
 function getDoc(){
   return {
     num:qs('#pv-num').value, date:qs('#pv-date').value, exp:qs('#pv-exp').value,
@@ -416,7 +481,7 @@ Totale: ${d.k.tot}`;
   else { await navigator.clipboard.writeText(text+'\n'+location.href); alert('Copiato negli appunti ✅'); }
 };
 
-/* Stampa pulita: popola #printArea e stampa */
+/* Stampa Preventivo */
 qs('#pv-print').onclick=()=>{
   const d=getDoc();
   const tel = S.get('phone','+39 351 796 9013');
@@ -521,36 +586,200 @@ qs('#pv-print').onclick=()=>{
     <h2>Termini</h2>
     <div class="meta">${termsHtml}</div>
   </div>`;
-
   window.print();
 };
 
-/* Pulsanti manutenzione app */
-qs('#app-refresh').onclick=()=>{
-  if(!confirm('Svuotare dati locali (bozze, logo, impostazioni, numerazione) e ricaricare?')) return;
-  localStorage.clear(); location.reload();
+/* —— INTERVENTI —— */
+const sigIvCli = signature('#iv-sg-cliente');
+const sigIvTec = signature('#iv-sg-tecnico');
+
+function ivNextNum(){ const k='ivCounter'; let v=+(localStorage.getItem(k)||0); v++; localStorage.setItem(k,v); return 'IV-'+String(v).padStart(4,'0'); }
+function ivToday(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+
+function ivCalc(){
+  const hours = +qs('#iv-hours').value||0;
+  const rate  = +qs('#iv-rate').value||0;
+  const mat   = +qs('#iv-mat').value||0;
+  const disc  = (+qs('#iv-disc').value||0)/100;
+  const mark  = (+qs('#iv-mark').value||0)/100;
+
+  let subtotal = hours*rate + mat;
+  if(disc>0) subtotal *= (1-disc);
+  if(mark>0) subtotal *= (1+mark);
+
+  qs('#iv-total').value = fmt(subtotal);
+  ivSaveDraft();
+}
+['#iv-hours','#iv-rate','#iv-mat','#iv-disc','#iv-mark'].forEach(id=>{
+  const el = document.querySelector(id); if(el) el.addEventListener('input', ivCalc);
+});
+
+function ivNew(){
+  qs('#iv-num').value = ivNextNum();
+  qs('#iv-date').value = ivToday();
+  qs('#iv-status').value='in_corso';
+  ['#iv-cli','#iv-con','#iv-obj','#iv-desc'].forEach(s=>qs(s).value='');
+  ['#iv-chk-inst','#iv-chk-rip','#iv-chk-man'].forEach(s=>qs(s).checked=false);
+  qs('#iv-hours').value=0; qs('#iv-rate').value=0; qs('#iv-mat').value=0;
+  qs('#iv-disc').value=0; qs('#iv-mark').value=0; qs('#iv-total').value=fmt(0);
+  sigIvCli.clear(); sigIvTec.clear();
+  ivCalc();
+}
+function ivDoc(){
+  return {
+    num:qs('#iv-num').value, date:qs('#iv-date').value, status:qs('#iv-status').value,
+    cli:qs('#iv-cli').value, con:qs('#iv-con').value, obj:qs('#iv-obj').value,
+    chk:{inst:qs('#iv-chk-inst').checked, rip:qs('#iv-chk-rip').checked, man:qs('#iv-chk-man').checked},
+    desc:qs('#iv-desc').value,
+    hours:+qs('#iv-hours').value||0, rate:+qs('#iv-rate').value||0, mat:+qs('#iv-mat').value||0,
+    disc:+qs('#iv-disc').value||0, mark:+qs('#iv-mark').value||0, total:qs('#iv-total').value,
+    signCli:sigIvCli.data(), signTec:sigIvTec.data()
+  };
+}
+function ivSet(d){
+  if(!d) return ivNew();
+  qs('#iv-num').value=d.num||ivNextNum();
+  qs('#iv-date').value=d.date||ivToday();
+  qs('#iv-status').value=d.status||'in_corso';
+  qs('#iv-cli').value=d.cli||''; qs('#iv-con').value=d.con||'';
+  qs('#iv-obj').value=d.obj||''; qs('#iv-desc').value=d.desc||'';
+  qs('#iv-chk-inst').checked=!!(d.chk?.inst); qs('#iv-chk-rip').checked=!!(d.chk?.rip); qs('#iv-chk-man').checked=!!(d.chk?.man);
+  qs('#iv-hours').value=d.hours||0; qs('#iv-rate').value=d.rate||0; qs('#iv-mat').value=d.mat||0;
+  qs('#iv-disc').value=d.disc||0; qs('#iv-mark').value=d.mark||0;
+  if(d.signCli) sigIvCli.load(d.signCli); if(d.signTec) sigIvTec.load(d.signTec);
+  ivCalc();
+}
+function ivSaveDraft(){ S.set('ivDraft', ivDoc()); }
+
+qs('#iv-new').onclick=ivNew;
+qs('#iv-save').onclick=()=>{ ivSaveDraft(); alert('Intervento salvato sul dispositivo ✅'); };
+qs('#iv-share').onclick=async()=>{
+  const d=ivDoc();
+  const att = [d.chk.inst?'Installazione':null, d.chk.rip?'Riparazione':null, d.chk.man?'Manutenzione':null].filter(Boolean).join(', ') || '-';
+  const text = `Intervento ${d.num}
+Cliente: ${d.cli}
+Oggetto: ${d.obj}
+Attività: ${att}
+Totale: ${d.total}`;
+  if(navigator.share){ try{ await navigator.share({title:d.num, text, url:location.href}); }catch(e){} }
+  else { await navigator.clipboard.writeText(text+'\n'+location.href); alert('Copiato negli appunti ✅'); }
 };
-qs('#app-cache').onclick=async()=>{
-  if(!confirm('Aggiornare cache/PWA? (disinstalla SW, svuota CacheStorage e ricarica)')) return;
-  try{
-    if('serviceWorker' in navigator){
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r=>r.unregister()));
-    }
-    if('caches' in window){
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k=>caches.delete(k)));
-    }
-  }catch(e){}
-  const url = new URL(location.href);
-  url.searchParams.set('v', Date.now().toString());
-  location.replace(url.toString());
+qs('#iv-print').onclick=()=>{
+  const d=ivDoc();
+  const tel = S.get('phone','+39 351 796 9013');
+  const terms = (S.get('terms','')||'').trim();
+  const termsHtml = terms? terms.replace(/\n/g,'<br>') :
+    `<strong>Termini:</strong> Pagamento <strong>50%</strong> all’accettazione e <strong>50%</strong> a fine lavori.
+     Il materiale resta di proprietà dell’installatore fino al saldo completo. Le firme equivalgono a firma digitale.`;
+
+  const att = [d.chk.inst?'Installazione':null, d.chk.rip?'Riparazione':null, d.chk.man?'Manutenzione':null].filter(Boolean).join(', ') || '-';
+
+  qs('#iv-printArea').innerHTML = `
+  <div style="font:14px/1.3 Arial;color:#111">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+      <div style="width:52px;height:52px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">G</div>
+      <div>
+        <div style="font-weight:800;font-size:18px">Giorgio — Elettricista & Antennista</div>
+        <div style="color:#444">Tel. ${tel}</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div><strong>${d.num}</strong></div>
+        <div>Data: ${d.date}</div>
+        <div>Stato: ${d.status.replace('_',' ')}</div>
+      </div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin:8px 0">
+      <tr><td style="border:1px solid #000;padding:6px"><strong>Cliente:</strong> ${d.cli||'-'}</td>
+          <td style="border:1px solid #000;padding:6px"><strong>Contatto:</strong> ${d.con||'-'}</td></tr>
+      <tr><td colspan="2" style="border:1px solid #000;padding:6px"><strong>Oggetto:</strong> ${d.obj||'-'}</td></tr>
+      <tr><td colspan="2" style="border:1px solid #000;padding:6px"><strong>Attività:</strong> ${att}</td></tr>
+    </table>
+
+    <table style="width:100%;border-collapse:collapse;margin:8px 0">
+      <tr><td style="padding:6px"><strong>Ore:</strong> ${d.hours}</td>
+          <td style="padding:6px"><strong>Tariffa:</strong> ${fmt(d.rate)}</td>
+          <td style="padding:6px"><strong>Materiali:</strong> ${fmt(d.mat)}</td></tr>
+      <tr><td style="padding:6px"><strong>Sconto:</strong> ${d.disc}%</td>
+          <td style="padding:6px"><strong>Maggiorazione:</strong> ${d.mark}%</td>
+          <td style="padding:6px"><strong>Totale:</strong> ${d.total}</td></tr>
+    </table>
+
+    <div style="display:flex;gap:20px;margin-top:20px">
+      <div><div style="width:260px;height:90px;border:1px solid #000;display:flex;align-items:center;justify-content:center">
+        ${d.signCli?`<img src="${d.signCli}" style="max-width:100%;max-height:100%">`:''}</div>
+        <div style="font-size:12px;color:#333">Firma Cliente</div></div>
+      <div><div style="width:260px;height:90px;border:1px solid #000;display:flex;align-items:center;justify-content:center">
+        ${d.signTec?`<img src="${d.signTec}" style="max-width:100%;max-height:100%">`:''}</div>
+        <div style="font-size:12px;color:#333">Firma Tecnico</div></div>
+    </div>
+
+    <div style="margin:12px 0">${termsHtml}</div>
+  </div>`;
+  window.print();
 };
 
-/* Avvio */
+/* Preventivo ➜ Crea Intervento da questo */
+document.getElementById('pv-to-iv').addEventListener('click', () => {
+  const d = getDoc();
+  const ivDraft = {
+    num:null, date:null, status:'in_corso',
+    cli:d.cli||'', con:d.con||'',
+    obj: (d.obj? d.obj+' ' : '') + `(da preventivo ${d.num})`,
+    chk:{inst:true, rip:false, man:false},
+    desc:`Creato da preventivo ${d.num}`,
+    hours:0, rate:0, mat:0, disc:0, mark:0,
+    signCli:'', signTec:''
+  };
+  S.set('ivDraft', ivDraft);
+  document.querySelector('.tab[data-tab="iv"]').click();
+  setTimeout(()=>{
+    ivNew();
+    const d2 = S.get('ivDraft', null);
+    if(d2){
+      qs('#iv-cli').value=d2.cli;
+      qs('#iv-con').value=d2.con;
+      qs('#iv-obj').value=d2.obj;
+      qs('#iv-desc').value=d2.desc;
+      qs('#iv-chk-inst').checked=true;
+      ivCalc();
+      ivSaveDraft();
+    }
+  },0);
+});
+
+/* Pulsanti manutenzione app */
+document.getElementById('app-refresh').addEventListener('click', async ()=>{
+  if(!confirm('Svuotare dati locali + cache e ricaricare l’app?')) return;
+  try{
+    localStorage.clear();
+    if('caches' in window){ const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k))); }
+    if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister())); }
+  }finally{ location.reload(); }
+});
+
+/* PWA: install prompt e registrazione SW (non obbligatorio se i file mancano) */
+let deferredPrompt=null;
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./service-worker.js', { scope:'/gestionale-giorgio/' })
+    .catch(()=>{});
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault(); deferredPrompt=e;
+    const btn=qs('#app-install'); if(btn) btn.hidden=false;
+  });
+}
+qs('#app-install').addEventListener('click', async ()=>{
+  if(!deferredPrompt){ alert('Se non appare il prompt, usa “Aggiungi alla schermata Home” dal browser.'); return; }
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; qs('#app-install').hidden=true;
+});
+
+/* Avvio app */
 function boot(){
   loadBrand();
   if(!S.get('pvCounter',null)) localStorage.setItem('pvCounter','0');
+  if(!S.get('ivCounter',null)) localStorage.setItem('ivCounter','0');
+
+  // Preventivo
   qs('#pv-num').value = nextNum();
   qs('#pv-date').value = today();
   const d = new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
@@ -558,6 +787,10 @@ function boot(){
   addRow();
   const draft = S.get('draft',null); if(draft) setDoc(draft);
   calc();
+
+  // Interventi
+  const ivDraft = S.get('ivDraft',null);
+  if(ivDraft) ivSet(ivDraft); else ivNew();
 }
 boot();
 </script>
