@@ -1,24 +1,22 @@
 {
   "name": "Gestionale Giorgio",
-  "short_name": "Giorgio",
-  "description": "Gestionale preventivi e interventi - Giorgio Elettricista & Antennista",
+  "short_name": "Gestionale",
   "start_url": "/gestionale-giorgio/",
   "scope": "/gestionale-giorgio/",
   "display": "standalone",
   "background_color": "#0A2E5C",
   "theme_color": "#0A2E5C",
+  "description": "Gestionale Giorgio — Elettricista & Antennista: preventivi, interventi e firme digitali.",
   "icons": [
     {
-      "src": "icona-192.png",
+      "src": "icone/icona-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icona-512.png",
+      "src": "icone/icona-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
