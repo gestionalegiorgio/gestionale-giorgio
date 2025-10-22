@@ -59,18 +59,7 @@
   }
 </style>
 </head>
-<script>
-  // DISATTIVA SW VECCHI (una tantum per buttare la cache vecchia)
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => r.unregister());
-    }).then(() => {
-      if (caches && caches.keys) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-      }
-    });
-  }
-</script><body>
+<body>
 <header>
   <h1 id="appTitle">Giorgio — Elettricista & Antennista</h1>
   <small>Tel. +39 351 796 9013</small>
@@ -263,6 +252,31 @@
 </div>
 
 <script>
+// === LOGO ===
+function applyLogo(){
+  const img = document.getElementById('appLogo');
+  const data = localStorage.getItem('logoDataUrl');
+  if (data) { img.src = data; img.style.display='inline-block'; }
+  else { img.removeAttribute('src'); img.style.display='none'; }
+}
+async function fileToDataURL(file){
+  return new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); });
+}
+// handler del file logo (se già esiste #cfgLogo nelle impostazioni)
+const logoInput = document.getElementById('cfgLogo');
+if (logoInput) {
+  logoInput.addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    if (!/^image\//.test(f.type)) { alert('Carica un file immagine'); return; }
+    const dataUrl = await fileToDataURL(f);
+    localStorage.setItem('logoDataUrl', dataUrl);
+    applyLogo();
+    alert('Logo aggiornato ✅');
+  });
+}
+// applica all'avvio
+applyLogo();
+</script>
 /* ==========================
    Utils
 ========================== */
