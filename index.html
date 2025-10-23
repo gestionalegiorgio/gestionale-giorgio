@@ -83,7 +83,9 @@
         <button class="btn primary" id="pv-save" type="button">Salva</button>
         <button class="btn" id="pv-print" type="button">Stampa / PDF</button>
         <button class="btn warn" id="pv-share" type="button">Condividi</button>
-        <button class="btn danger" id="app-refresh" type="button">Aggiorna app (svuota dati)</button>
+        <!-- NOVITÀ: due azioni separate -->
+        <button class="btn" id="app-reload" type="button">Ricarica app</button>
+        <button class="btn danger" id="app-reset" type="button">Svuota dati e ricarica</button>
       </div>
 
       <div class="row3">
@@ -178,7 +180,7 @@
     </div>
   </section>
 
-  <!-- INTERVENTI -->
+  <!-- INTERVENTI (sempre visibile) -->
   <section id="iv">
     <div class="card">
       <h3>Interventi</h3>
@@ -205,7 +207,7 @@
 </main>
 
 <script>
-/* Disattivo eventuali SW vecchi (evita cache rotte). Il tuo PWA continuerà con il suo service worker separato. */
+/* Evita service worker vecchi del browser locale */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
 }
@@ -387,8 +389,7 @@ function setDoc(d){
   calc();
 }
 function saveDraft(){ S.set('draft', getDoc()); }
-function save(){ S.set('draft', getDoc()); }
-qs('#pv-save').onclick=()=>{ save(); alert('Salvato sul dispositivo ✅'); };
+qs('#pv-save').onclick=()=>{ saveDraft(); alert('Salvato sul dispositivo ✅'); };
 qs('#pv-share').onclick=async()=>{
   const d=getDoc();
   const text=`Preventivo ${d.num}
@@ -398,6 +399,8 @@ Totale: ${d.k.tot}`;
   if(navigator.share){ try{ await navigator.share({title:d.num,text}); }catch(e){} }
   else { await navigator.clipboard.writeText(text); alert('Copiato negli appunti ✅'); }
 };
+
+/* Stampa solo parte cliente (pulita) */
 qs('#pv-print').onclick=()=>{
   const d=getDoc();
   const rowsHtml=(d.rows||[]).map(r=>`<tr>
@@ -458,11 +461,20 @@ qs('#pv-print').onclick=()=>{
   window.print();
 };
 
-/* Aggiorna app: pulisce SOLO i dati locali (bozze, impostazioni, numerazione) */
-qs('#app-refresh').onclick=()=>{
-  if(!confirm('Svuotare dati locali (bozze, logo, impostazioni) e ricaricare?')) return;
-  localStorage.clear(); location.reload();
-};
+/* Ricarica risorse SENZA perdere dati */
+function reloadApp(){
+  const u = new URL(location.href);
+  u.searchParams.set('v', Date.now().toString()); // cache-buster
+  location.replace(u.toString());
+}
+/* Svuota dati locali e ricarica */
+function resetAndReload(){
+  if(!confirm('Sicuro di cancellare bozze, impostazioni, logo e numerazione?')) return;
+  localStorage.clear();
+  reloadApp();
+}
+qs('#app-reload').onclick = reloadApp;
+qs('#app-reset').onclick  = resetAndReload;
 
 /* Avvio */
 function boot(){
@@ -473,7 +485,6 @@ function boot(){
   const d = new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
   qs('#pv-exp').value = d.toISOString().slice(0,10);
   addRow();
-  // ricarica bozza se presente
   const draft = S.get('draft',null); if(draft) setDoc(draft);
   calc();
 }
