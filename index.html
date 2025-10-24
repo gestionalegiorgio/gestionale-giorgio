@@ -1,118 +1,85 @@
 <!doctype html>
 <html lang="it">
 <head>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="theme-color" content="#0A2E5C">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestionale Giorgio — Elettricista & Antennista</title>
-<meta name="theme-color" content="#0A2E5C">
-<style>
-  :root{--brand:#0A2E5C;--accent:#F59E0B;--bg:#f5f7fb;--card:#fff;--line:#e5e7eb;--muted:#64748b}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111827}
-  header{position:sticky;top:0;z-index:10;background:var(--brand);color:#fff;padding:10px 14px;border-bottom:3px solid var(--accent)}
-  header .row{display:flex;gap:10px;align-items:center}
-  .logo{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
-  .title{display:flex;flex-direction:column}
-  .title strong{font-size:18px}
-  nav.tabs{display:flex;gap:8px;padding:10px;background:#eef2ff;border-bottom:1px solid var(--line);position:sticky;top:66px;z-index:9}
-  .tab{border:1px solid #c7d2fe;background:#fff;padding:8px 12px;border-radius:999px;cursor:pointer}
-  .tab.active{background:#1b3e8b;color:#fff;border-color:#1b3e8b}
-  main{padding:14px;max-width:1100px;margin:0 auto}
-  section{display:none}
-  section.active{display:block}
-  .layout{display:grid;grid-template-columns:290px 1fr;gap:12px}
-  @media (max-width:960px){.layout{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-  .list{max-height:70vh;overflow:auto}
-  .row-item{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
-  .row-item:hover{background:#f9fafb}
-  .muted{color:var(--muted)}
-  label{display:block;margin:6px 2px;color:#334155;font-weight:600;font-size:13px}
-  input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
-  textarea{min-height:90px}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  @media (max-width:800px){.row2,.row3{grid-template-columns:1fr}}
-  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-  .btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-  .btn.primary{background:var(--accent);color:#111;border-color:var(--accent)}
-  .btn.warn{background:#fff3bf;border-color:#fde68a}
-  .btn.danger{color:#ef4444;border-color:#ef4444}
-  table{width:100%;border-collapse:collapse}
-  th,td{border:1px solid var(--line);padding:8px}
-  th{background:#f8fafc;text-align:left;font-size:13px;color:#334155}
-  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
-  @media (max-width:800px){.kpi{grid-template-columns:repeat(2,1fr)}}
-  .kpi .box{background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:10px}
-  .kpi .val{font-weight:800}
-  .signwrap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media (max-width:800px){.signwrap{grid-template-columns:1fr}}
-  .sign{border:2px dashed var(--line);border-radius:12px;padding:10px;background:#fff}
-  .sign footer{display:flex;gap:6px;margin-top:6px;align-items:center}
-  .status{margin-left:auto;color:var(--muted);font-size:12px}
-  .hint{color:var(--muted);font-size:12px}
-  .terms{font-size:13px;color:#111827}
-  .print-only{display:none}
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#0A2E5C">
 
-  /* ===== Stampa cliente (A4, una pagina se possibile) ===== */
-  @page { size: A4; margin: 10mm; }
-  .sheet{width:210mm; min-height:297mm; padding:10mm; margin:0 auto; font:12.5px/1.35 Arial, sans-serif; color:#111}
-  .pb-avoid{break-inside:avoid}
-  .table-clean{width:100%; border-collapse:collapse}
-  .table-clean th,.table-clean td{border:1px solid #000; padding:6px}
-  .print-header{display:flex; gap:12px; align-items:center; margin-bottom:8px}
-  .print-logo{width:52px;height:52px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
-  .print-col{margin-left:auto; text-align:right}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gestionale Giorgio — Elettricista & Antennista</title>
 
-  @media print{
-    header,nav.tabs,.btns,.no-print,.list{display:none!important}
-    main{padding:0}
-    .print-only{display:block}
-    body{background:#fff}
-    .card{border:none}
-    table,th,td{border:1px solid #000}
-  }
-</style>
+  <style>
+    :root{--brand:#0A2E5C;--accent:#F59E0B;--bg:#f5f7fb;--card:#fff;--line:#e5e7eb;--muted:#64748b}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111827}
+    header{position:sticky;top:0;z-index:10;background:var(--brand);color:#fff;padding:10px 14px;border-bottom:3px solid var(--accent)}
+    header .row{display:flex;gap:10px;align-items:center}
+    .logo{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
+    .title{display:flex;flex-direction:column}
+    .title strong{font-size:18px}
+    nav.tabs{display:flex;gap:8px;padding:10px;background:#eef2ff;border-bottom:1px solid var(--line);position:sticky;top:66px;z-index:9}
+    .tab{border:1px solid #c7d2fe;background:#fff;padding:8px 12px;border-radius:999px;cursor:pointer}
+    .tab.active{background:#1b3e8b;color:#fff;border-color:#1b3e8b}
+    main{padding:14px;max-width:1100px;margin:0 auto}
+    section{display:none}
+    section.active{display:block}
+    .layout{display:grid;grid-template-columns:290px 1fr;gap:12px}
+    @media (max-width:960px){.layout{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+    .list{max-height:70vh;overflow:auto}
+    .row-item{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
+    .row-item:hover{background:#f9fafb}
+    .muted{color:var(--muted)}
+    label{display:block;margin:6px 2px;color:#334155;font-weight:600;font-size:13px}
+    input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
+    textarea{min-height:90px}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    @media (max-width:800px){.row2,.row3{grid-template-columns:1fr}}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#111;border-color:var(--accent)}
+    .btn.warn{background:#fff3bf;border-color:#fde68a}
+    .btn.danger{color:#ef4444;border-color:#ef4444}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid var(--line);padding:8px}
+    th{background:#f8fafc;text-align:left;font-size:13px;color:#334155}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+    @media (max-width:800px){.kpi{grid-template-columns:repeat(2,1fr)}}
+    .kpi .box{background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:10px}
+    .kpi .val{font-weight:800}
+    .signwrap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:800px){.signwrap{grid-template-columns:1fr}}
+    .sign{border:2px dashed var(--line);border-radius:12px;padding:10px;background:#fff}
+    .sign footer{display:flex;gap:6px;margin-top:6px;align-items:center}
+    .status{margin-left:auto;color:var(--muted);font-size:12px}
+    .hint{color:var(--muted);font-size:12px}
+    .terms{font-size:13px;color:#111827}
+    .print-only{display:none}
+
+    /* ===== Stampa cliente (A4, una pagina se possibile) ===== */
+    @page { size: A4; margin: 10mm; }
+    .sheet{width:210mm; min-height:297mm; padding:10mm; margin:0 auto; font:12.5px/1.35 Arial, sans-serif; color:#111}
+    .pb-avoid{break-inside:avoid}
+    .table-clean{width:100%; border-collapse:collapse}
+    .table-clean th,.table-clean td{border:1px solid #000; padding:6px}
+    .print-header{display:flex; gap:12px; align-items:center; margin-bottom:8px}
+    .print-logo{width:52px;height:52px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+    .print-col{margin-left:auto; text-align:right}
+
+    @media print{
+      header,nav.tabs,.btns,.no-print,.list{display:none!important}
+      main{padding:0}
+      .print-only{display:block}
+      body{background:#fff}
+      .card{border:none}
+      table,th,td{border:1px solid #000}
+    }
+  </style>
 </head>
-<script>
-  // Registration per GitHub Pages (path /gestionale-giorgio/)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/gestionale-giorgio/sw.js', { scope: '/gestionale-giorgio/' })
-        .then(reg => {
-          // opzionale: ascolta aggiornamenti e mostra un alert per ricaricare
-          if (reg.waiting) {
-            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          }
-          reg.addEventListener('updatefound', () => {
-            const newSW = reg.installing;
-            newSW?.addEventListener('statechange', () => {
-              if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-                // nuova versione pronta
-                console.log('Nuova versione disponibile. Ricarica per aggiornare.');
-              }
-            });
-          });
-        })
-        .catch(err => console.error('SW register error:', err));
-    });
-  }
-
-  // Pulsante "Ricarica app" / "Svuota dati e ricarica" (se li hai nell’interfaccia)
-  // Esempio:
-  // document.querySelector('#app-reload')?.addEventListener('click', () => location.reload());
-  // document.querySelector('#app-reset')?.addEventListener('click', () => {
-  //   localStorage.clear();
-  //   if (navigator.serviceWorker?.controller) {
-  //     navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
-  //   }
-  //   location.reload();
-  // });
-</script>
 <body>
 
 <header>
@@ -121,6 +88,9 @@
     <div class="title">
       <strong>Gestionale Giorgio</strong>
       <small id="hdrTel">Tel. +39 351 796 9013</small>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn" id="app-install" style="display:none">Installa app</button>
     </div>
   </div>
 </header>
@@ -188,7 +158,7 @@
         <h3 style="margin:12px 2px 6px">Materiali / Servizi</h3>
         <table>
           <thead><tr><th>Descrizione</th><th style="width:110px">Q.tà</th><th style="width:140px">Prezzo</th><th style="width:44px" class="no-print">×</th></tr></thead>
-          <tbody id="pv-rows"></tbody>
+        <tbody id="pv-rows"></tbody>
         </table>
         <div class="btns no-print">
           <button class="btn" id="row-add">+ Riga</button>
@@ -373,33 +343,58 @@
         <button class="btn primary" id="st-save" type="button">Salva impostazioni</button>
         <button class="btn danger" id="st-reset" type="button">Ripristina predefiniti</button>
       </div>
+      <div class="hint">Per aggiornare alla nuova versione puoi usare “Ricarica app”. Se vuoi ripartire pulito usa “Svuota dati e ricarica”.</div>
     </div>
   </section>
 
 </main>
 
 <script>
-/* Evita service worker vecchi (single-file mode) */
+/* ========= PWA: Service Worker + Install ========= */
+/* Registra SW con scope per GitHub Pages (repo: /gestionale-giorgio/) */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+  window.addEventListener('load', () => {
+    const swUrl = location.pathname.includes('/gestionale-giorgio/')
+      ? '/gestionale-giorgio/sw.js'
+      : './sw.js';
+    const scope = location.pathname.includes('/gestionale-giorgio/')
+      ? '/gestionale-giorgio/'
+      : './';
+
+    navigator.serviceWorker.register(swUrl, { scope })
+      .catch(err => console.error('SW register error:', err));
+  });
 }
-// Registra il service worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js");
-}
-/* Utils */
+
+/* Pulsante Installa (Android) */
+let deferredPrompt = null;
+const installBtn = document.getElementById('app-install');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'inline-block';
+});
+installBtn?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  installBtn.style.display = 'none';
+});
+
+/* ========= Utils ========= */
 const qs=(s,e=document)=>e.querySelector(s), qsa=(s,e=document)=>[...e.querySelectorAll(s)];
 const fmt=n=>(Math.round((+n||0)*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 const today=()=>{const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10);};
 const S={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
 
-/* Tabs */
+/* ========= Tabs ========= */
 qsa('.tab').forEach(b=>b.addEventListener('click',()=>{
   qsa('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
   const id=b.dataset.tab; qsa('main>section').forEach(s=>s.classList.toggle('active', s.id===id));
 }));
 
-/* Brand / Impostazioni */
+/* ========= Brand / Impostazioni ========= */
 function loadBrand(){
   const phone=S.get('phone','+39 351 796 9013');
   const terms=S.get('terms','');
@@ -408,20 +403,7 @@ function loadBrand(){
   qs('#st-phone').value=phone;
   qs('#st-terms').value=terms;
   if(logo){qs('#appLogo').src=logo}else{qs('#appLogo').removeAttribute('src')}
-}<button class="btn" id="app-install">Installa app</button>
-<script>
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById("app-install").style.display = "block";
-});
-document.getElementById("app-install").onclick = async () => {
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt = null;
-};
-</script>
+}
 qs('#st-logo').addEventListener('change',e=>{
   const f=e.target.files?.[0]; if(!f) return;
   if(!/^image\/(jpeg|png)$/.test(f.type)){alert('Carica JPG/PNG');return}
@@ -430,7 +412,7 @@ qs('#st-logo').addEventListener('change',e=>{
 qs('#st-save').onclick=()=>{S.set('phone',qs('#st-phone').value.trim()||'+39 351 796 9013');S.set('terms',qs('#st-terms').value);loadBrand();alert('Impostazioni salvate ✅')};
 qs('#st-reset').onclick=()=>{['phone','terms','logo'].forEach(S.del);loadBrand()};
 
-/* ===== Preventivi: archivio ===== */
+/* ========= Preventivi: archivio ========= */
 const PV_KEY='pvList';
 const getPVList=()=>S.get(PV_KEY,[]);
 const setPVList=arr=>S.set(PV_KEY,arr);
@@ -571,10 +553,7 @@ qs('#pv-to-iv').onclick=()=>{
   alert('Intervento creato dalla scheda preventivo ✅  (vai nella tab Interventi)');
 };
 
-/* Bozza PV */
-function restoreDraftPV(){ const d=S.get('pvDraft',null); if(d) setPVDoc(d) }
-
-/* ===== Interventi: archivio ===== */
+/* ========= Interventi: archivio ========= */
 const IV_KEY='ivList';
 const getIVList=()=>S.get(IV_KEY,[]);
 const setIVList=arr=>S.set(IV_KEY,arr);
@@ -675,13 +654,12 @@ qs('#iv-print').onclick=()=>{
   window.print();
 };
 
-/* Ricarica risorse SENZA perdere dati */
+/* ========= Azioni app ========= */
 function reloadApp(){ const u=new URL(location.href); u.searchParams.set('v', Date.now().toString()); location.replace(u.toString()); }
-/* Svuota dati locali e ricarica */
 function resetAndReload(){ if(!confirm('Sicuro di cancellare bozze, logo, impostazioni e numerazioni + archivi?')) return; localStorage.clear(); reloadApp(); }
 qs('#app-reload').onclick=reloadApp; qs('#app-reset').onclick=resetAndReload;
 
-/* Avvio */
+/* ========= Avvio ========= */
 function boot(){
   loadBrand();
   if(!S.get('pvCounter',null)) localStorage.setItem('pvCounter','0');
