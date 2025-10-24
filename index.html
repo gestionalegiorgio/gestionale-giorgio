@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="it">
 <head>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#0A2E5C">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gestionale Giorgio — Elettricista & Antennista</title>
@@ -344,7 +348,10 @@
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
 }
-
+// Registra il service worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
 /* Utils */
 const qs=(s,e=document)=>e.querySelector(s), qsa=(s,e=document)=>[...e.querySelectorAll(s)];
 const fmt=n=>(Math.round((+n||0)*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
@@ -366,7 +373,20 @@ function loadBrand(){
   qs('#st-phone').value=phone;
   qs('#st-terms').value=terms;
   if(logo){qs('#appLogo').src=logo}else{qs('#appLogo').removeAttribute('src')}
-}
+}<button class="btn" id="app-install">Installa app</button>
+<script>
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("app-install").style.display = "block";
+});
+document.getElementById("app-install").onclick = async () => {
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+};
+</script>
 qs('#st-logo').addEventListener('change',e=>{
   const f=e.target.files?.[0]; if(!f) return;
   if(!/^image\/(jpeg|png)$/.test(f.type)){alert('Carica JPG/PNG');return}
