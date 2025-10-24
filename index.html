@@ -8,13 +8,13 @@
 <style>
   :root{--brand:#0A2E5C;--accent:#F59E0B;--bg:#f5f7fb;--card:#fff;--line:#e5e7eb;--muted:#64748b}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111827}
-  header{position:sticky;top:0;z-index:5;background:var(--brand);color:#fff;padding:10px 14px;border-bottom:3px solid var(--accent)}
+  body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111827}
+  header{position:sticky;top:0;z-index:10;background:var(--brand);color:#fff;padding:10px 14px;border-bottom:3px solid var(--accent)}
   header .row{display:flex;gap:10px;align-items:center}
   .logo{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;background:#fff}
   .title{display:flex;flex-direction:column}
   .title strong{font-size:18px}
-  .tabs{display:flex;gap:8px;padding:10px;background:#eef2ff;border-bottom:1px solid var(--line)}
+  nav.tabs{display:flex;gap:8px;padding:10px;background:#eef2ff;border-bottom:1px solid var(--line);position:sticky;top:66px;z-index:9}
   .tab{border:1px solid #c7d2fe;background:#fff;padding:8px 12px;border-radius:999px;cursor:pointer}
   .tab.active{background:#1b3e8b;color:#fff;border-color:#1b3e8b}
   main{padding:14px;max-width:1100px;margin:0 auto}
@@ -22,10 +22,10 @@
   section.active{display:block}
   .layout{display:grid;grid-template-columns:290px 1fr;gap:12px}
   @media (max-width:960px){.layout{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px; padding:14px; margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
   .list{max-height:70vh;overflow:auto}
-  .row{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
-  .row:hover{background:#f9fafb}
+  .row-item{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
+  .row-item:hover{background:#f9fafb}
   .muted{color:var(--muted)}
   label{display:block;margin:6px 2px;color:#334155;font-weight:600;font-size:13px}
   input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
@@ -35,7 +35,7 @@
   @media (max-width:800px){.row2,.row3{grid-template-columns:1fr}}
   .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-  .btn.primary{background:#1e66ff;color:#fff;border-color:#1e66ff}
+  .btn.primary{background:var(--accent);color:#111;border-color:var(--accent)}
   .btn.warn{background:#fff3bf;border-color:#fde68a}
   .btn.danger{color:#ef4444;border-color:#ef4444}
   table{width:100%;border-collapse:collapse}
@@ -52,6 +52,10 @@
   .status{margin-left:auto;color:var(--muted);font-size:12px}
   .hint{color:var(--muted);font-size:12px}
   .terms{font-size:13px;color:#111827}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px}
+  .bd-green{background:#dcfce7;border-color:#86efac}
+  .bd-yellow{background:#fef9c3;border-color:#fde047}
+  .bd-red{background:#fee2e2;border-color:#fecaca}
   .print-only{display:none}
   @media print{
     header,.tabs,.btns,.no-print,.list{display:none!important}
@@ -68,7 +72,7 @@
   <div class="row">
     <img id="appLogo" class="logo" alt="Logo">
     <div class="title">
-      <strong>Giorgio — Elettricista & Antennista</strong>
+      <strong>Gestionale Giorgio</strong>
       <small id="hdrTel">Tel. +39 351 796 9013</small>
     </div>
   </div>
@@ -95,6 +99,24 @@
           <button class="btn" id="app-reload">Ricarica app</button>
           <button class="btn danger" id="app-reset">Svuota dati e ricarica</button>
         </div>
+        <div class="row2" style="margin-bottom:8px">
+          <div>
+            <label>Filtro stato</label>
+            <select id="pv-filter">
+              <option value="">Tutti</option>
+              <option>Bozza</option>
+              <option>Inviato</option>
+              <option>Accettato</option>
+              <option>Rifiutato</option>
+              <option>In scadenza (7gg)</option>
+              <option>Scaduto</option>
+            </select>
+          </div>
+          <div>
+            <label>Cerca per cliente/numero</label>
+            <input id="pv-search" placeholder="es. Rossi o PV-0012">
+          </div>
+        </div>
         <div class="hint" style="margin:6px 2px"><strong>Elenco Preventivi</strong></div>
         <div id="pv-list" class="list"></div>
       </div>
@@ -106,7 +128,16 @@
           <div><label>Data</label><input id="pv-date" type="date"></div>
           <div><label>Scadenza</label><input id="pv-exp" type="date"></div>
         </div>
-        <div class="row2">
+        <div class="row3">
+          <div>
+            <label>Stato</label>
+            <select id="pv-st">
+              <option>Bozza</option>
+              <option>Inviato</option>
+              <option>Accettato</option>
+              <option>Rifiutato</option>
+            </select>
+          </div>
           <div><label>Cliente</label><input id="pv-cli" placeholder="Nome cliente"></div>
           <div><label>Contatto</label><input id="pv-con" placeholder="Telefono / Email"></div>
         </div>
@@ -183,10 +214,22 @@
         </div>
 
         <div class="card">
-          <div class="terms" id="terms">
-            <strong>Termini:</strong> Pagamento <strong>50%</strong> all’accettazione e <strong>50%</strong> a fine lavori.
-            Il materiale resta di proprietà dell’installatore fino al saldo completo. Le firme equivalgono a firma digitale.
+          <div class="row2">
+            <div>
+              <label>Modello termini</label>
+              <select id="terms-preset">
+                <option value="std">Standard 50/50 + proprietà materiale</option>
+                <option value="solo-materiali">Acconto materiali + saldo a fine lavori</option>
+                <option value="consegna">Pagamento alla consegna/lavoro ultimato</option>
+              </select>
+            </div>
+            <div>
+              <label>Anteprima stato scadenza</label>
+              <div id="pv-exp-badge" class="badge">—</div>
+            </div>
           </div>
+          <label>Termini (modificabili)</label>
+          <textarea id="st-terms"></textarea>
         </div>
 
         <div class="print-only" id="printArea"></div>
@@ -194,7 +237,7 @@
     </div>
   </section>
 
-  <!-- ===================== INTERVENTI (sempre visibile) ===================== -->
+  <!-- ===================== INTERVENTI ===================== -->
   <section id="iv">
     <div class="layout">
       <!-- elenco -->
@@ -217,9 +260,9 @@
           <div>
             <label>Stato</label>
             <select id="iv-st">
-              <option>Aperto</option>
+              <option>Da fare</option>
               <option>In corso</option>
-              <option>Completato</option>
+              <option>Chiuso</option>
             </select>
           </div>
         </div>
@@ -299,27 +342,22 @@
   <section id="st">
     <div class="card">
       <h3>Impostazioni</h3>
-      <div class="row2">
+      <div class="row3">
         <div><label>Telefono intestazione</label><input id="st-phone" value="+39 351 796 9013"></div>
-        <div><label>Termini personalizzati (preventivi)</label><textarea id="st-terms" placeholder="Scrivi qui i tuoi termini..."></textarea></div>
+        <div><label>Logo (JPG/PNG)</label><input id="st-logo" type="file" accept="image/jpeg,image/png"></div>
+        <div><label>Colore principale</label><input id="st-brand" value="#0A2E5C"></div>
       </div>
-      <label>Logo (JPG/PNG)</label>
-      <input id="st-logo" type="file" accept="image/jpeg,image/png">
       <div class="btns" style="margin-top:8px">
         <button class="btn primary" id="st-save" type="button">Salva impostazioni</button>
         <button class="btn danger" id="st-reset" type="button">Ripristina predefiniti</button>
       </div>
+      <p class="hint">Nota: per installazione “come app” con prompt automatico e offline vero servono 2 file aggiuntivi (manifest e service worker). Qui è il file unico semplificato.</p>
     </div>
   </section>
 
 </main>
 
 <script>
-/* Disattiva eventuali SW vecchi per sicurezza (modalità “solo file”) */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-}
-
 /* Utils */
 const qs=(s,e=document)=>e.querySelector(s), qsa=(s,e=document)=>[...e.querySelectorAll(s)];
 const fmt=n=>(Math.round((+n||0)*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
@@ -335,11 +373,12 @@ qsa('.tab').forEach(b=>b.addEventListener('click',()=>{
 /* Brand / Impostazioni */
 function loadBrand(){
   const phone=S.get('phone','+39 351 796 9013');
-  const terms=S.get('terms','');
   const logo=S.get('logo',null);
+  const brand=S.get('brand','#0A2E5C');
+  document.documentElement.style.setProperty('--brand', brand);
   qs('#hdrTel').textContent='Tel. '+phone;
   qs('#st-phone').value=phone;
-  qs('#st-terms').value=terms;
+  qs('#st-brand').value=brand;
   if(logo){qs('#appLogo').src=logo}else{qs('#appLogo').removeAttribute('src')}
 }
 qs('#st-logo').addEventListener('change',e=>{
@@ -347,23 +386,53 @@ qs('#st-logo').addEventListener('change',e=>{
   if(!/^image\/(jpeg|png)$/.test(f.type)){alert('Carica JPG/PNG');return}
   const rd=new FileReader(); rd.onload=ev=>{S.set('logo',ev.target.result);loadBrand();alert('Logo aggiornato ✅')}; rd.readAsDataURL(f);
 });
-qs('#st-save').onclick=()=>{S.set('phone',qs('#st-phone').value.trim()||'+39 351 796 9013');S.set('terms',qs('#st-terms').value);loadBrand();alert('Impostazioni salvate ✅')};
-qs('#st-reset').onclick=()=>{['phone','terms','logo'].forEach(S.del);loadBrand()};
+qs('#st-save').onclick=()=>{S.set('phone',qs('#st-phone').value.trim()||'+39 351 796 9013'); S.set('brand',qs('#st-brand').value.trim()||'#0A2E5C'); loadBrand(); alert('Impostazioni salvate ✅')};
+qs('#st-reset').onclick=()=>{['phone','logo','brand'].forEach(S.del); loadBrand()};
 
-/* ===== Preventivi: archivio ===== */
+/* ===== Preventivi: archivio/lista ===== */
 const PV_KEY='pvList';
 const getPVList=()=>S.get(PV_KEY,[]);
 const setPVList=arr=>S.set(PV_KEY,arr);
+
+function statusBadge(st, exp){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const ex=exp?new Date(exp):null; if(ex) ex.setHours(0,0,0,0);
+  let cls=''; let text=st;
+  if(ex){
+    const diff=(ex-now)/(1000*60*60*24);
+    if(diff<0){ cls='bd-red'; text+=' · Scaduto'; }
+    else if(diff<=7){ cls='bd-yellow'; text+=' · In scadenza'; }
+  }
+  return `<span class="badge ${cls}">${text}</span>`;
+}
+
 function renderPVList(){
-  const box=qs('#pv-list'); const arr=getPVList(); box.innerHTML='';
-  if(!arr.length){box.innerHTML='<div class="muted" style="padding:10px">Nessun preventivo salvato</div>';return}
-  arr.forEach(p=>{
-    const d=document.createElement('div'); d.className='row';
-    d.innerHTML=`<div><strong>${p.num}</strong><div class="muted" style="font-size:12px">${p.date} · ${p.cli||'—'}</div></div><div class="muted">${p.exp||''}</div>`;
+  const box=qs('#pv-list'); const arr=getPVList();
+  const f=qs('#pv-filter').value; const q=(qs('#pv-search').value||'').toLowerCase();
+  let l=arr.slice();
+  if(q) l=l.filter(p=>(p.cli||'').toLowerCase().includes(q)||(p.num||'').toLowerCase().includes(q));
+  if(f){
+    if(f==='In scadenza (7gg)'){
+      const now=new Date(); now.setHours(0,0,0,0);
+      l=l.filter(p=>{ if(!p.exp) return false; const ex=new Date(p.exp); ex.setHours(0,0,0,0); const diff=(ex-now)/(1000*60*60*24); return diff>=0 && diff<=7; });
+    } else if(f==='Scaduto'){
+      const now=new Date(); now.setHours(0,0,0,0);
+      l=l.filter(p=>{ if(!p.exp) return false; const ex=new Date(p.exp); ex.setHours(0,0,0,0); return ex<now; });
+    } else {
+      l=l.filter(p=>p.st===f);
+    }
+  }
+  box.innerHTML='';
+  if(!l.length){box.innerHTML='<div class="muted" style="padding:10px">Nessun preventivo</div>';return}
+  l.forEach(p=>{
+    const d=document.createElement('div'); d.className='row-item';
+    d.innerHTML=`<div><strong>${p.num}</strong><div class="muted" style="font-size:12px">${p.date} · ${p.cli||'—'}</div></div><div>${statusBadge(p.st,p.exp)}</div>`;
     d.onclick=()=>setPVDoc(p);
     box.appendChild(d);
   });
 }
+qs('#pv-filter').addEventListener('change',renderPVList);
+qs('#pv-search').addEventListener('input',renderPVList);
 
 /* Preventivi — righe materiali */
 function addRow(desc='',qty=1,price=0){
@@ -376,6 +445,8 @@ function addRow(desc='',qty=1,price=0){
   tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',calcPV));
   tr.querySelector('.x').addEventListener('click',()=>{tr.remove();calcPV()});
 }
+qs('#row-add').onclick=()=>addRow();
+qs('#row-clr').onclick=()=>{qs('#pv-rows').innerHTML='';calcPV();};
 
 /* Firma riutilizzabile */
 function signature(boxSel){
@@ -397,7 +468,7 @@ function signature(boxSel){
 const sigCli = signature('#sg-cliente');
 const sigTec = signature('#sg-tecnico');
 
-/* Calcoli preventivo */
+/* Calcoli PV */
 function pvRows(){ return qsa('#pv-rows tr').map(tr=>({d:qs('.d',tr).value.trim(), q:+qs('.q',tr).value||0, p:+qs('.p',tr).value||0})).filter(r=>r.d||r.q||r.p) }
 function calcPV(){
   const r=pvRows(); const mat=r.reduce((s,v)=>s+v.q*v.p,0); const mo=(+qs('#mo-qty').value||0)*(+qs('#mo-rate').value||0);
@@ -407,44 +478,51 @@ function calcPV(){
   qs('#k-mat').textContent=fmt(matNet); qs('#k-mo').textContent=fmt(mo); qs('#k-imp').textContent=fmt(impon); qs('#k-tot').textContent=fmt(tot); qs('#pv-tot').value=fmt(tot);
   const auto=qs('#pv-ace-auto').checked; const acp=(+qs('#pv-acp').value||0)/100; let ac=auto?(tot*acp):(+qs('#pv-ace').value||0); if(ac>tot) ac=tot;
   qs('#pv-ace').value=(Math.round(ac*100)/100).toFixed(2); qs('#pv-bal').value=(Math.max(tot-ac,0)).toFixed(2);
+  updateExpBadge();
   saveDraftPV();
 }
-['#mo-qty','#mo-rate','#pv-disc','#pv-mark','#pv-acp','#pv-ace','#pv-ace-auto'].forEach(sel=>qs(sel).addEventListener('input',calcPV));
+['#mo-qty','#mo-rate','#pv-disc','#pv-mark','#pv-acp','#pv-ace','#pv-ace-auto','#pv-exp'].forEach(sel=>qs(sel).addEventListener('input',calcPV));
 
 /* Numerazione + nuovo PV */
 function nextPVNum(){ const k='pvCounter'; let v=+(localStorage.getItem(k)||0); v++; localStorage.setItem(k,v); return 'PV-'+String(v).padStart(4,'0'); }
 function newPV(){
-  qs('#pv-num').value=nextPVNum(); qs('#pv-date').value=today(); const d=new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); qs('#pv-exp').value=d.toISOString().slice(0,10);
-  ['#pv-cli','#pv-con','#pv-obj'].forEach(s=>qs(s).value=''); qs('#mo-type').value='ora'; qs('#mo-qty').value=0; qs('#mo-rate').value=0; qs('#pv-disc').value=0; qs('#pv-mark').value=0; qs('#pv-acp').value=50; qs('#pv-ace').value=0; qs('#pv-bal').value=0; qs('#pv-ace-auto').checked=true;
+  qs('#pv-num').value=nextPVNum(); qs('#pv-date').value=today();
+  const d=new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); qs('#pv-exp').value=d.toISOString().slice(0,10);
+  qs('#pv-st').value='Bozza';
+  ['#pv-cli','#pv-con','#pv-obj'].forEach(s=>qs(s).value=''); qs('#mo-type').value='ora'; qs('#mo-qty').value=0; qs('#mo-rate').value=0;
+  qs('#pv-disc').value=0; qs('#pv-mark').value=0; qs('#pv-acp').value=50; qs('#pv-ace').value=0; qs('#pv-bal').value=0; qs('#pv-ace-auto').checked=true;
   qs('#pv-rows').innerHTML=''; addRow(); sigCli.clear(); sigTec.clear(); calcPV();
 }
 qs('#pv-new').onclick=newPV;
 
-/* Oggetto documento PV */
-function getPVDoc(){ return { id:crypto.randomUUID(), num:qs('#pv-num').value, date:qs('#pv-date').value, exp:qs('#pv-exp').value, cli:qs('#pv-cli').value, con:qs('#pv-con').value, obj:qs('#pv-obj').value, moType:qs('#mo-type').value, moQty:+qs('#mo-qty').value||0, moRate:+qs('#mo-rate').value||0, rows:pvRows(), disc:+qs('#pv-disc').value||0, mark:+qs('#pv-mark').value||0, acp:+qs('#pv-acp').value||0, ace:+qs('#pv-ace').value||0, bal:+qs('#pv-bal').value||0, k:{mat:qs('#k-mat').textContent, mo:qs('#k-mo').textContent, imp:qs('#k-imp').textContent, tot:qs('#k-tot').textContent}, signCli:sigCli.data(), signTec:sigTec.data() } }
+/* Document PV */
+function getPVDoc(){ return { id:crypto.randomUUID(), num:qs('#pv-num').value, date:qs('#pv-date').value, exp:qs('#pv-exp').value, st:qs('#pv-st').value, cli:qs('#pv-cli').value, con:qs('#pv-con').value, obj:qs('#pv-obj').value, moType:qs('#mo-type').value, moQty:+qs('#mo-qty').value||0, moRate:+qs('#mo-rate').value||0, rows:pvRows(), disc:+qs('#pv-disc').value||0, mark:+qs('#pv-mark').value||0, acp:+qs('#pv-acp').value||0, ace:+qs('#pv-ace').value||0, bal:+qs('#pv-bal').value||0, k:{mat:qs('#k-mat').textContent, mo:qs('#k-mo').textContent, imp:qs('#k-imp').textContent, tot:qs('#k-tot').textContent}, signCli:sigCli.data(), signTec:sigTec.data(), terms:qs('#st-terms').value } }
 function setPVDoc(d){
   if(!d) return;
-  qs('#pv-num').value=d.num||nextPVNum(); qs('#pv-date').value=d.date||today(); qs('#pv-exp').value=d.exp||today();
+  qs('#pv-num').value=d.num||nextPVNum(); qs('#pv-date').value=d.date||today(); qs('#pv-exp').value=d.exp||today(); qs('#pv-st').value=d.st||'Bozza';
   qs('#pv-cli').value=d.cli||''; qs('#pv-con').value=d.con||''; qs('#pv-obj').value=d.obj||'';
   qs('#mo-type').value=d.moType||'ora'; qs('#mo-qty').value=d.moQty||0; qs('#mo-rate').value=d.moRate||0;
   qs('#pv-rows').innerHTML=''; (d.rows||[]).forEach(x=>addRow(x.d,x.q,x.p)); if((d.rows||[]).length===0) addRow();
   qs('#pv-disc').value=d.disc||0; qs('#pv-mark').value=d.mark||0; qs('#pv-acp').value=d.acp||50; qs('#pv-ace').value=d.ace||0; qs('#pv-bal').value=d.bal||0;
+  qs('#st-terms').value=d.terms||S.get('termsDefault',termsStandard());
   if(d.signCli) sigCli.load(d.signCli); if(d.signTec) sigTec.load(d.signTec);
   calcPV();
 }
 function saveDraftPV(){ S.set('pvDraft', getPVDoc()); }
 qs('#pv-save').onclick=()=>{ const d=getPVDoc(); const arr=getPVList(); arr.unshift(d); setPVList(arr); renderPVList(); alert('Preventivo salvato in elenco ✅'); };
 qs('#pv-share').onclick=async()=>{const d=getPVDoc(); const text=`Preventivo ${d.num}\nCliente: ${d.cli}\nOggetto: ${d.obj}\nTotale: ${d.k.tot}`; if(navigator.share){try{await navigator.share({title:d.num,text})}catch(e){}} else {await navigator.clipboard.writeText(text); alert('Copiato negli appunti ✅')}};
+
+/* Stampa (solo parte cliente) */
 qs('#pv-print').onclick=()=>{
   const d=getPVDoc();
   const rowsHtml=(d.rows||[]).map(r=>`<tr><td>${r.d||''}</td><td style="text-align:right">${r.q||0}</td><td style="text-align:right">${fmt(r.p||0)}</td><td style="text-align:right">${fmt((r.q||0)*(r.p||0))}</td></tr>`).join('');
-  const tel=S.get('phone','+39 351 796 9013'); const terms=(S.get('terms','')||'').trim();
-  const termsHtml=terms?terms.replace(/\n/g,'<br>'):`<strong>Termini:</strong> Pagamento <strong>50%</strong> all’accettazione e <strong>50%</strong> a fine lavori. Il materiale resta di proprietà dell’installatore fino al saldo completo. Le firme equivalgono a firma digitale.`;
+  const tel=S.get('phone','+39 351 796 9013');
+  const termsHtml=(d.terms||'').trim().replace(/\n/g,'<br>');
   qs('#printArea').innerHTML=`<div style="font:14px/1.3 Arial;color:#111">
     <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
       <div style="width:52px;height:52px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">G</div>
-      <div><div style="font-weight:800;font-size:18px">Giorgio — Elettricista & Antennista</div><div style="color:#444">Tel. ${tel}</div></div>
-      <div style="margin-left:auto;text-align:right"><div><strong>${d.num}</strong></div><div>Data: ${d.date}</div><div>Scadenza: ${d.exp}</div></div>
+      <div><div style="font-weight:800;font-size:18px">Gestionale Giorgio</div><div style="color:#444">Tel. ${tel}</div></div>
+      <div style="margin-left:auto;text-align:right"><div><strong>${d.num}</strong></div><div>Data: ${d.date}</div><div>Scadenza: ${d.exp}</div><div>${d.st}</div></div>
     </div>
     <table style="width:100%;border-collapse:collapse;margin:8px 0">
       <tr><td style="border:1px solid #000;padding:6px"><strong>Cliente:</strong> ${d.cli||'-'}</td><td style="border:1px solid #000;padding:6px"><strong>Contatto:</strong> ${d.con||'-'}</td></tr>
@@ -456,8 +534,8 @@ qs('#pv-print').onclick=()=>{
     </table>
     <table style="width:100%;border-collapse:collapse;margin:8px 0">
       <tr><td style="padding:6px"><strong>Manodopera:</strong> ${d.moQty} ${d.moType==='ora'?'h':'gg'} × ${fmt(d.moRate)}</td><td style="padding:6px;text-align:right"><strong>Materiali:</strong> ${d.k.mat}</td></tr>
-      <tr><td style="padding:6px"><strong>Sconto:</strong> ${d.disc}% — <strong>Maggiorazione:</strong> ${d.mark}%</td><td style="padding:6px;text-align:right"><strong>Imponibile:</strong> ${d.k.imp}</td></tr>
-      <tr><td style="padding:6px"><strong>Totale:</strong> ${d.k.tot}</td><td style="padding:6px;text-align:right"><strong>Saldo:</strong> € ${(d.bal||0).toFixed(2)}</td></tr>
+      <tr><td style="padding:6px"><strong>Imponibile (materiali + manodopera):</strong> ${d.k.imp}</td><td style="padding:6px;text-align:right"><strong>Totale:</strong> ${d.k.tot}</td></tr>
+      <tr><td style="padding:6px"><strong>Acconto richiesto:</strong> ${(+d.acp||0)}% / € ${(d.ace||0).toFixed(2)}</td><td style="padding:6px;text-align:right"><strong>Saldo:</strong> € ${(d.bal||0).toFixed(2)}</td></tr>
     </table>
     <div style="margin:12px 0">${termsHtml}</div>
     <div style="display:flex;gap:20px;margin-top:20px">
@@ -467,10 +545,46 @@ qs('#pv-print').onclick=()=>{
   window.print();
 };
 
+/* Preset termini (modificabili) */
+function termsStandard(){
+  return `Pagamento 50% all’accettazione del preventivo e 50% a fine lavori.
+Il materiale resta di proprietà dell’installatore fino al saldo completo.
+Prezzi al netto di urgenze/trasferte non indicate.
+Le firme apposte equivalgono a firma digitale.`;
+}
+function termsSoloMateriali(){
+  return `Acconto pari al costo dei materiali prima dell’ordine; saldo a fine lavori.
+Il materiale resta di proprietà dell’installatore fino al saldo completo.
+Le firme apposte equivalgono a firma digitale.`;
+}
+function termsConsegna(){
+  return `Pagamento alla consegna/a lavori ultimati salvo diversi accordi scritti.
+Il materiale resta di proprietà dell’installatore fino al saldo completo.
+Le firme apposte equivalgono a firma digitale.`;
+}
+const PRESET_MAP={std:termsStandard, 'solo-materiali':termsSoloMateriali, consegna:termsConsegna};
+qs('#terms-preset').addEventListener('change',()=>{
+  const k=qs('#terms-preset').value; qs('#st-terms').value=(PRESET_MAP[k]||termsStandard)(); saveDraftPV();
+});
+
+/* Badge scadenza */
+function updateExpBadge(){
+  const badge=qs('#pv-exp-badge'); const st=qs('#pv-st').value; const exp=qs('#pv-exp').value;
+  if(!exp){ badge.textContent='—'; badge.className='badge'; return; }
+  const now=new Date(); now.setHours(0,0,0,0);
+  const ex=new Date(exp); ex.setHours(0,0,0,0);
+  const diff=(ex-now)/(1000*60*60*24);
+  badge.className='badge';
+  if(diff<0){ badge.classList.add('bd-red'); badge.textContent=st+' · Scaduto'; }
+  else if(diff<=7){ badge.classList.add('bd-yellow'); badge.textContent=st+' · In scadenza'; }
+  else { badge.classList.add('bd-green'); badge.textContent=st; }
+}
+qs('#pv-st').addEventListener('change',()=>{updateExpBadge(); saveDraftPV()});
+
 /* Crea intervento dai dati del preventivo */
 qs('#pv-to-iv').onclick=()=>{
   const d=getPVDoc();
-  newIV(); // reset e numero nuovo
+  newIV();
   qs('#iv-cli').value=d.cli||''; qs('#iv-con').value=d.con||''; qs('#iv-obj').value=d.obj||'';
   qs('#iv-rows').innerHTML=''; (d.rows||[]).forEach(x=>ivAddRow(x.d,x.q,x.p));
   qs('#iv-mo-type').value=d.moType; qs('#iv-mo-qty').value=d.moQty; qs('#iv-mo-rate').value=d.moRate;
@@ -481,17 +595,18 @@ qs('#pv-to-iv').onclick=()=>{
 
 /* Bozza PV */
 function restoreDraftPV(){ const d=S.get('pvDraft',null); if(d) setPVDoc(d) }
-function removeDraftPV(){ S.del('pvDraft') }
 
 /* ===== Interventi: archivio ===== */
 const IV_KEY='ivList';
 const getIVList=()=>S.get(IV_KEY,[]);
 const setIVList=arr=>S.set(IV_KEY,arr);
+
 function renderIVList(){
-  const box=qs('#iv-list'); const arr=getIVList(); box.innerHTML='';
-  if(!arr.length){box.innerHTML='<div class="muted" style="padding:10px">Nessun intervento salvato</div>';return}
+  const box=qs('#iv-list'); const arr=getIVList();
+  box.innerHTML='';
+  if(!arr.length){box.innerHTML='<div class="muted" style="padding:10px">Nessun intervento</div>';return}
   arr.forEach(p=>{
-    const d=document.createElement('div'); d.className='row';
+    const d=document.createElement('div'); d.className='row-item';
     d.innerHTML=`<div><strong>${p.num}</strong><div class="muted" style="font-size:12px">${p.date} · ${p.cli||'—'}</div></div><div class="muted">${p.st||''}</div>`;
     d.onclick=()=>setIVDoc(p);
     box.appendChild(d);
@@ -531,18 +646,18 @@ function ivCalc(){
 /* Numerazione + nuovo IV */
 function nextIVNum(){ const k='ivCounter'; let v=+(localStorage.getItem(k)||0); v++; localStorage.setItem(k,v); return 'IV-'+String(v).padStart(4,'0'); }
 function newIV(){
-  qs('#iv-num').value=nextIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='Aperto';
+  qs('#iv-num').value=nextIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='Da fare';
   ['#iv-cli','#iv-con','#iv-obj','#iv-des'].forEach(s=>qs(s).value='');
   qs('#iv-mo-type').value='ora'; qs('#iv-mo-qty').value=0; qs('#iv-mo-rate').value=0; qs('#iv-disc').value=0; qs('#iv-mark').value=0;
   qs('#iv-rows').innerHTML=''; ivAddRow(); ivSigCli.clear(); ivSigTec.clear(); ivCalc();
 }
 qs('#iv-new').onclick=newIV;
 
-/* Oggetto documento IV */
+/* Document IV */
 function getIVDoc(){ return { id:crypto.randomUUID(), num:qs('#iv-num').value, date:qs('#iv-date').value, st:qs('#iv-st').value, cli:qs('#iv-cli').value, con:qs('#iv-con').value, obj:qs('#iv-obj').value, des:qs('#iv-des').value, moType:qs('#iv-mo-type').value, moQty:+qs('#iv-mo-qty').value||0, moRate:+qs('#iv-mo-rate').value||0, rows:ivRows(), disc:+qs('#iv-disc').value||0, mark:+qs('#iv-mark').value||0, k:{mat:qs('#iv-k-mat').textContent, mo:qs('#iv-k-mo').textContent, imp:qs('#iv-k-imp').textContent, tot:qs('#iv-k-tot').textContent}, signCli:ivSigCli.data(), signTec:ivSigTec.data() } }
 function setIVDoc(d){
   if(!d) return;
-  qs('#iv-num').value=d.num||nextIVNum(); qs('#iv-date').value=d.date||today(); qs('#iv-st').value=d.st||'Aperto';
+  qs('#iv-num').value=d.num||nextIVNum(); qs('#iv-date').value=d.date||today(); qs('#iv-st').value=d.st||'Da fare';
   qs('#iv-cli').value=d.cli||''; qs('#iv-con').value=d.con||''; qs('#iv-obj').value=d.obj||''; qs('#iv-des').value=d.des||'';
   qs('#iv-mo-type').value=d.moType||'ora'; qs('#iv-mo-qty').value=d.moQty||0; qs('#iv-mo-rate').value=d.moRate||0;
   qs('#iv-rows').innerHTML=''; (d.rows||[]).forEach(x=>ivAddRow(x.d,x.q,x.p)); if((d.rows||[]).length===0) ivAddRow();
@@ -560,7 +675,7 @@ qs('#iv-print').onclick=()=>{
   qs('#iv-printArea').innerHTML=`<div style="font:14px/1.3 Arial;color:#111">
     <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
       <div style="width:52px;height:52px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">G</div>
-      <div><div style="font-weight:800;font-size:18px">Giorgio — Elettricista & Antennista</div><div style="color:#444">Tel. ${tel}</div></div>
+      <div><div style="font-weight:800;font-size:18px">Gestionale Giorgio</div><div style="color:#444">Tel. ${tel}</div></div>
       <div style="margin-left:auto;text-align:right"><div><strong>${d.num}</strong></div><div>Data: ${d.date}</div><div>Stato: ${d.st}</div></div>
     </div>
     <table style="width:100%;border-collapse:collapse;margin:8px 0">
@@ -574,7 +689,7 @@ qs('#iv-print').onclick=()=>{
     </table>
     <table style="width:100%;border-collapse:collapse;margin:8px 0">
       <tr><td style="padding:6px"><strong>Manodopera:</strong> ${d.moQty} ${d.moType==='ora'?'h':'gg'} × ${fmt(d.moRate)}</td><td style="padding:6px;text-align:right"><strong>Materiali:</strong> ${d.k.mat}</td></tr>
-      <tr><td style="padding:6px"><strong>Imponibile:</strong> ${d.k.imp}</td><td style="padding:6px;text-align:right"><strong>Totale:</strong> ${d.k.tot}</td></tr>
+      <tr><td style="padding:6px"><strong>Imponibile (materiali + manodopera):</strong> ${d.k.imp}</td><td style="padding:6px;text-align:right"><strong>Totale:</strong> ${d.k.tot}</td></tr>
     </table>
     <div style="display:flex;gap:20px;margin-top:20px">
       <div><div style="width:260px;height:90px;border:1px solid #000;display:flex;align-items:center;justify-content:center">${d.signCli?`<img src="${d.signCli}" style="max-width:100%;max-height:100%">`:''}</div><div style="font-size:12px;color:#333">Firma Cliente</div></div>
@@ -583,7 +698,7 @@ qs('#iv-print').onclick=()=>{
   window.print();
 };
 
-/* Ricarica risorse SENZA perdere dati */
+/* Ricarica risorse (cache-buster) */
 function reloadApp(){ const u=new URL(location.href); u.searchParams.set('v', Date.now().toString()); location.replace(u.toString()); }
 /* Svuota dati locali e ricarica */
 function resetAndReload(){ if(!confirm('Sicuro di cancellare bozze, logo, impostazioni e numerazioni + archivi?')) return; localStorage.clear(); reloadApp(); }
@@ -594,14 +709,25 @@ function boot(){
   loadBrand();
   if(!S.get('pvCounter',null)) localStorage.setItem('pvCounter','0');
   if(!S.get('ivCounter',null)) localStorage.setItem('ivCounter','0');
+  // Termini default se non presenti
+  if(!S.get('termsDefault',null)) S.set('termsDefault', termsStandard());
+  if(!qs('#st-terms').value) qs('#st-terms').value = S.get('termsDefault', termsStandard());
+
   renderPVList(); renderIVList();
-  // PV iniziale
-  if(!S.get('pvDraft',null)){ // nuovo solo se non c'è bozza
-    qs('#pv-num').value=nextPVNum(); qs('#pv-date').value=today(); const d=new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); qs('#pv-exp').value=d.toISOString().slice(0,10); qs('#pv-rows').innerHTML=''; addRow(); calcPV();
-  }else{ restoreDraftPV(); }
-  // IV iniziale
-  if(!S.get('ivDraft',null)){ qs('#iv-num').value=nextIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='Aperto'; qs('#iv-rows').innerHTML=''; ivAddRow(); ivCalc(); }
-  else { setIVDoc(S.get('ivDraft',null)); }
+
+  // PV iniziale o bozza
+  if(!S.get('pvDraft',null)){
+    newPV();
+  } else {
+    restoreDraftPV();
+  }
+  // IV iniziale o bozza
+  if(!S.get('ivDraft',null)){
+    newIV();
+  } else {
+    setIVDoc(S.get('ivDraft',null));
+  }
+  updateExpBadge();
 }
 boot();
 </script>
