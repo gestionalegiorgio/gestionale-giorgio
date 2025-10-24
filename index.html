@@ -78,6 +78,41 @@
   }
 </style>
 </head>
+<script>
+  // Registration per GitHub Pages (path /gestionale-giorgio/)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/gestionale-giorgio/sw.js', { scope: '/gestionale-giorgio/' })
+        .then(reg => {
+          // opzionale: ascolta aggiornamenti e mostra un alert per ricaricare
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+          reg.addEventListener('updatefound', () => {
+            const newSW = reg.installing;
+            newSW?.addEventListener('statechange', () => {
+              if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                // nuova versione pronta
+                console.log('Nuova versione disponibile. Ricarica per aggiornare.');
+              }
+            });
+          });
+        })
+        .catch(err => console.error('SW register error:', err));
+    });
+  }
+
+  // Pulsante "Ricarica app" / "Svuota dati e ricarica" (se li hai nell’interfaccia)
+  // Esempio:
+  // document.querySelector('#app-reload')?.addEventListener('click', () => location.reload());
+  // document.querySelector('#app-reset')?.addEventListener('click', () => {
+  //   localStorage.clear();
+  //   if (navigator.serviceWorker?.controller) {
+  //     navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+  //   }
+  //   location.reload();
+  // });
+</script>
 <body>
 
 <header>
