@@ -60,7 +60,7 @@
   .terms{font-size:13px;color:#111827}
   .print-only{display:none}
 
-  /* ===== Stampa cliente (A4, cerca di forzare 1 pagina) ===== */
+  /* ===== Stampa cliente (A4, compatta su 1 pagina) ===== */
   @page { size: A4; margin: 8mm; }
   .sheet{width:190mm; min-height:271mm; margin:0 auto; font:12.2px/1.32 Arial, sans-serif; color:#111}
   .tight td,.tight th{padding:5px}
@@ -68,7 +68,6 @@
   .table-clean{width:100%; border-collapse:collapse}
   .table-clean th,.table-clean td{border:1px solid #000; padding:5px}
   .print-header{display:flex; gap:10px; align-items:center; margin-bottom:6px}
-  .print-logo{width:44px;height:44px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
   .print-col{margin-left:auto; text-align:right}
   .signbox{width:240px;height:80px;border:1px solid #000;display:flex;align-items:center;justify-content:center}
 
@@ -289,6 +288,14 @@
           <div><label>Totale</label><input id="iv-tot" readonly></div>
         </div>
 
+        <!-- KPI opzionali: non obbligatori, ma riaggiunti per praticità -->
+        <div class="kpi">
+          <div class="box"><div class="hint">Materiali</div><div class="val" id="iv-k-mat">€ 0,00</div></div>
+          <div class="box"><div class="hint">Manodopera</div><div class="val" id="iv-k-mo">€ 0,00</div></div>
+          <div class="box"><div class="hint">Imponibile</div><div class="val" id="iv-k-imp">€ 0,00</div></div>
+          <div class="box"><div class="hint">Totale</div><div class="val" id="iv-k-tot">€ 0,00</div></div>
+        </div>
+
         <h3 style="margin:12px 2px 6px">Firme</h3>
         <div class="signwrap">
           <div class="sign" id="iv-sg-cliente">
@@ -338,7 +345,7 @@
 </main>
 
 <script>
-/* ===== PWA: registra SW se presente ===== */
+/* ===== PWA (opzionale): registra SW se presente ===== */
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(()=>{});
 }
@@ -474,7 +481,15 @@ function newPV(){
 qs('#pv-new').onclick=newPV;
 
 /* Oggetto & CRUD PV */
-function getPVDoc(){ return { id:crypto.randomUUID(), num:qs('#pv-num').value, date:qs('#pv-date').value, exp:qs('#pv-exp').value, st:qs('#pv-st').value, cli:qs('#pv-cli').value, con:qs('#pv-con').value, obj:qs('#pv-obj').value, moType:qs('#mo-type').value, moQty:+qs('#mo-qty').value||0, moRate:+qs('#mo-rate').value||0, rows:pvRows(), disc:+qs('#pv-disc').value||0, mark:+qs('#pv-mark').value||0, acp:+qs('#pv-acp').value||0, ace:+qs('#pv-ace').value||0, bal:+qs('#pv-bal').value||0, k:{mat:qs('#k-mat').textContent, mo:qs('#k-mo').textContent, imp:qs('#k-imp').textContent, tot:qs('#k-tot').textContent}, signCli:sigCli.data(), signTec:sigTec.data() } }
+function getPVDoc(){
+  const r = pvRows();
+  const mat = r.reduce((s,v)=>s+v.q*v.p,0);
+  const mo  = (+qs('#mo-qty').value||0) * (+qs('#mo-rate').value||0);
+  const disc=(+qs('#pv-disc').value||0)/100, mark=(+qs('#pv-mark').value||0)/100;
+  let matNet=mat; if(disc>0) matNet*=1-disc; if(mark>0) matNet*=1+mark;
+  const impon=matNet+mo, tot=impon;
+  return { id:crypto.randomUUID(), num:qs('#pv-num').value, date:qs('#pv-date').value, exp:qs('#pv-exp').value, st:qs('#pv-st').value, cli:qs('#pv-cli').value, con:qs('#pv-con').value, obj:qs('#pv-obj').value, moType:qs('#mo-type').value, moQty:+qs('#mo-qty').value||0, moRate:+qs('#mo-rate').value||0, rows:r, disc:+qs('#pv-disc').value||0, mark:+qs('#pv-mark').value||0, acp:+qs('#pv-acp').value||0, ace:+qs('#pv-ace').value||0, bal:+qs('#pv-bal').value||0, k:{mat:fmt(matNet), mo:fmt(mo), imp:fmt(impon), tot:fmt(tot)}, signCli:sigCli.data(), signTec:sigTec.data() };
+}
 function setPVDoc(d){
   if(!d) return;
   qs('#pv-num').value=d.num||nextPVNum(); qs('#pv-date').value=d.date||today(); qs('#pv-exp').value=d.exp||today();
@@ -490,7 +505,7 @@ qs('#pv-save').onclick=()=>{ const d=getPVDoc(); const arr=getPVList(); const id
 qs('#pv-del').onclick=()=>{ const num=qs('#pv-num').value||''; if(!num) return; const arr=getPVList().filter(x=>x.num!==num); setPVList(arr); renderPVList(); alert('Preventivo eliminato ✅'); newPV(); };
 qs('#pv-share').onclick=async()=>{const d=getPVDoc(); const text=`Preventivo ${d.num}\nStato: ${d.st}\nCliente: ${d.cli}\nOggetto: ${d.obj}\nTotale: ${d.k.tot}`; if(navigator.share){try{await navigator.share({title:d.num,text})}catch(e){}} else {await navigator.clipboard.writeText(text); alert('Copiato negli appunti ✅')}};
 
-/* Stampa PV — una pagina */
+/* Stampa PV — una pagina con logo e firme */
 qs('#pv-print').onclick=()=>{
   const d=getPVDoc();
   const rowsHtml=(d.rows||[]).map(r=>`<tr class="pb-avoid"><td>${r.d||''}</td><td style="text-align:right">${r.q||0}</td><td style="text-align:right">${fmt(r.p||0)}</td><td style="text-align:right">${fmt((r.q||0)*(r.p||0))}</td></tr>`).join('');
@@ -498,7 +513,7 @@ qs('#pv-print').onclick=()=>{
   const termsHtml=terms?terms.replace(/\n/g,'<br>'):`<strong>Termini:</strong> Pagamento <strong>50%</strong> all’accettazione e <strong>50%</strong> a fine lavori. Il materiale resta di proprietà dell’installatore fino al saldo completo. Le firme equivalgono a firma digitale.`;
   const logo=S.get('logo',null);
   const logoHtml = logo ? `<img src="${logo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid #000">`
-                        : `<div class="print-logo">G</div>`;
+                        : `<div style="width:44px;height:44px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">G</div>`;
   qs('#printArea').innerHTML=`<div class="sheet">
     <div class="print-header">
       ${logoHtml}
@@ -539,14 +554,28 @@ qs('#pv-to-iv').onclick=()=>{
   alert('Intervento creato dalla scheda preventivo ✅ (vai nella tab Interventi)');
 };
 
-/* ===== Calcoli IV ===== */
+/* ===== Calcoli IV (patch: niente errori se KPI assenti) ===== */
 function ivRows(){ return qsa('#iv-rows tr').map(tr=>({d:qs('.d',tr).value.trim(), q:+qs('.q',tr).value||0, p:+qs('.p',tr).value||0})).filter(r=>r.d||r.q||r.p) }
 function ivCalc(){
-  const r=ivRows(); const mat=r.reduce((s,v)=>s+v.q*v.p,0); const mo=(+qs('#iv-mo-qty').value||0)*(+qs('#iv-mo-rate').value||0);
-  const disc=(+qs('#iv-disc').value||0)/100, mark=(+qs('#iv-mark').value||0)/100;
-  let matNet=mat; if(disc>0) matNet*=1-disc; if(mark>0) matNet*=1+mark;
-  const impon=matNet+mo; const tot=impon;
-  qs('#iv-k-mat').textContent=fmt(matNet); qs('#iv-k-mo').textContent=fmt(mo); qs('#iv-k-imp').textContent=fmt(impon); qs('#iv-k-tot').textContent=fmt(tot); qs('#iv-tot').value=fmt(tot);
+  const r = ivRows();
+  const mat = r.reduce((s,v)=> s + v.q*v.p, 0);
+  const mo  = (+qs('#iv-mo-qty').value||0) * (+qs('#iv-mo-rate').value||0);
+  const disc = (+qs('#iv-disc').value||0)/100;
+  const mark = (+qs('#iv-mark').value||0)/100;
+
+  let matNet = mat;
+  if (disc>0) matNet *= (1 - disc);
+  if (mark>0) matNet *= (1 + mark);
+
+  const impon = matNet + mo;
+  const tot   = impon;
+
+  qs('#iv-tot').value = fmt(tot);
+  qs('#iv-k-mat') && (qs('#iv-k-mat').textContent = fmt(matNet));
+  qs('#iv-k-mo')  && (qs('#iv-k-mo').textContent  = fmt(mo));
+  qs('#iv-k-imp') && (qs('#iv-k-imp').textContent = fmt(impon));
+  qs('#iv-k-tot') && (qs('#iv-k-tot').textContent = fmt(tot));
+
   saveDraftIV();
 }
 ['#iv-mo-qty','#iv-mo-rate','#iv-disc','#iv-mark','#iv-st'].forEach(sel=>qs(sel).addEventListener('input',ivCalc));
@@ -561,8 +590,29 @@ function newIV(){
 }
 qs('#iv-new').onclick=newIV;
 
-/* Oggetto & CRUD IV */
-function getIVDoc(){ return { id:crypto.randomUUID(), num:qs('#iv-num').value, date:qs('#iv-date').value, st:qs('#iv-st').value, cli:qs('#iv-cli').value, con:qs('#iv-con').value, obj:qs('#iv-obj').value, des:qs('#iv-des').value, moType:qs('#iv-mo-type').value, moQty:+qs('#iv-mo-qty').value||0, moRate:+qs('#iv-mo-rate').value||0, rows:ivRows(), disc:+qs('#iv-disc').value||0, mark:+qs('#iv-mark').value||0, k:{mat:qs('#iv-k-mat').textContent, mo:qs('#iv-k-mo').textContent, imp:qs('#iv-k-imp').textContent, tot:qs('#iv-k-tot').textContent}, signCli:ivSigCli.data(), signTec:ivSigTec.data() } }
+/* Oggetto & CRUD IV (patch: ricalcolo interno, no DOM KPI) */
+function getIVDoc(){
+  const r = ivRows();
+  const mat = r.reduce((s,v)=> s + v.q*v.p, 0);
+  const mo  = (+qs('#iv-mo-qty').value||0) * (+qs('#iv-mo-rate').value||0);
+  const disc = (+qs('#iv-disc').value||0)/100;
+  const mark = (+qs('#iv-mark').value||0)/100;
+  let matNet = mat;
+  if (disc>0) matNet *= (1 - disc);
+  if (mark>0) matNet *= (1 + mark);
+  const impon = matNet + mo;
+  const tot   = impon;
+
+  return {
+    id:crypto.randomUUID(),
+    num:qs('#iv-num').value, date:qs('#iv-date').value, st:qs('#iv-st').value,
+    cli:qs('#iv-cli').value, con:qs('#iv-con').value, obj:qs('#iv-obj').value, des:qs('#iv-des').value,
+    moType:qs('#iv-mo-type').value, moQty:+qs('#iv-mo-qty').value||0, moRate:+qs('#iv-mo-rate').value||0,
+    rows:r, disc:+qs('#iv-disc').value||0, mark:+qs('#iv-mark').value||0,
+    k:{mat:fmt(matNet), mo:fmt(mo), imp:fmt(impon), tot:fmt(tot)},
+    signCli:ivSigCli.data(), signTec:ivSigTec.data()
+  };
+}
 function setIVDoc(d){
   if(!d) return;
   qs('#iv-num').value=d.num||nextIVNum(); qs('#iv-date').value=d.date||today(); qs('#iv-st').value=d.st||'In corso';
@@ -576,12 +626,12 @@ function saveDraftIV(){ S.set('ivDraft', getIVDoc()); }
 qs('#iv-save').onclick=()=>{ const d=getIVDoc(); const arr=getIVList(); const idx=arr.findIndex(x=>x.num===d.num); if(idx>=0) arr[idx]=d; else arr.unshift(d); setIVList(arr); renderIVList(); alert('Intervento salvato in elenco ✅') };
 qs('#iv-del').onclick=()=>{ const num=qs('#iv-num').value; const arr=getIVList().filter(x=>x.num!==num); setIVList(arr); renderIVList(); alert('Intervento eliminato ✅'); newIV(); };
 
-/* Stampa IV — una pagina */
+/* Stampa IV — una pagina con logo e firme */
 qs('#iv-print').onclick=()=>{
   const d=getIVDoc(); const rowsHtml=(d.rows||[]).map(r=>`<tr class="pb-avoid"><td>${r.d||''}</td><td style="text-align:right">${r.q||0}</td><td style="text-align:right">${fmt(r.p||0)}</td><td style="text-align:right">${fmt((r.q||0)*(r.p||0))}</td></tr>`).join('');
   const tel=S.get('phone','+39 351 796 9013'); const logo=S.get('logo',null);
   const logoHtml = logo ? `<img src="${logo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid #000">`
-                        : `<div class="print-logo">G</div>`;
+                        : `<div style="width:44px;height:44px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">G</div>`;
   qs('#iv-printArea').innerHTML=`<div class="sheet">
     <div class="print-header">
       ${logoHtml}
