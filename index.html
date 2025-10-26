@@ -4,10 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gestionale Giorgio — Elettricista & Antennista</title>
-<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0A2E5C">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="theme-color" content="#0A2E5C">
 <style>
   :root{--brand:#0A2E5C;--accent:#F59E0B;--bg:#f5f7fb;--card:#fff;--line:#e5e7eb;--muted:#64748b}
   *{box-sizing:border-box}
@@ -55,17 +54,17 @@
   .status{margin-left:auto;color:var(--muted);font-size:12px}
   .hint{color:var(--muted);font-size:12px}
   .terms{font-size:13px;color:#111827}
+  .print-only{display:none}
 
   /* ===== Stampa cliente (A4) ===== */
   @page { size: A4; margin: 10mm; }
-  .print-only{display:none}
-  .sheet{width:210mm; min-height:297mm; padding:10mm; margin:0 auto; font:12.5px/1.35 Arial, sans-serif; color:#111}
+  .sheet{width:210mm; /* niente min-height, così non crea pagine vuote */ padding:0; margin:0 auto; font:12.5px/1.35 Arial, sans-serif; color:#111}
   .pb-avoid{break-inside:avoid}
   .table-clean{width:100%; border-collapse:collapse}
   .table-clean th,.table-clean td{border:1px solid #000; padding:6px}
   .print-header{display:flex; gap:12px; align-items:center; margin-bottom:8px}
   .print-logo{width:52px;height:52px;border-radius:50%;background:#0A2E5C;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden}
-  .print-logo img{width:100%;height:100%;object-fit:cover}
+  .print-logo img{width:52px;height:52px;object-fit:cover;border-radius:50%}
   .print-col{margin-left:auto; text-align:right}
 
   @media print{
@@ -106,9 +105,9 @@
         <div class="btns">
           <button class="btn" id="pv-new">Nuovo</button>
           <button class="btn primary" id="pv-save">Salva in elenco</button>
-          <button class="btn" id="pv-del">Elimina selezionato</button>
           <button class="btn warn" id="pv-share">Condividi</button>
           <button class="btn" id="pv-print">Stampa / PDF</button>
+          <button class="btn" id="pv-del">Elimina</button>
           <button class="btn" id="app-reload">Ricarica app</button>
           <button class="btn danger" id="app-reset">Svuota dati e ricarica</button>
         </div>
@@ -228,8 +227,8 @@
         <div class="btns">
           <button class="btn" id="iv-new">Nuovo</button>
           <button class="btn primary" id="iv-save">Salva in elenco</button>
-          <button class="btn" id="iv-del">Elimina selezionato</button>
           <button class="btn" id="iv-print">Stampa / PDF</button>
+          <button class="btn" id="iv-del">Elimina</button>
         </div>
         <div class="hint" style="margin:6px 2px"><strong>Elenco Interventi</strong></div>
         <div id="iv-list" class="list"></div>
@@ -341,7 +340,7 @@
 </main>
 
 <script>
-/* Disattiva eventuali service worker vecchi in modalità “solo file” */
+/* Evita SW vecchi (modalità semplice) */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
 }
@@ -439,18 +438,10 @@ function calcPV(){
 }
 ['#mo-qty','#mo-rate','#pv-disc','#pv-mark','#pv-acp','#pv-ace','#pv-ace-auto','#pv-st'].forEach(sel=>qs(sel).addEventListener('input',calcPV));
 
-/* ===== Numerazione con “prenotazione al salvataggio” ===== */
-// PREVENTIVI
-function peekPVNum(){ const v = +(localStorage.getItem('pvCounter')||0) + 1; return 'PV-'+String(v).padStart(4,'0'); }
-function reservePV(){ const v = +(localStorage.getItem('pvCounter')||0) + 1; localStorage.setItem('pvCounter', v); return 'PV-'+String(v).padStart(4,'0'); }
-// INTERVENTI
-function peekIVNum(){ const v = +(localStorage.getItem('ivCounter')||0) + 1; return 'IV-'+String(v).padStart(4,'0'); }
-function reserveIV(){ const v = +(localStorage.getItem('ivCounter')||0) + 1; localStorage.setItem('ivCounter', v); return 'IV-'+String(v).padStart(4,'0'); }
-
-/* Nuovo PV */
+/* Numerazione + nuovo PV */
+function nextPVNum(){ const k='pvCounter'; let v=+(localStorage.getItem(k)||0); v++; localStorage.setItem(k,v); return 'PV-'+String(v).padStart(4,'0'); }
 function newPV(){
-  qs('#pv-num').value=peekPVNum(); qs('#pv-date').value=today();
-  const d=new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); qs('#pv-exp').value=d.toISOString().slice(0,10);
+  qs('#pv-num').value=nextPVNum(); qs('#pv-date').value=today(); const d=new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); qs('#pv-exp').value=d.toISOString().slice(0,10);
   ['#pv-cli','#pv-con','#pv-obj'].forEach(s=>qs(s).value=''); qs('#pv-st').value='Bozza';
   qs('#mo-type').value='ora'; qs('#mo-qty').value=0; qs('#mo-rate').value=0; qs('#pv-disc').value=0; qs('#pv-mark').value=0; qs('#pv-acp').value=50; qs('#pv-ace').value=0; qs('#pv-bal').value=0; qs('#pv-ace-auto').checked=true;
   qs('#pv-rows').innerHTML=''; addRow(); sigCli.clear(); sigTec.clear(); calcPV();
@@ -461,7 +452,7 @@ qs('#pv-new').onclick=newPV;
 function getPVDoc(){ return { id:crypto.randomUUID(), num:qs('#pv-num').value, date:qs('#pv-date').value, exp:qs('#pv-exp').value, st:qs('#pv-st').value, cli:qs('#pv-cli').value, con:qs('#pv-con').value, obj:qs('#pv-obj').value, moType:qs('#mo-type').value, moQty:+qs('#mo-qty').value||0, moRate:+qs('#mo-rate').value||0, rows:pvRows(), disc:+qs('#pv-disc').value||0, mark:+qs('#pv-mark').value||0, acp:+qs('#pv-acp').value||0, ace:+qs('#pv-ace').value||0, bal:+qs('#pv-bal').value||0, k:{mat:qs('#k-mat').textContent, mo:qs('#k-mo').textContent, imp:qs('#k-imp').textContent, tot:qs('#k-tot').textContent}, signCli:sigCli.data(), signTec:sigTec.data() } }
 function setPVDoc(d){
   if(!d) return;
-  qs('#pv-num').value=d.num||peekPVNum(); qs('#pv-date').value=d.date||today(); qs('#pv-exp').value=d.exp||today();
+  qs('#pv-num').value=d.num||nextPVNum(); qs('#pv-date').value=d.date||today(); qs('#pv-exp').value=d.exp||today();
   qs('#pv-st').value=d.st||'Bozza'; qs('#pv-cli').value=d.cli||''; qs('#pv-con').value=d.con||''; qs('#pv-obj').value=d.obj||'';
   qs('#mo-type').value=d.moType||'ora'; qs('#mo-qty').value=d.moQty||0; qs('#mo-rate').value=d.moRate||0;
   qs('#pv-rows').innerHTML=''; (d.rows||[]).forEach(x=>addRow(x.d,x.q,x.p)); if((d.rows||[]).length===0) addRow();
@@ -470,37 +461,32 @@ function setPVDoc(d){
   calcPV();
 }
 function saveDraftPV(){ S.set('pvDraft', getPVDoc()); }
+qs('#pv-save').onclick=()=>{ const d=getPVDoc(); const arr=getPVList(); 
+  // se esiste stesso numero, sovrascrivo
+  const ix=arr.findIndex(x=>x.num===d.num); if(ix>=0) arr[ix]=d; else arr.unshift(d);
+  setPVList(arr); renderPVList(); alert('Preventivo salvato in elenco ✅'); 
+};
+qs('#pv-del').onclick=()=>{ const num=qs('#pv-num').value.trim(); if(!num){alert('Nessun numero');return}
+  const arr=getPVList().filter(x=>x.num!==num); setPVList(arr); renderPVList(); alert('Preventivo eliminato ✅'); newPV();
+};
+qs('#pv-share').onclick=async()=>{const d=getPVDoc(); const text=`Preventivo ${d.num}\nStato: ${d.st}\nCliente: ${d.cli}\nOggetto: ${d.obj}\nTotale: ${d.k.tot}`; if(navigator.share){try{await navigator.share({title:d.num,text})}catch(e){}} else {await navigator.clipboard.writeText(text); alert('Copiato negli appunti ✅')}};
 
-/* SALVA / CONDIVIDI / STAMPA / ELIMINA Preventivo */
-qs('#pv-save').onclick=()=>{
-  let d=getPVDoc();
-  const current=+(localStorage.getItem('pvCounter')||0);
-  const expected='PV-'+String(current+1).padStart(4,'0');
-  if (d.num===expected) d.num=reservePV();
-  else { const m=/^PV-(\d+)$/.exec(d.num); if(m){const n=parseInt(m[1],10); if(n>current) localStorage.setItem('pvCounter',n);} }
-  const arr=getPVList(); 
-  // se esiste stesso numero, sovrascrivi, altrimenti inserisci
-  const i=arr.findIndex(x=>x.num===d.num); if(i>=0) arr[i]=d; else arr.unshift(d);
-  setPVList(arr); renderPVList(); alert('Preventivo salvato in elenco ✅');
-};
-qs('#pv-del').onclick=()=>{
-  const num=qs('#pv-num').value.trim(); if(!num) return;
-  const arr=getPVList().filter(x=>x.num!==num); setPVList(arr); renderPVList(); alert('Preventivo eliminato ✅');
-  newPV();
-};
-qs('#pv-share').onclick=async()=>{
-  const d=getPVDoc(); const text=`Preventivo ${d.num}\nStato: ${d.st}\nCliente: ${d.cli}\nOggetto: ${d.obj}\nTotale: ${d.k.tot}`;
-  if(navigator.share){try{await navigator.share({title:d.num,text})}catch(e){}} else {await navigator.clipboard.writeText(text); alert('Copiato negli appunti ✅')}
-};
+/* Stampa Preventivo — SOLO parte cliente (usa logo se presente) */
+function getPrintLogoHTML(){
+  const logo = S.get('logo', null);
+  if(logo) return `<div class="print-logo"><img src="${logo}" alt="Logo"></div>`;
+  return `<div class="print-logo">G</div>`;
+}
 qs('#pv-print').onclick=()=>{
+  // svuoto sempre entrambe le aree per evitare residui
+  qs('#printArea').innerHTML=''; qs('#iv-printArea').innerHTML='';
   const d=getPVDoc();
   const rowsHtml=(d.rows||[]).map(r=>`<tr class="pb-avoid"><td>${r.d||''}</td><td style="text-align:right">${r.q||0}</td><td style="text-align:right">${fmt(r.p||0)}</td><td style="text-align:right">${fmt((r.q||0)*(r.p||0))}</td></tr>`).join('');
   const tel=S.get('phone','+39 351 796 9013'); const terms=(S.get('terms','')||'').trim();
   const termsHtml=terms?terms.replace(/\n/g,'<br>'):`<strong>Termini:</strong> Pagamento <strong>50%</strong> all’accettazione e <strong>50%</strong> a fine lavori. Il materiale resta di proprietà dell’installatore fino al saldo completo. Le firme equivalgono a firma digitale.`;
-  const logo=S.get('logo',null);
   qs('#printArea').innerHTML=`<div>
     <div class="print-header">
-      <div class="print-logo">${logo?`<img src="${logo}" alt="Logo">`:'G'}</div>
+      ${getPrintLogoHTML()}
       <div>
         <div style="font-weight:800;font-size:18px">Gestionale Giorgio</div>
         <div style="color:#444">Tel. ${tel}</div>
@@ -546,7 +532,7 @@ qs('#pv-to-iv').onclick=()=>{
   alert('Intervento creato dalla scheda preventivo ✅  (vai nella tab Interventi)');
 };
 
-/* Bozza PV (facoltativa) */
+/* Bozza PV (opzionale) */
 function restoreDraftPV(){ const d=S.get('pvDraft',null); if(d) setPVDoc(d) }
 
 /* ===== Interventi: archivio ===== */
@@ -594,9 +580,10 @@ function ivCalc(){
 }
 ['#iv-mo-qty','#iv-mo-rate','#iv-disc','#iv-mark','#iv-st'].forEach(sel=>qs(sel).addEventListener('input',ivCalc));
 
-/* Numerazione + Nuovo IV (peek) */
+/* Numerazione + nuovo IV */
+function nextIVNum(){ const k='ivCounter'; let v=+(localStorage.getItem(k)||0); v++; localStorage.setItem(k,v); return 'IV-'+String(v).padStart(4,'0'); }
 function newIV(){
-  qs('#iv-num').value=peekIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='In corso';
+  qs('#iv-num').value=nextIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='In corso';
   ['#iv-cli','#iv-con','#iv-obj','#iv-des'].forEach(s=>qs(s).value='');
   qs('#iv-mo-type').value='ora'; qs('#iv-mo-qty').value=0; qs('#iv-mo-rate').value=0; qs('#iv-disc').value=0; qs('#iv-mark').value=0;
   qs('#iv-rows').innerHTML=''; ivAddRow(); ivSigCli.clear(); ivSigTec.clear(); ivCalc();
@@ -607,7 +594,7 @@ qs('#iv-new').onclick=newIV;
 function getIVDoc(){ return { id:crypto.randomUUID(), num:qs('#iv-num').value, date:qs('#iv-date').value, st:qs('#iv-st').value, cli:qs('#iv-cli').value, con:qs('#iv-con').value, obj:qs('#iv-obj').value, des:qs('#iv-des').value, moType:qs('#iv-mo-type').value, moQty:+qs('#iv-mo-qty').value||0, moRate:+qs('#iv-mo-rate').value||0, rows:ivRows(), disc:+qs('#iv-disc').value||0, mark:+qs('#iv-mark').value||0, k:{mat:qs('#iv-k-mat').textContent, mo:qs('#iv-k-mo').textContent, imp:qs('#iv-k-imp').textContent, tot:qs('#iv-k-tot').textContent}, signCli:ivSigCli.data(), signTec:ivSigTec.data() } }
 function setIVDoc(d){
   if(!d) return;
-  qs('#iv-num').value=d.num||peekIVNum(); qs('#iv-date').value=d.date||today(); qs('#iv-st').value=d.st||'In corso';
+  qs('#iv-num').value=d.num||nextIVNum(); qs('#iv-date').value=d.date||today(); qs('#iv-st').value=d.st||'In corso';
   qs('#iv-cli').value=d.cli||''; qs('#iv-con').value=d.con||''; qs('#iv-obj').value=d.obj||''; qs('#iv-des').value=d.des||'';
   qs('#iv-mo-type').value=d.moType||'ora'; qs('#iv-mo-qty').value=d.moQty||0; qs('#iv-mo-rate').value=d.moRate||0;
   qs('#iv-rows').innerHTML=''; (d.rows||[]).forEach(x=>ivAddRow(x.d,x.q,x.p)); if((d.rows||[]).length===0) ivAddRow();
@@ -615,29 +602,23 @@ function setIVDoc(d){
   qs('#iv-disc').value=d.disc||0; qs('#iv-mark').value=d.mark||0; ivCalc();
 }
 function saveDraftIV(){ S.set('ivDraft', getIVDoc()); }
-
-/* SALVA / ELIMINA / STAMPA Intervento */
-qs('#iv-save').onclick=()=>{
-  let d=getIVDoc();
-  const current=+(localStorage.getItem('ivCounter')||0);
-  const expected='IV-'+String(current+1).padStart(4,'0');
-  if (d.num===expected) d.num=reserveIV();
-  else { const m=/^IV-(\d+)$/.exec(d.num); if(m){const n=parseInt(m[1],10); if(n>current) localStorage.setItem('ivCounter',n);} }
-  const arr=getIVList();
-  const i=arr.findIndex(x=>x.num===d.num); if(i>=0) arr[i]=d; else arr.unshift(d);
-  setIVList(arr); renderIVList(); alert('Intervento salvato in elenco ✅');
+qs('#iv-save').onclick=()=>{ const d=getIVDoc(); const arr=getIVList();
+  const ix=arr.findIndex(x=>x.num===d.num); if(ix>=0) arr[ix]=d; else arr.unshift(d);
+  setIVList(arr); renderIVList(); alert('Intervento salvato in elenco ✅')
 };
-qs('#iv-del').onclick=()=>{
-  const num=qs('#iv-num').value.trim(); if(!num) return;
+qs('#iv-del').onclick=()=>{ const num=qs('#iv-num').value.trim(); if(!num){alert('Nessun numero');return}
   const arr=getIVList().filter(x=>x.num!==num); setIVList(arr); renderIVList(); alert('Intervento eliminato ✅'); newIV();
 };
+
+/* Stampa Intervento */
 qs('#iv-print').onclick=()=>{
+  // svuoto sempre entrambe le aree per evitare residui
+  qs('#iv-printArea').innerHTML=''; qs('#printArea').innerHTML='';
   const d=getIVDoc(); const rowsHtml=(d.rows||[]).map(r=>`<tr class="pb-avoid"><td>${r.d||''}</td><td style="text-align:right">${r.q||0}</td><td style="text-align:right">${fmt(r.p||0)}</td><td style="text-align:right">${fmt((r.q||0)*(r.p||0))}</td></tr>`).join('');
   const tel=S.get('phone','+39 351 796 9013');
-  const logo=S.get('logo',null);
   qs('#iv-printArea').innerHTML=`<div>
     <div class="print-header">
-      <div class="print-logo">${logo?`<img src="${logo}" alt="Logo">`:'G'}</div>
+      ${getPrintLogoHTML()}
       <div><div style="font-weight:800;font-size:18px">Gestionale Giorgio</div><div style="color:#444">Tel. ${tel}</div></div>
       <div class="print-col"><div><strong>${d.num}</strong></div><div>Data: ${d.date}</div><div>Stato: ${d.st}</div></div>
     </div>
@@ -662,9 +643,8 @@ qs('#iv-print').onclick=()=>{
   window.print();
 };
 
-/* Ricarica risorse SENZA perdere dati */
+/* Ricarica/svuota */
 function reloadApp(){ const u=new URL(location.href); u.searchParams.set('v', Date.now().toString()); location.replace(u.toString()); }
-/* Svuota dati locali e ricarica */
 function resetAndReload(){ if(!confirm('Sicuro di cancellare bozze, logo, impostazioni e numerazioni + archivi?')) return; localStorage.clear(); reloadApp(); }
 qs('#app-reload').onclick=reloadApp; qs('#app-reset').onclick=resetAndReload;
 
@@ -674,14 +654,14 @@ function boot(){
   if(!S.get('pvCounter',null)) localStorage.setItem('pvCounter','0');
   if(!S.get('ivCounter',null)) localStorage.setItem('ivCounter','0');
   renderPVList(); renderIVList();
-  // PV iniziale (peek, no incremento)
+  // PV iniziale
   if(!S.get('pvDraft',null)){
-    qs('#pv-num').value=peekPVNum(); qs('#pv-date').value=today();
+    qs('#pv-num').value=nextPVNum(); qs('#pv-date').value=today();
     const d=new Date(qs('#pv-date').value); d.setDate(d.getDate()+30); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); qs('#pv-exp').value=d.toISOString().slice(0,10);
     qs('#pv-rows').innerHTML=''; addRow(); calcPV();
-  } else { setPVDoc(S.get('pvDraft',null)); }
-  // IV iniziale (peek)
-  if(!S.get('ivDraft',null)){ qs('#iv-num').value=peekIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='In corso'; qs('#iv-rows').innerHTML=''; ivAddRow(); ivCalc(); }
+  }else{ setPVDoc(S.get('pvDraft',null)); }
+  // IV iniziale
+  if(!S.get('ivDraft',null)){ qs('#iv-num').value=nextIVNum(); qs('#iv-date').value=today(); qs('#iv-st').value='In corso'; qs('#iv-rows').innerHTML=''; ivAddRow(); ivCalc(); }
   else { setIVDoc(S.get('ivDraft',null)); }
 }
 boot();
