@@ -4,106 +4,192 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestionale Giorgio</title>
+
 <style>
 body{
 font-family:Arial, sans-serif;
 background:#f4f6fb;
 margin:0;
-padding:20px;
 }
-.container{
-max-width:600px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:15px;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-h1{
+
+header{
+background:#1e3c72;
+color:white;
+padding:15px;
 text-align:center;
-color:#1e3c72;
-margin-bottom:20px;
-}
-label{
+font-size:22px;
 font-weight:bold;
-font-size:14px;
 }
+
+nav{
+display:flex;
+justify-content:center;
+gap:10px;
+padding:10px;
+background:white;
+box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+nav button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#e0e6f5;
+font-weight:bold;
+}
+
+nav button.active{
+background:#1e3c72;
+color:white;
+}
+
+.section{
+display:none;
+padding:20px;
+max-width:800px;
+margin:auto;
+}
+
+.section.active{
+display:block;
+}
+
 input,textarea{
 width:100%;
-padding:10px;
+padding:8px;
 margin-top:5px;
 margin-bottom:15px;
-border-radius:8px;
+border-radius:6px;
 border:1px solid #ccc;
 }
-button{
-width:100%;
-padding:12px;
+
+button.primary{
 background:#1e3c72;
 color:white;
 border:none;
-border-radius:10px;
-font-size:16px;
-font-weight:bold;
+padding:10px;
+border-radius:8px;
 cursor:pointer;
+width:100%;
+font-weight:bold;
 }
-button:hover{
-background:#162c54;
-}
-.ricevuta{
-margin-top:20px;
+
+.card{
+background:white;
 padding:15px;
-background:#f9fafc;
+margin-top:10px;
 border-radius:10px;
-border:1px solid #ddd;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-<h1>Gestionale Giorgio</h1>
+<header>Gestionale Giorgio</header>
 
-<label>Cliente</label>
-<input id="cliente" placeholder="Nome cliente">
+<nav>
+<button onclick="show('preventivi')" id="btnPreventivi" class="active">Preventivi</button>
+<button onclick="show('ricevute')" id="btnRicevute">Ricevute</button>
+<button onclick="show('archivio')" id="btnArchivio">Archivio</button>
+</nav>
 
-<label>Descrizione lavoro</label>
-<textarea id="descrizione" placeholder="Descrizione intervento"></textarea>
+<div id="preventivi" class="section active">
+<h3>Nuovo Preventivo</h3>
+<input id="prevCliente" placeholder="Cliente">
+<textarea id="prevDesc" placeholder="Descrizione lavori"></textarea>
+<input id="prevImporto" type="number" placeholder="Importo €">
+<button class="primary" onclick="salvaPreventivo()">Salva Preventivo</button>
+<div id="listaPreventivi"></div>
+</div>
 
-<label>Importo €</label>
-<input id="importo" type="number" placeholder="0">
+<div id="ricevute" class="section">
+<h3>Nuova Ricevuta</h3>
+<input id="ricCliente" placeholder="Cliente">
+<textarea id="ricDesc" placeholder="Descrizione lavoro"></textarea>
+<input id="ricImporto" type="number" placeholder="Importo €">
+<button class="primary" onclick="salvaRicevuta()">Genera Ricevuta</button>
+<div id="listaRicevute"></div>
+</div>
 
-<button onclick="genera()">Genera Ricevuta</button>
-
-<div class="ricevuta" id="output"></div>
-
+<div id="archivio" class="section">
+<h3>Archivio</h3>
+<input id="search" placeholder="Cerca cliente..." oninput="renderArchivio()">
+<div id="archivioList"></div>
 </div>
 
 <script>
-let numero = 1;
 
-function genera(){
-let cliente=document.getElementById("cliente").value;
-let descrizione=document.getElementById("descrizione").value;
-let importo=document.getElementById("importo").value;
+let preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
+let ricevute = JSON.parse(localStorage.getItem("ricevute")) || [];
+let numero = localStorage.getItem("numeroRicevuta") || 1;
 
-if(cliente=="" || importo==""){
-alert("Compila cliente e importo");
-return;
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+document.getElementById("btn"+capitalize(id)).classList.add("active");
 }
 
-let oggi=new Date().toLocaleDateString("it-IT");
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 
-document.getElementById("output").innerHTML=
-"<strong>Ricevuta n° R-"+numero+"</strong><br>"+
-"Data: "+oggi+"<br><br>"+
-"<strong>Cliente:</strong> "+cliente+"<br>"+
-"<strong>Descrizione:</strong> "+descrizione+"<br>"+
-"<strong>Importo:</strong> € "+importo+"<br><br>"+
-"Prestazione occasionale senza Partita IVA.";
+function salvaPreventivo(){
+let p={
+cliente:prevCliente.value,
+desc:prevDesc.value,
+importo:prevImporto.value,
+data:new Date().toLocaleDateString()
+};
+preventivi.push(p);
+localStorage.setItem("preventivi",JSON.stringify(preventivi));
+renderPreventivi();
+prevCliente.value="";prevDesc.value="";prevImporto.value="";
+}
 
+function salvaRicevuta(){
+let r={
+numero:"R-"+numero,
+cliente:ricCliente.value,
+desc:ricDesc.value,
+importo:ricImporto.value,
+data:new Date().toLocaleDateString()
+};
 numero++;
+localStorage.setItem("numeroRicevuta",numero);
+ricevute.push(r);
+localStorage.setItem("ricevute",JSON.stringify(ricevute));
+renderRicevute();
+renderArchivio();
+ricCliente.value="";ricDesc.value="";ricImporto.value="";
 }
+
+function renderPreventivi(){
+listaPreventivi.innerHTML="";
+preventivi.forEach(p=>{
+listaPreventivi.innerHTML+=`<div class="card"><b>${p.cliente}</b><br>${p.desc}<br>€ ${p.importo}<br>${p.data}</div>`;
+});
+}
+
+function renderRicevute(){
+listaRicevute.innerHTML="";
+ricevute.forEach(r=>{
+listaRicevute.innerHTML+=`<div class="card"><b>${r.numero}</b><br>${r.cliente}<br>${r.desc}<br>€ ${r.importo}<br>${r.data}</div>`;
+});
+}
+
+function renderArchivio(){
+let q=search.value.toLowerCase();
+archivioList.innerHTML="";
+ricevute.filter(r=>r.cliente.toLowerCase().includes(q))
+.forEach(r=>{
+archivioList.innerHTML+=`<div class="card"><b>${r.numero}</b> - ${r.cliente}<br>€ ${r.importo}</div>`;
+});
+}
+
+renderPreventivi();
+renderRicevute();
+renderArchivio();
+
 </script>
 
 </body>
