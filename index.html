@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionale Giorgio</title>
+<style>
+body{
+font-family:Arial, sans-serif;
+background:#f4f6fb;
+margin:0;
+padding:20px;
+}
+.container{
+max-width:600px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+h1{
+text-align:center;
+color:#1e3c72;
+margin-bottom:20px;
+}
+label{
+font-weight:bold;
+font-size:14px;
+}
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+button{
+width:100%;
+padding:12px;
+background:#1e3c72;
+color:white;
+border:none;
+border-radius:10px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+button:hover{
+background:#162c54;
+}
+.ricevuta{
+margin-top:20px;
+padding:15px;
+background:#f9fafc;
+border-radius:10px;
+border:1px solid #ddd;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Gestionale Giorgio</h1>
+
+<label>Cliente</label>
+<input id="cliente" placeholder="Nome cliente">
+
+<label>Descrizione lavoro</label>
+<textarea id="descrizione" placeholder="Descrizione intervento"></textarea>
+
+<label>Importo €</label>
+<input id="importo" type="number" placeholder="0">
+
+<button onclick="genera()">Genera Ricevuta</button>
+
+<div class="ricevuta" id="output"></div>
+
+</div>
+
+<script>
+let numero = 1;
+
+function genera(){
+let cliente=document.getElementById("cliente").value;
+let descrizione=document.getElementById("descrizione").value;
+let importo=document.getElementById("importo").value;
+
+if(cliente=="" || importo==""){
+alert("Compila cliente e importo");
+return;
+}
+
+let oggi=new Date().toLocaleDateString("it-IT");
+
+document.getElementById("output").innerHTML=
+"<strong>Ricevuta n° R-"+numero+"</strong><br>"+
+"Data: "+oggi+"<br><br>"+
+"<strong>Cliente:</strong> "+cliente+"<br>"+
+"<strong>Descrizione:</strong> "+descrizione+"<br>"+
+"<strong>Importo:</strong> € "+importo+"<br><br>"+
+"Prestazione occasionale senza Partita IVA.";
+
+numero++;
+}
+</script>
+
+</body>
+</html>
