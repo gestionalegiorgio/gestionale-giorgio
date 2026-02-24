@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestionale Giorgio</title>
+  <meta name="theme-color" content="#1e3c72" />
+  <style>
+    :root{
+      --blue:#1e3c72;
+      --blue2:#162c54;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --muted:#6b7280;
+      --shadow:0 10px 25px rgba(0,0,0,0.08);
+      --radius:16px;
+      --ok:#065f46;
+      --warn:#9a3412;
+      --bad:#7f1d1d;
+      --chip:#f9fafb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:#0f172a;
+    }
+    header{
+      background:linear-gradient(90deg,var(--blue),#244a8a);
+      color:#fff;
+      padding:16px 14px;
+      text-align:center;
+      border-bottom:1px solid rgba(255,255,255,.16);
+    }
+    header .title{font-size:20px;font-weight:950;letter-spacing:.2px}
+    header .sub{margin-top:6px;font-size:13px;opacity:.95;line-height:1.35}
+    .tabs{
+      position:sticky;top:0;z-index:50;
+      display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+      padding:10px;background:#fff;border-bottom:1px solid var(--border);
+    }
+    .tab{
+      border:none;cursor:pointer;
+      padding:9px 14px;border-radius:999px;
+      background:#e0e6f5;font-weight:900;color:#0f172a;
+      transition:.12s transform ease;
+    }
+    .tab:active{transform:scale(.98)}
+    .tab.active{background:var(--blue);color:#fff}
+    .wrap{max-width:1100px;margin:0 auto;padding:14px}
+    .section{display:none}
+    .section.active{display:block}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:900px){.grid.two{grid-template-columns:1fr 1fr;align-items:start}}
+    .panel{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:14px;
+    }
+    h2{margin:4px 0 12px;font-size:17px;color:var(--blue);font-weight:950}
+    h3{margin:6px 0 10px;font-size:15px;color:#0f172a;font-weight:950}
+    label{display:block;font-size:13px;font-weight:900;margin:10px 0 6px}
+    input,textarea,select{
+      width:100%;padding:10px 11px;border-radius:12px;border:1px solid #cfd5e3;
+      background:#fff;font-size:15px;outline:none;
+    }
+    textarea{min-height:90px;resize:vertical}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1 1 170px}
+    .btn{
+      border:none;cursor:pointer;border-radius:12px;
+      padding:11px 12px;font-weight:950;font-size:14px;
+      transition:.12s transform ease,.12s filter ease;
+    }
+    .btn:active{transform:scale(.99)}
+    .btn.primary{background:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2)}
+    .btn.ghost{background:#eef2ff;color:#0f172a;border:1px solid #dbe3ff}
+    .btn.danger{background:#fee2e2;color:var(--bad);border:1px solid #fecaca}
+    .btn.small{padding:9px 10px;font-size:13px}
+    .muted{color:var(--muted);font-size:13px;line-height:1.4}
+    .hr{height:1px;background:var(--border);margin:12px 0}
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .card{
+      background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+      box-shadow:0 5px 15px rgba(0,0,0,0.05);
+      padding:12px;
+    }
+    .card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .title{font-weight:950;font-size:15px}
+    .meta{margin-top:6px;font-size:13px;line-height:1.35}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .badge{
+      padding:6px 10px;border-radius:999px;font-size:12px;font-weight:950;
+      border:1px solid var(--border);background:var(--chip);white-space:nowrap;
+    }
+    .b-ok{background:#ecfdf5;border-color:#a7f3d0;color:var(--ok)}
+    .b-warn{background:#fff7ed;border-color:#fed7aa;color:var(--warn)}
+    .b-bad{background:#fef2f2;border-color:#fecaca;color:var(--bad)}
+    .kpis{display:flex;gap:10px;flex-wrap:wrap}
+    .kpi{flex:1 1 190px;background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:10px}
+    .kpi .v{font-weight:1000;font-size:18px}
+    .kpi .l{font-size:12px;color:var(--muted);font-weight:900}
+    .notice{
+      margin-top:10px;padding:10px;border-radius:12px;
+      background:#f8fafc;border:1px dashed #cbd5e1;font-size:13px;line-height:1.35;
+    }
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .pillbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .pill{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:900;font-size:13px;cursor:pointer}
+    .pill:active{transform:scale(.99)}
+    .sigbox{
+      border:1px solid #cfd5e3;border-radius:12px;overflow:hidden;background:#fff;
+      touch-action:none;
+    }
+    canvas{display:block;width:100%;height:160px}
+    .footer{margin:18px 0 10px;text-align:center;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="title">Gestionale Giorgio</div>
+  <div class="sub">
+    Offline • Preventivi • Interventi • Clienti • Ricevute A4 • Statistiche<br>
+    Tel/WhatsApp: <b id="hdrTel">+39 351 796 9013</b> • <span id="hdrZona">Alberobello e zone limitrofe</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tabDashboard" onclick="showSection('dashboard')">Dashboard</button>
+  <button class="tab" id="tabClienti" onclick="showSection('clienti')">Clienti</button>
+  <button class="tab" id="tabPreventivi" onclick="showSection('preventivi')">Preventivi</button>
+  <button class="tab" id="tabInterventi" onclick="showSection('interventi')">Interventi</button>
+  <button class="tab" id="tabRicevute" onclick="showSection('ricevute')">Ricevute</button>
+  <button class="tab" id="tabListino" onclick="showSection('listino')">Listino</button>
+  <button class="tab" id="tabBackup" onclick="showSection('backup')">Backup</button>
+  <button class="tab" id="tabImpostazioni" onclick="showSection('impostazioni')">Impostazioni</button>
+</div>
+
+<div class="wrap">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="section active">
+    <div class="panel">
+      <h2>Dashboard</h2>
+      <div class="muted">Qui vedi se stai salendo di livello: incassi, media, e quanto “materiali” vs “manodopera”.</div>
+
+      <div class="hr"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="kIncMese">€ 0,00</div><div class="l">Incasso mese (netto)</div></div>
+        <div class="kpi"><div class="v" id="kIncAnno">€ 0,00</div><div class="l">Incasso anno (netto)</div></div>
+        <div class="kpi"><div class="v" id="kMedia">€ 0,00</div><div class="l">Media per ricevuta (netto)</div></div>
+        <div class="kpi"><div class="v" id="kManodopera">€ 0,00</div><div class="l">Manodopera anno</div></div>
+        <div class="kpi"><div class="v" id="kMateriali">€ 0,00</div><div class="l">Materiali anno</div></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div>
+          <label>Ricerca rapida cliente</label>
+          <input id="dashSearch" placeholder="Nome / telefono..." oninput="renderDashboardSearch()">
+        </div>
+      </div>
+      <div id="dashResults" class="list"></div>
+
+      <div class="notice">
+        Suggerimento: se vuoi clienti migliori, usa <b>Uscita + diagnosi</b> e proponi un miglioramento quando serve (es. serraggio quadro).
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTI -->
+  <section id="clienti" class="section">
+    <div class="grid two">
+      <div class="panel">
+        <h2>Nuovo Cliente</h2>
+        <label>Nome cliente</label>
+        <input id="cNome" placeholder="Nome e cognome / azienda">
+        <div class="row">
+          <div>
+            <label>Telefono (WhatsApp)</label>
+            <input id="cTel" placeholder="Es: 351 796 9013" inputmode="tel">
+          </div>
+          <div>
+            <label>Zona / Indirizzo (opz.)</label>
+            <input id="cZona" placeholder="Alberobello / Via...">
+          </div>
+        </div>
+        <label>Note (opz.)</label>
+        <textarea id="cNote" placeholder="Info utili, citofono, ecc."></textarea>
+
+        <button class="btn primary" onclick="saveCliente()">Salva cliente</button>
+
+        <div class="notice">
+          Il gestionale collega automaticamente preventivi/interventi/ricevute al cliente tramite telefono (se lo metti) o nome.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Elenco Clienti</h2>
+        <div class="row">
+          <div>
+            <label>Cerca</label>
+            <input id="cSearch" placeholder="Nome / telefono..." oninput="renderClienti()">
+          </div>
+        </div>
+        <div id="clientiList" class="list"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>Storico Cliente</h2>
+      <div class="muted">Apri un cliente dall’elenco per vedere lo storico.</div>
+      <div class="hr"></div>
+      <div id="clienteDettaglio"></div>
+    </div>
+  </section>
+
+  <!-- PREVENTIVI -->
+  <section id="preventivi" class="section">
+    <div class="grid two">
+      <div class="panel">
+        <h2>Nuovo Preventivo</h2>
+        <label>Cliente</label>
+        <input id="pCliente" placeholder="Nome cliente">
+        <label>Telefono cliente (opz.)</label>
+        <input id="pTel" placeholder="Es: 351..." inputmode="tel">
+
+        <label>Descrizione lavori</label>
+        <textarea id="pDesc" placeholder="Descrizione dettagliata..."></textarea>
+
+        <div class="row">
+          <div>
+            <label>Manodopera €</label>
+            <input id="pMan" type="number" placeholder="0" inputmode="decimal">
+          </div>
+          <div>
+            <label>Materiali €</label>
+            <input id="pMat" type="number" placeholder="0" inputmode="decimal">
+          </div>
+          <div>
+            <label>Extra € (uscita/urgenza)</label>
+            <input id="pExtra" type="number" placeholder="0" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Stato</label>
+            <select id="pStato">
+              <option value="In attesa">In attesa</option>
+              <option value="Accettato">Accettato</option>
+              <option value="Rifiutato">Rifiutato</option>
+            </select>
+          </div>
+          <div>
+            <label>Proposta migliorativa (opz.)</label>
+            <input id="pMiglioria" placeholder="Es: Serraggio quadro consigliato">
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="savePreventivo()">Salva preventivo</button>
+
+        <div class="pillbar">
+          <button class="pill" onclick="applyQuick('pExtra', getListinoValue('uscita_diagnosi', 60))">Uscita + diagnosi</button>
+          <button class="pill" onclick="appendText('pMiglioria','Serraggio quadro consigliato')">Serraggio quadro</button>
+          <button class="pill" onclick="appendText('pMiglioria','Protezione sovratensioni consigliata')">SPD</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Lista Preventivi</h2>
+        <div class="row">
+          <div>
+            <label>Filtro stato</label>
+            <select id="pFilter" onchange="renderPreventivi()">
+              <option value="Tutti">Tutti</option>
+              <option value="In attesa">In attesa</option>
+              <option value="Accettato">Accettato</option>
+              <option value="Rifiutato">Rifiutato</option>
+            </select>
+          </div>
+          <div>
+            <label>Cerca</label>
+            <input id="pSearch" placeholder="Cliente / testo..." oninput="renderPreventivi()">
+          </div>
+        </div>
+        <div id="preventiviList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERVENTI -->
+  <section id="interventi" class="section">
+    <div class="grid two">
+      <div class="panel">
+        <h2>Nuovo Intervento</h2>
+        <label>Cliente</label>
+        <input id="iCliente" placeholder="Nome cliente">
+        <label>Telefono cliente (opz.)</label>
+        <input id="iTel" placeholder="Es: 351..." inputmode="tel">
+        <div class="row">
+          <div>
+            <label>Indirizzo / zona (opz.)</label>
+            <input id="iInd" placeholder="Via... / Alberobello">
+          </div>
+          <div>
+            <label>Stato</label>
+            <select id="iStato">
+              <option value="Aperto">Aperto</option>
+              <option value="In corso">In corso</option>
+              <option value="Chiuso">Chiuso</option>
+              <option value="Pagato">Pagato</option>
+              <option value="Da richiamare">Da richiamare</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Descrizione / diagnosi</label>
+        <textarea id="iDesc" placeholder="Cosa hai trovato e cosa hai fatto..."></textarea>
+
+        <div class="row">
+          <div>
+            <label>Manodopera €</label>
+            <input id="iMan" type="number" placeholder="0" inputmode="decimal">
+          </div>
+          <div>
+            <label>Materiali €</label>
+            <input id="iMat" type="number" placeholder="0" inputmode="decimal">
+          </div>
+          <div>
+            <label>Extra €</label>
+            <input id="iExtra" type="number" placeholder="0" inputmode="decimal">
+          </div>
+        </div>
+
+        <label>Note (opz.)</label>
+        <textarea id="iNote" placeholder="Accesso, tempi, foto, ecc."></textarea>
+
+        <button class="btn primary" onclick="saveIntervento()">Salva intervento</button>
+
+        <div class="pillbar">
+          <button class="pill" onclick="applyQuick('iExtra', getListinoValue('uscita_diagnosi', 60))">Uscita + diagnosi</button>
+          <button class="pill" onclick="appendText('iNote','Serraggio quadro eseguito / consigliato')">Serraggio quadro</button>
+          <button class="pill" onclick="appendText('iNote','Consigliata sostituzione luci con LED')">LED</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Lista Interventi</h2>
+        <div class="row">
+          <div>
+            <label>Filtro stato</label>
+            <select id="iFilter" onchange="renderInterventi()">
+              <option value="Tutti">Tutti</option>
+              <option value="Aperto">Aperto</option>
+              <option value="In corso">In corso</option>
+              <option value="Chiuso">Chiuso</option>
+              <option value="Pagato">Pagato</option>
+              <option value="Da richiamare">Da richiamare</option>
+            </select>
+          </div>
+          <div>
+            <label>Cerca</label>
+            <input id="iSearch" placeholder="Cliente / testo..." oninput="renderInterventi()">
+          </div>
+        </div>
+        <div id="interventiList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RICEVUTE -->
+  <section id="ricevute" class="section">
+    <div class="grid two">
+      <div class="panel">
+        <h2>Nuova Ricevuta (PRO)</h2>
+        <div class="row">
+          <div>
+            <label>Numero</label>
+            <input id="rNumero" class="mono" readonly>
+          </div>
+          <div>
+            <label>Data</label>
+            <input id="rData" readonly>
+          </div>
+        </div>
+
+        <label>Cliente</label>
+        <input id="rCliente" placeholder="Nome cliente">
+        <div class="row">
+          <div>
+            <label>Telefono (opz.)</label>
+            <input id="rTel" placeholder="Es: 351..." inputmode="tel">
+          </div>
+          <div>
+            <label>Indirizzo (opz.)</label>
+            <input id="rInd" placeholder="Via... / Alberobello">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>CF Cliente (opz.)</label>
+            <input id="rCF" class="mono" placeholder="Facoltativo">
+          </div>
+          <div>
+            <label>P.IVA Cliente (opz.)</label>
+            <input id="rPIVA" class="mono" placeholder="Facoltativa">
+          </div>
+        </div>
+
+        <label>Descrizione intervento</label>
+        <textarea id="rDesc" placeholder="Intervento eseguito..."></textarea>
+
+        <div class="row">
+          <div>
+            <label>Manodopera €</label>
+            <input id="rMan" type="number" placeholder="0" inputmode="decimal">
+          </div>
+          <div>
+            <label>Materiali €</label>
+            <input id="rMat" type="number" placeholder="0" inputmode="decimal">
+          </div>
+          <div>
+            <label>Extra €</label>
+            <input id="rExtra" type="number" placeholder="0" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Pagamento</label>
+            <select id="rPag">
+              <option value="Contanti">Contanti</option>
+              <option value="Bonifico">Bonifico</option>
+              <option value="POS">POS</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+          <div>
+            <label>Ritenuta d’acconto 20%</label>
+            <select id="rRit" onchange="updateTotaliRicevuta()">
+              <option value="no">No</option>
+              <option value="si">Sì</option>
+            </select>
+          </div>
+          <div>
+            <label>Marca da bollo</label>
+            <select id="rBollo" onchange="updateTotaliRicevuta()">
+              <option value="auto">Auto</option>
+              <option value="no">No</option>
+              <option value="si">Sì</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:12px;background:#f9fafb;border:1px solid var(--border);box-shadow:none">
+          <div class="row">
+            <div>
+              <div class="muted">Totale lordo</div>
+              <div class="title" id="rLordo">€ 0,00</div>
+            </div>
+            <div>
+              <div class="muted">Ritenuta</div>
+              <div class="title" id="rRitVal">€ 0,00</div>
+            </div>
+            <div>
+              <div class="muted">Netto da incassare</div>
+              <div class="title" id="rNetto">€ 0,00</div>
+            </div>
+          </div>
+          <div class="muted" id="rBolloHint" style="margin-top:6px"></div>
+        </div>
+
+        <label>Note (opz.)</label>
+        <textarea id="rNote" placeholder="Note..."></textarea>
+
+        <div class="hr"></div>
+
+        <h3>Firma Cliente (dito)</h3>
+        <div class="sigbox">
+          <canvas id="sigCliente" width="900" height="320"></canvas>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost" onclick="clearSig('sigCliente')">Pulisci firma cliente</button>
+        </div>
+
+        <h3 style="margin-top:14px">Firma Tecnico (dito)</h3>
+        <div class="sigbox">
+          <canvas id="sigTecnico" width="900" height="320"></canvas>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost" onclick="clearSig('sigTecnico')">Pulisci firma tecnico</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn primary" onclick="saveRicevuta()">Salva ricevuta</button>
+          <button class="btn ghost" onclick="printRicevutaPreview()">Stampa / Salva PDF</button>
+          <button class="btn ghost" onclick="whatsRicevutaPreview()">Invia testo WhatsApp</button>
+        </div>
+
+        <div class="pillbar">
+          <button class="pill" onclick="applyQuick('rExtra', getListinoValue('uscita_diagnosi', 60))">Uscita + diagnosi</button>
+          <button class="pill" onclick="appendText('rDesc','Uscita + diagnosi. ')">Inserisci in descrizione</button>
+        </div>
+
+        <div class="notice">
+          Logo: puoi usare <b>logo.png</b> nella stessa cartella del sito oppure incollare un logo in impostazioni (data URL).
+        </div>
+      </div>
