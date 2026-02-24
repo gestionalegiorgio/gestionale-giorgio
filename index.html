@@ -3,192 +3,271 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestionale Giorgio</title>
+<title>Gestionale Giorgio PRO</title>
+<meta name="theme-color" content="#1e3c72">
 
 <style>
+:root{
+--blue:#1e3c72;
+--bg:#f4f6fb;
+--card:#ffffff;
+--border:#e5e7eb;
+--radius:14px;
+--shadow:0 8px 20px rgba(0,0,0,0.06);
+}
+
 body{
-font-family:Arial, sans-serif;
-background:#f4f6fb;
 margin:0;
+font-family:Arial, sans-serif;
+background:var(--bg);
 }
 
 header{
-background:#1e3c72;
+background:var(--blue);
 color:white;
 padding:15px;
 text-align:center;
-font-size:22px;
 font-weight:bold;
 }
 
-nav{
+.tabs{
 display:flex;
 justify-content:center;
 gap:10px;
 padding:10px;
 background:white;
-box-shadow:0 2px 10px rgba(0,0,0,0.05);
+border-bottom:1px solid var(--border);
 }
 
-nav button{
-padding:10px 15px;
+.tabs button{
+padding:10px 14px;
 border:none;
 border-radius:8px;
-cursor:pointer;
 background:#e0e6f5;
+cursor:pointer;
 font-weight:bold;
 }
 
-nav button.active{
-background:#1e3c72;
+.tabs button.active{
+background:var(--blue);
 color:white;
 }
 
 .section{
 display:none;
-padding:20px;
-max-width:800px;
+max-width:1000px;
 margin:auto;
+padding:20px;
 }
 
 .section.active{
 display:block;
 }
 
-input,textarea{
+.panel{
+background:var(--card);
+padding:15px;
+border-radius:var(--radius);
+box-shadow:var(--shadow);
+margin-bottom:15px;
+}
+
+input, textarea, select{
 width:100%;
 padding:8px;
 margin-top:5px;
-margin-bottom:15px;
-border-radius:6px;
+margin-bottom:10px;
+border-radius:8px;
 border:1px solid #ccc;
 }
 
 button.primary{
-background:#1e3c72;
+background:var(--blue);
 color:white;
 border:none;
 padding:10px;
 border-radius:8px;
 cursor:pointer;
-width:100%;
 font-weight:bold;
 }
 
 .card{
 background:white;
-padding:15px;
+padding:12px;
+border-radius:12px;
+border:1px solid var(--border);
 margin-top:10px;
-border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.kpi{
+display:inline-block;
+padding:10px 15px;
+background:white;
+border-radius:12px;
+border:1px solid var(--border);
+margin:5px;
+font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
-<header>Gestionale Giorgio</header>
+<header>Gestionale Giorgio PRO</header>
 
-<nav>
-<button onclick="show('preventivi')" id="btnPreventivi" class="active">Preventivi</button>
-<button onclick="show('ricevute')" id="btnRicevute">Ricevute</button>
-<button onclick="show('archivio')" id="btnArchivio">Archivio</button>
-</nav>
+<div class="tabs">
+<button id="tabPrev" class="active" onclick="show('preventivi')">Preventivi</button>
+<button id="tabRic" onclick="show('ricevute')">Ricevute</button>
+<button id="tabStats" onclick="show('statistiche')">Statistiche</button>
+</div>
 
 <div id="preventivi" class="section active">
+
+<div class="panel">
 <h3>Nuovo Preventivo</h3>
-<input id="prevCliente" placeholder="Cliente">
-<textarea id="prevDesc" placeholder="Descrizione lavori"></textarea>
-<input id="prevImporto" type="number" placeholder="Importo €">
-<button class="primary" onclick="salvaPreventivo()">Salva Preventivo</button>
+<input id="pCliente" placeholder="Cliente">
+<textarea id="pDesc" placeholder="Descrizione lavori"></textarea>
+<input id="pManodopera" type="number" placeholder="Manodopera €">
+<input id="pMateriali" type="number" placeholder="Materiali €">
+<select id="pStato">
+<option>In attesa</option>
+<option>Accettato</option>
+<option>Rifiutato</option>
+</select>
+<button class="primary" onclick="salvaPreventivo()">Salva</button>
+</div>
+
+<div class="panel">
+<h3>Lista Preventivi</h3>
 <div id="listaPreventivi"></div>
 </div>
 
+</div>
+
 <div id="ricevute" class="section">
+
+<div class="panel">
 <h3>Nuova Ricevuta</h3>
-<input id="ricCliente" placeholder="Cliente">
-<textarea id="ricDesc" placeholder="Descrizione lavoro"></textarea>
-<input id="ricImporto" type="number" placeholder="Importo €">
-<button class="primary" onclick="salvaRicevuta()">Genera Ricevuta</button>
+<input id="rCliente" placeholder="Cliente">
+<textarea id="rDesc" placeholder="Descrizione intervento"></textarea>
+<input id="rManodopera" type="number" placeholder="Manodopera €">
+<input id="rMateriali" type="number" placeholder="Materiali €">
+<select id="rPagamento">
+<option>Contanti</option>
+<option>Bonifico</option>
+<option>POS</option>
+</select>
+<button class="primary" onclick="salvaRicevuta()">Genera</button>
+</div>
+
+<div class="panel">
+<h3>Lista Ricevute</h3>
 <div id="listaRicevute"></div>
 </div>
 
-<div id="archivio" class="section">
-<h3>Archivio</h3>
-<input id="search" placeholder="Cerca cliente..." oninput="renderArchivio()">
-<div id="archivioList"></div>
+</div>
+
+<div id="statistiche" class="section">
+
+<div class="panel">
+<h3>Statistiche</h3>
+<div class="kpi">Totale mese: € <span id="totMese">0</span></div>
+<div class="kpi">Totale anno: € <span id="totAnno">0</span></div>
+<div class="kpi">Media intervento: € <span id="media">0</span></div>
+</div>
+
 </div>
 
 <script>
 
-let preventivi = JSON.parse(localStorage.getItem("preventivi")) || [];
-let ricevute = JSON.parse(localStorage.getItem("ricevute")) || [];
-let numero = localStorage.getItem("numeroRicevuta") || 1;
+let preventivi = JSON.parse(localStorage.getItem("gg_prev")) || [];
+let ricevute = JSON.parse(localStorage.getItem("gg_ric")) || [];
 
 function show(id){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
-document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-document.getElementById("btn"+capitalize(id)).classList.add("active");
+document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+document.getElementById("tab"+id.charAt(0).toUpperCase()+id.slice(1,3)).classList.add("active");
 }
 
-function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-
 function salvaPreventivo(){
-let p={
-cliente:prevCliente.value,
-desc:prevDesc.value,
-importo:prevImporto.value,
-data:new Date().toLocaleDateString()
+let p = {
+cliente:pCliente.value,
+desc:pDesc.value,
+manodopera:Number(pManodopera.value||0),
+materiali:Number(pMateriali.value||0),
+stato:pStato.value,
+data:new Date().toISOString()
 };
 preventivi.push(p);
-localStorage.setItem("preventivi",JSON.stringify(preventivi));
+localStorage.setItem("gg_prev",JSON.stringify(preventivi));
 renderPreventivi();
-prevCliente.value="";prevDesc.value="";prevImporto.value="";
+pCliente.value="";pDesc.value="";pManodopera.value="";pMateriali.value="";
 }
 
 function salvaRicevuta(){
-let r={
-numero:"R-"+numero,
-cliente:ricCliente.value,
-desc:ricDesc.value,
-importo:ricImporto.value,
-data:new Date().toLocaleDateString()
+let r = {
+cliente:rCliente.value,
+desc:rDesc.value,
+manodopera:Number(rManodopera.value||0),
+materiali:Number(rMateriali.value||0),
+pagamento:rPagamento.value,
+data:new Date().toISOString()
 };
-numero++;
-localStorage.setItem("numeroRicevuta",numero);
 ricevute.push(r);
-localStorage.setItem("ricevute",JSON.stringify(ricevute));
+localStorage.setItem("gg_ric",JSON.stringify(ricevute));
 renderRicevute();
-renderArchivio();
-ricCliente.value="";ricDesc.value="";ricImporto.value="";
+calcolaStatistiche();
+rCliente.value="";rDesc.value="";rManodopera.value="";rMateriali.value="";
 }
 
 function renderPreventivi(){
 listaPreventivi.innerHTML="";
 preventivi.forEach(p=>{
-listaPreventivi.innerHTML+=`<div class="card"><b>${p.cliente}</b><br>${p.desc}<br>€ ${p.importo}<br>${p.data}</div>`;
+let tot = p.manodopera + p.materiali;
+listaPreventivi.innerHTML+=`<div class="card">
+<b>${p.cliente}</b><br>
+€ ${tot} (${p.stato})
+</div>`;
 });
 }
 
 function renderRicevute(){
 listaRicevute.innerHTML="";
 ricevute.forEach(r=>{
-listaRicevute.innerHTML+=`<div class="card"><b>${r.numero}</b><br>${r.cliente}<br>${r.desc}<br>€ ${r.importo}<br>${r.data}</div>`;
+let tot = r.manodopera + r.materiali;
+listaRicevute.innerHTML+=`<div class="card">
+<b>${r.cliente}</b><br>
+€ ${tot} - ${r.pagamento}
+</div>`;
 });
 }
 
-function renderArchivio(){
-let q=search.value.toLowerCase();
-archivioList.innerHTML="";
-ricevute.filter(r=>r.cliente.toLowerCase().includes(q))
-.forEach(r=>{
-archivioList.innerHTML+=`<div class="card"><b>${r.numero}</b> - ${r.cliente}<br>€ ${r.importo}</div>`;
+function calcolaStatistiche(){
+let now = new Date();
+let mese = now.getMonth();
+let anno = now.getFullYear();
+
+let totMese=0;
+let totAnno=0;
+
+ricevute.forEach(r=>{
+let d=new Date(r.data);
+let tot=r.manodopera+r.materiali;
+if(d.getFullYear()==anno) totAnno+=tot;
+if(d.getFullYear()==anno && d.getMonth()==mese) totMese+=tot;
 });
+
+let media = ricevute.length ? (totAnno/ricevute.length) : 0;
+
+totMese.innerText=totMese.toFixed(2);
+totAnno.innerText=totAnno.toFixed(2);
+media.innerText=media.toFixed(2);
 }
 
 renderPreventivi();
 renderRicevute();
-renderArchivio();
+calcolaStatistiche();
 
 </script>
 
